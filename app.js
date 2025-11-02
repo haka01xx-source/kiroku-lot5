@@ -35,6 +35,11 @@
     compareResult: null
   };
 
+  // Firebase objects (initialized if firebase-config.js is present)
+  let firebaseApp = null;
+  let firebaseAuth = null;
+  let firebaseDB = null;
+
   let testRecords = [];
   let currentTestId = null;
   let templates = [];
@@ -65,6 +70,41 @@
     localStorage.setItem(TEMPLATE_LS_KEY, JSON.stringify(templates));
   }
 
+  // 教科名の候補を再構築して `newSubjectName` セレクトに反映する
+  function refreshSubjectNameOptions() {
+    if(!els || !els.newSubjectName) return;
+    const existing = new Set();
+    // テンプレートから収集
+    templates.forEach(t => { (t.subjects||[]).forEach(s => { if(s && s.name) existing.add(s.name); }); });
+    // 既存テストの教科から収集
+    testRecords.forEach(t => { (t.subjects||[]).forEach(s => { if(s && s.name) existing.add(s.name); }); });
+    // 現在の選択を保持
+    const cur = els.newSubjectName.value;
+    els.newSubjectName.innerHTML = '<option value="">教科を選択...</option>';
+    Array.from(existing).sort().forEach(name => {
+      if(!name) return;
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      els.newSubjectName.appendChild(opt);
+    });
+    if(cur) els.newSubjectName.value = cur;
+  }
+
+  // 現在のテスト名に対応するテンプレートがあればテンプレートの教科を現在のテストに合わせて更新する
+  function updateCurrentTemplate() {
+    if(!currentTestId) return;
+    const test = testRecords.find(t => t.id === currentTestId);
+    if(!test) return;
+    const tplName = `${test.name}のテンプレート`;
+    const tpl = templates.find(t => t.name === tplName);
+    if(!tpl) return;
+    tpl.subjects = test.subjects.map(s => ({name: s.name}));
+    saveTemplates();
+    // テンプレート一覧と教科候補を更新
+    if(els && els.templateSelect) refreshTemplateSelect();
+    refreshSubjectNameOptions();
+  }
+
   function saveAsTemplate() {
     const test = testRecords.find(t => t.id === currentTestId);
     if(!test) return alert('テンプレートとして保存するテストがありません');
@@ -79,6 +119,9 @@
     
     templates.push(template);
     saveTemplates();
+    // テンプレート選択肢を更新し、教科候補を再構築
+    if(els && els.templateSelect) refreshTemplateSelect();
+    refreshSubjectNameOptions();
     alert('テンプレートを保存しました');
   }
 
@@ -114,6 +157,9 @@
     }
     
     save();
+    // テンプレート適用後、テンプレート側と教科候補を更新
+    updateCurrentTemplate();
+    refreshSubjectNameOptions();
     renderBoard();
   }
 
@@ -616,6 +662,8 @@
       opt.textContent = t.name;
       select.appendChild(opt);
     });
+    // テンプレート一覧更新時に教科候補も更新
+    refreshSubjectNameOptions();
   }
 
   function bind(){
@@ -643,6 +691,11 @@
     els.showTemplateQRBtn = $('showTemplateQRBtn');
     els.downloadTemplateQRBtn = $('downloadTemplateQRBtn');
     els.templateQR = $('templateQR');
+  // auth UI
+  els.signInBtn = $('signInBtn');
+  els.signOutBtn = $('signOutBtn');
+  els.authUser = $('authUser');
+  els.syncBtn = $('syncBtn');
   // share / compare elements
   els.shareBtn = $('shareBtn');
   els.shareLink = $('shareLink');
@@ -721,6 +774,121 @@
       if(!templateId) return alert('テンプレートを選択してください');
       shareTemplate(templateId);
     });
+
+    // auth handlers (may be hidden if firebase not configured)
+    if(els.signInBtn) els.signInBtn.addEventListener('click', ()=>{
+      signInWithGoogle();
+    });
+    if(els.signOutBtn) els.signOutBtn.addEventListener('click', ()=>{
+      signOut();
+    });
+    if(els.syncBtn) els.syncBtn.addEventListener('click', ()=>{
+      if(confirm('クラウドと同期します。クラウドに保存されているデータでローカルを上書きしますか？(OK = 上書き, Cancel = クラウドへ上書き)')){
+        loadFromCloud(true);
+      } else {
+        syncToCloud();
+      }
+    });
+  }
+
+  // --- Firebase (Google Auth) 初期化と同期ロジック ---
+  function loadScript(src){
+    return new Promise((res, rej)=>{
+      const s = document.createElement('script'); s.src = src; s.async = true;
+      s.onload = () => res(); s.onerror = (e) => rej(e);
+      document.head.appendChild(s);
+    });
+  }
+
+  async function initFirebaseIfConfigured(){
+    // firebase-config.js をロードして window.FIREBASE_CONFIG があるか確認
+    try{
+      await loadScript('/firebase-config.js');
+    }catch(e){
+      // no config file
+    }
+    if(!window.FIREBASE_CONFIG) return; // 設定がない場合は何もしない
+
+    // 互換版 SDK を読み込む (簡易実装)
+    try{
+      await loadScript('https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js');
+    }catch(e){ console.error('failed to load firebase sdk', e); return; }
+
+    try{
+      firebaseApp = firebase.initializeApp(window.FIREBASE_CONFIG);
+      firebaseAuth = firebase.auth();
+      firebaseDB = firebase.firestore();
+      // auth state
+      firebaseAuth.onAuthStateChanged(user => {
+        if(user){
+          // show signed in UI
+          if(els.authUser) { els.authUser.textContent = user.displayName || user.email || user.uid; els.authUser.style.display = 'inline-block'; }
+          if(els.signInBtn) els.signInBtn.style.display = 'none';
+          if(els.signOutBtn) els.signOutBtn.style.display = 'inline-block';
+          if(els.syncBtn) els.syncBtn.style.display = 'inline-block';
+          // 自動的にクラウドのデータを確認してマージ/上書きを促す
+          // 簡易実装: 既にクラウドにデータがあればユーザーに確認
+          firebaseDB.doc(`users/${user.uid}/data`).get().then(doc=>{
+            if(!doc.exists) return; // nothing
+            try{
+              const cloud = doc.data();
+              if(!cloud || !cloud.testRecords) return;
+              if(confirm('クラウド上に保存されたデータが見つかりました。クラウドのデータでローカルを上書きしますか？(OK = 上書き, Cancel = ローカル→クラウドへ上書き)')){
+                testRecords = cloud.testRecords;
+                if(testRecords.length) currentTestId = testRecords[0].id;
+                save(); refreshTestSelect(); renderBoard();
+              } else {
+                syncToCloud();
+              }
+            }catch(e){ console.error('parse cloud data', e); }
+          }).catch(e=>{ console.error('load cloud doc', e); });
+        } else {
+          // signed out
+          if(els.authUser) els.authUser.style.display = 'none';
+          if(els.signInBtn) els.signInBtn.style.display = 'inline-block';
+          if(els.signOutBtn) els.signOutBtn.style.display = 'none';
+          if(els.syncBtn) els.syncBtn.style.display = 'none';
+        }
+      });
+    }catch(e){ console.error('init firebase error', e); }
+  }
+
+  function signInWithGoogle(){
+    if(!firebaseAuth) return alert('Firebase が未設定です。firebase-config.js を配置してください');
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebaseAuth.signInWithPopup(provider).catch(e=>{ alert('サインインに失敗しました: ' + e.message); });
+  }
+
+  function signOut(){ if(!firebaseAuth) return; firebaseAuth.signOut(); }
+
+  // 現在のローカルデータをクラウドに保存
+  function syncToCloud(){
+    const user = firebaseAuth?.currentUser;
+    if(!user) return alert('先に Google でサインインしてください');
+    const payload = { testRecords };
+    firebaseDB.doc(`users/${user.uid}/data`).set(payload).then(()=>{
+      alert('クラウドへ保存しました');
+    }).catch(e=>{ alert('クラウド保存に失敗しました: ' + e.message); });
+  }
+
+  // クラウドからデータを読み込む。force=true ならローカルを上書き
+  function loadFromCloud(force){
+    const user = firebaseAuth?.currentUser;
+    if(!user) return alert('先に Google でサインインしてください');
+    firebaseDB.doc(`users/${user.uid}/data`).get().then(doc=>{
+      if(!doc.exists) return alert('クラウドにデータが見つかりません');
+      const cloud = doc.data();
+      if(!cloud || !cloud.testRecords) return alert('クラウドデータの形式が不正です');
+      if(force){
+        testRecords = cloud.testRecords; save(); refreshTestSelect(); renderBoard(); alert('クラウドのデータでローカルを上書きしました');
+      } else {
+        // 非強制はクラウド→マージ（クラウドにないテストを追加）
+        cloud.testRecords.forEach(ct => { if(!testRecords.find(t=>t.id===ct.id)) testRecords.push(ct); });
+        save(); refreshTestSelect(); renderBoard(); alert('クラウドのデータをマージしました');
+      }
+    }).catch(e=>{ alert('クラウド読み込みに失敗しました: ' + e.message); });
   }
 
   // バージョン表示の更新
@@ -737,15 +905,19 @@
     templates = loadTemplates();
     updateVersionLabel();
     if(testRecords.length) currentTestId = testRecords[0].id;
-    bind(); refreshTestSelect(); refreshTemplateSelect(); renderBoard();
+  bind(); refreshTestSelect(); refreshTemplateSelect(); renderBoard();
+  // 初期化時に教科候補を反映
+  refreshSubjectNameOptions();
+  // Firebase があれば初期化を行う
+  try{ initFirebaseIfConfigured(); }catch(e){ console.warn('initFirebaseIfConfigured failed', e); }
     // ウィンドウリサイズ時にグラフを再描画
     window.addEventListener('resize', ()=>{
       const test = testRecords.find(t=>t.id===currentTestId);
       drawChart(test);
     });
     window.addEventListener('beforeunload', ()=> save());
-    // parse share and template params on load
-    const sharedFromUrl = parseSharedParam();
+  // parse share and template params on load
+  const sharedFromUrl = parseSharedParam();
     if(sharedFromUrl){
       const pasteEl = document.getElementById('pasteShared');
       if(pasteEl) pasteEl.value = JSON.stringify(sharedFromUrl, null, 2);
@@ -760,6 +932,8 @@
         templates.push(sharedTemplate);
         saveTemplates();
         refreshTemplateSelect();
+        // 読み込んだテンプレートの教科を教科候補に追加
+        refreshSubjectNameOptions();
         alert('テンプレートを読み込みました');
       }
     }
