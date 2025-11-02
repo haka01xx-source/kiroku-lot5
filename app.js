@@ -760,6 +760,9 @@
     els.showTemplateQRBtn = $('showTemplateQRBtn');
     els.downloadTemplateQRBtn = $('downloadTemplateQRBtn');
     els.templateQR = $('templateQR');
+  // account save/load buttons in header
+  els.saveAcctBtn = $('saveAcctBtn');
+  els.loadAcctBtn = $('loadAcctBtn');
     // NOTE: short-code UI removed (we keep account-based sync only)
   els.acctIdInput = $('acctIdInput');
   els.acctBirthdayInput = $('acctBirthdayInput');
@@ -864,6 +867,12 @@
       try{ const ok = await loginAccount(sid, bday); if(ok) notify('ログインしました'); }catch(e){ alert('ログインに失敗しました: ' + e.message); }
     });
     if(els.logoutAcctBtn) els.logoutAcctBtn.addEventListener('click', ()=>{ logoutAccount(); notify('ログアウトしました'); });
+    if(els.saveAcctBtn) els.saveAcctBtn.addEventListener('click', async ()=>{
+      try{ await saveToAccount(); }catch(e){ alert('アカウント保存に失敗しました: ' + e.message); }
+    });
+    if(els.loadAcctBtn) els.loadAcctBtn.addEventListener('click', async ()=>{
+      try{ await loadFromAccount(); }catch(e){ alert('アカウント読み込みに失敗しました: ' + e.message); }
+    });
   }
 
   // --- Firebase (Google Auth) 初期化と同期ロジック ---
