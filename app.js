@@ -44,6 +44,7 @@
   let currentTestId = null;
   let templates = [];
   const TEMPLATE_LS_KEY = 'kiroku_lot_templates_v1';
+  const SELECTED_TEST_LS_KEY = 'kiroku_lot_selected_test_v1';
 
   function $(id){ return document.getElementById(id); }
 
@@ -122,7 +123,25 @@
     // テンプレート選択肢を更新し、教科候補を再構築
     if(els && els.templateSelect) refreshTemplateSelect();
     refreshSubjectNameOptions();
-    alert('テンプレートを保存しました');
+
+    // さらに、テンプレートを元に新しいテスト種類を自動追加する
+    try{
+      const newTest = {
+        id: uid(),
+        name: name,
+        subjects: template.subjects.map(s => ({name: s.name, score: null})),
+        previous: []
+      };
+      testRecords.push(newTest);
+      // 選択を追加したテストに切り替えて保存・再描画
+      currentTestId = newTest.id;
+      save();
+      refreshTestSelect();
+      renderBoard();
+      localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId);
+    }catch(e){ console.error('saveAsTemplate add test', e); }
+
+    alert('テンプレートを保存し、新しいテスト種類を追加しました');
   }
 
   function applyTemplate(templateId) {
@@ -253,6 +272,13 @@
       opt.value = t.id; opt.textContent = t.name;
       els.testSelect.appendChild(opt);
     });
+    // restore selected test from localStorage if present and valid
+    try{
+      const stored = localStorage.getItem(SELECTED_TEST_LS_KEY);
+      if(stored && testRecords.find(t=>t.id===stored)){
+        currentTestId = stored;
+      }
+    }catch(e){ /* ignore */ }
     if(!currentTestId && testRecords.length) currentTestId = testRecords[0].id;
     if(currentTestId) els.testSelect.value = currentTestId;
   }
@@ -380,14 +406,15 @@
   function drawChart(test, sharedTest){
     const canvas = document.getElementById('scoreChart');
     if(!canvas) return;
-    const ctx = canvas.getContext('2d');
     // サイズ調整（高DPR対応）
     const DPR = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.max(300, rect.width * DPR);
     canvas.height = Math.max(150, rect.height * DPR);
-    ctx.scale(DPR, DPR);
-    // 背景クリア
+    const ctx = canvas.getContext('2d');
+    // 明示的に transform をリセットしてから DPI スケーリング
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // 背景クリア（CSSサイズでクリア）
     ctx.clearRect(0,0,rect.width,rect.height);
 
     if(!test || !test.subjects || !test.subjects.length){
@@ -398,21 +425,26 @@
 
     // 教科名を統合（自分のと共有データの両方の教科を含める）
     const allSubjects = new Set([
-      ...test.subjects.map(s => s.name),
-      ...(sharedTest?.subjects || []).map(s => s.name)
+      ...((test && test.subjects) ? test.subjects.map(s => s.name) : []),
+      ...((sharedTest && sharedTest.subjects) ? sharedTest.subjects.map(s => s.name) : [])
     ]);
 
     const labels = Array.from(allSubjects);
     // 自分のデータ
     const curr = labels.map(name => {
-      const sub = test.subjects.find(s => s.name === name);
+      const sub = (test && test.subjects) ? test.subjects.find(s => s.name === name) : null;
       return sub && typeof sub.score === 'number' ? sub.score : null;
     });
-    // 共有データ
+    // 共有データ（文字列になっている可能性に対応して数値化を試みる）
     const shared = labels.map(name => {
-      const sub = sharedTest?.subjects?.find(s => s.name === name);
-      return sub && typeof sub.score === 'number' ? sub.score : null;
+      const sub = (sharedTest && sharedTest.subjects) ? sharedTest.subjects.find(s => s.name === name) : null;
+      if(!sub) return null;
+      const v = sub.score;
+      if(typeof v === 'number') return v;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
     });
+    const hasSharedData = shared.some(v => v != null);
 
     // 値の最大（100を上限にする）
     const maxVal = Math.max(100, 
@@ -432,7 +464,7 @@
     ctx.textAlign = 'right';
     const legendY = padding.top - 4;
     ctx.fillText('あなた', w - 120, legendY);
-    if(shared) {
+    if(hasSharedData) {
       ctx.fillText('共有データ', w - 10, legendY);
     }
 
@@ -475,7 +507,9 @@
       // xラベル
       ctx.fillStyle = '#475569'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
       const labelY = padding.top + chartH + 18;
-      ctx.fillText(lab, xCenter + 8, labelY);
+      // 長いラベルは切る
+      const labelText = (lab && lab.length > 12) ? lab.slice(0,12) + '…' : lab;
+      ctx.fillText(labelText, xCenter, labelY);
     });
 
     // y軸値（左）
@@ -489,7 +523,10 @@
 
   function addTest(name){
     const t = {id: uid(), name: name || '無題', subjects: [], previous: []};
-    testRecords.push(t); currentTestId = t.id; save(); refreshTestSelect(); renderBoard();
+    testRecords.push(t);
+    currentTestId = t.id;
+    try{ localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId); }catch(e){}
+    save(); refreshTestSelect(); renderBoard();
   }
 
   function deleteCurrentTest(){
@@ -498,6 +535,7 @@
     if(!confirm(`テスト「${testRecords[idx].name}」を削除しますか？`)) return;
     testRecords.splice(idx,1);
     currentTestId = testRecords.length ? testRecords[0].id : null;
+    try{ if(currentTestId) localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId); else localStorage.removeItem(SELECTED_TEST_LS_KEY); }catch(e){}
     save(); refreshTestSelect(); renderBoard();
   }
 
@@ -713,7 +751,7 @@
     });
     els.renameTestBtn.addEventListener('click', renameCurrentTest);
     els.deleteTestBtn.addEventListener('click', deleteCurrentTest);
-    els.testSelect.addEventListener('change', e=>{ currentTestId = e.target.value; renderBoard(); });
+  els.testSelect.addEventListener('change', e=>{ currentTestId = e.target.value; try{ localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId); }catch(e){} renderBoard(); });
     els.addSubjectBtn.addEventListener('click', ()=>{
       const name = els.newSubjectName.value.trim();
       const score = els.newSubjectScore.value;
