@@ -297,6 +297,7 @@
   }
 
   function refreshTestSelect(){
+    if(!els || !els.testSelect) return;
     els.testSelect.innerHTML = '';
     testRecords.forEach(t => {
       const opt = document.createElement('option');
@@ -340,6 +341,8 @@
   }
 
   function renderBoard(){
+    // If page doesn't have the board elements (e.g., on login.html), skip rendering
+    if(!els || !els.boardTitle || !els.scoreTableBody) return;
     const test = testRecords.find(t=>t.id===currentTestId);
     if(!test){
       els.boardTitle.textContent = '—';
@@ -723,6 +726,7 @@
   }
 
   function refreshTemplateSelect() {
+    if(!els || !els.templateSelect) return;
     const select = els.templateSelect;
     select.innerHTML = '<option value="">テンプレートを選択...</option>';
     templates.forEach(t => {
@@ -961,6 +965,8 @@
       // auth OK
       currentAccountId = id;
       try{ localStorage.setItem('kl_account_id', currentAccountId); }catch(e){}
+      // If this page doesn't have the main UI (e.g., login.html), skip DOM updates and defer loading until index loads
+      if(!document.getElementById('testSelect')) return true;
       // update UI
       if(els.authUser) { els.authUser.textContent = `acct:${currentAccountId}`; els.authUser.style.display = 'inline-block'; }
       if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'inline-block';
