@@ -82,6 +82,19 @@
       </div>
 
       <div class="row small">
+        <label>アカウント（学籍番号 / 誕生日で登録）
+          <input id="acctIdInput" placeholder="学籍番号（例: 202312345）" />
+          <input id="acctBirthdayInput" placeholder="誕生日（YYYYMMDD）" />
+        </label>
+        <div class="btn-group">
+          <button id="registerAcctBtn" class="btn">登録</button>
+          <button id="loginAcctBtn" class="btn">ログイン</button>
+          <button id="logoutAcctBtn" class="btn" style="display:none">ログアウト</button>
+        </div>
+        <small class="muted">※ 誕生日はパスワード扱いになります。セキュリティに不安がある場合は Google 認証を利用してください。</small>
+      </div>
+
+      <div class="row small">
         <button id="shareBtn" class="btn">共有リンクを作成</button>
         <input id="shareLink" placeholder="共有リンクがここに表示されます" readonly />
         <button id="copyShareBtn" class="btn">コピー</button>

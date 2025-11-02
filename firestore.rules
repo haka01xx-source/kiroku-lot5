@@ -15,5 +15,15 @@ service cloud.firestore {
       // 所有者のみ削除/更新可能（所有者の uid をフィールドとして保存していることが前提）
       allow update, delete: if request.auth != null && request.auth.uid == resource.data.ownerUid;
     }
+    // accounts: 学籍番号ベースのアカウントデータ（アプリ側でパスワードチェックを行います）
+    // 注意: このルールはサンプル実装向けであり、本番運用ではより厳格な認証を推奨します。
+    match /accounts/{acctId} {
+      // account メタデータ（passwordHash 等）は読み書き可
+      allow read, write: if true;
+      // account/{acctId}/data に保存されるテストデータも読み書き可
+      match /data {
+        allow read, write: if true;
+      }
+    }
   }
 }

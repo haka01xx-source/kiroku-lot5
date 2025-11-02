@@ -35,6 +35,9 @@
     compareResult: null
   };
 
+  // account id for custom auth (学籍番号ベース)
+  let currentAccountId = null;
+
   // Firebase objects (initialized if firebase-config.js is present)
   let firebaseApp = null;
   let firebaseAuth = null;
@@ -263,7 +266,16 @@
     return sample;
   }
 
-  function save(){ localStorage.setItem(LS_KEY, JSON.stringify(testRecords)); }
+  function save(){
+    localStorage.setItem(LS_KEY, JSON.stringify(testRecords));
+    // 自動的に学籍番号アカウントへも保存（ログイン済みかつ firebase 初期化済みの場合）
+    try{
+      if(currentAccountId && firebaseDB){
+        // fire-and-forget
+        saveToAccount().catch(e=>console.error('auto saveToAccount failed', e));
+      }
+    }catch(e){}
+  }
 
   function refreshTestSelect(){
     els.testSelect.innerHTML = '';
@@ -733,6 +745,11 @@
     els.shortCodeInput = $('shortCodeInput');
     els.genShortCodeBtn = $('genShortCodeBtn');
     els.applyShortCodeBtn = $('applyShortCodeBtn');
+  els.acctIdInput = $('acctIdInput');
+  els.acctBirthdayInput = $('acctBirthdayInput');
+  els.registerAcctBtn = $('registerAcctBtn');
+  els.loginAcctBtn = $('loginAcctBtn');
+  els.logoutAcctBtn = $('logoutAcctBtn');
   // auth UI
   els.signInBtn = $('signInBtn');
   els.signOutBtn = $('signOutBtn');
@@ -832,6 +849,21 @@
         if(ok) alert('コードから読み込みました');
       }catch(e){ alert('読み込みに失敗しました: ' + e.message); }
     });
+
+    // account handlers (学籍番号 + 誕生日)
+    if(els.registerAcctBtn) els.registerAcctBtn.addEventListener('click', async ()=>{
+      const sid = els.acctIdInput.value.trim();
+      const bday = els.acctBirthdayInput.value.trim();
+      if(!sid || !bday) return alert('学籍番号と誕生日を入力してください');
+      try{ await registerAccount(sid, bday); alert('アカウントを作成しました。ログインして続けてください。'); }catch(e){ alert('登録に失敗しました: ' + e.message); }
+    });
+    if(els.loginAcctBtn) els.loginAcctBtn.addEventListener('click', async ()=>{
+      const sid = els.acctIdInput.value.trim();
+      const bday = els.acctBirthdayInput.value.trim();
+      if(!sid || !bday) return alert('学籍番号と誕生日を入力してください');
+      try{ const ok = await loginAccount(sid, bday); if(ok) alert('ログインしました'); }catch(e){ alert('ログインに失敗しました: ' + e.message); }
+    });
+    if(els.logoutAcctBtn) els.logoutAcctBtn.addEventListener('click', ()=>{ logoutAccount(); alert('ログアウトしました'); });
 
     // auth handlers (may be hidden if firebase not configured)
     if(els.signInBtn) els.signInBtn.addEventListener('click', ()=>{
@@ -996,6 +1028,89 @@
     return true;
   }
 
+  // ---- Account (学籍番号 + 誕生日) based auth (client-side hash) ----
+  async function hashString(str){
+    const enc = new TextEncoder();
+    const data = enc.encode(str);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    // convert to hex
+    const arr = Array.from(new Uint8Array(hash));
+    return arr.map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function registerAccount(studentId, birthday){
+    if(!firebaseDB) throw new Error('Firebase 未初期化');
+    const id = String(studentId).trim();
+    const pw = String(birthday).trim();
+    if(!id || !pw) throw new Error('学籍番号・誕生日が必要です');
+    const docRef = firebaseDB.collection('accounts').doc(id);
+    const snap = await docRef.get();
+    if(snap.exists) throw new Error('その学籍番号は既に登録されています');
+    const hash = await hashString(pw);
+    await docRef.set({ passwordHash: hash, createdAt: new Date().toISOString() });
+    // also save current local data under accounts/{id}/data
+    await firebaseDB.collection('accounts').doc(id).collection('meta').doc('data').set({ testRecords, savedAt: new Date().toISOString() });
+    return true;
+  }
+
+  async function loginAccount(studentId, birthday){
+    if(!firebaseDB) throw new Error('Firebase 未初期化');
+    const id = String(studentId).trim();
+    const pw = String(birthday).trim();
+    if(!id || !pw) throw new Error('学籍番号・誕生日が必要です');
+    const docRef = firebaseDB.collection('accounts').doc(id);
+    const snap = await docRef.get();
+    if(!snap.exists) throw new Error('アカウントが見つかりません');
+    const data = snap.data();
+    const hash = await hashString(pw);
+    if(!data || data.passwordHash !== hash) throw new Error('学籍番号または誕生日が誤っています');
+    // auth OK
+    currentAccountId = id;
+    try{ localStorage.setItem('kl_account_id', currentAccountId); }catch(e){}
+    // update UI
+    if(els.authUser) { els.authUser.textContent = `acct:${currentAccountId}`; els.authUser.style.display = 'inline-block'; }
+    if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'inline-block';
+    // load account data if exists
+    const dataSnap = await firebaseDB.collection('accounts').doc(id).collection('meta').doc('data').get();
+    if(dataSnap.exists){
+      const payload = dataSnap.data();
+      if(payload && payload.testRecords){
+        if(confirm('アカウントに保存されたデータをローカルに読み込みますか？(OK = 上書き, Cancel = マージ)')){
+          testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; save(); refreshTestSelect(); renderBoard();
+        } else {
+          // merge
+          payload.testRecords.forEach(tr => { if(!testRecords.find(t=>t.id===tr.id)) testRecords.push(tr); });
+          save(); refreshTestSelect(); renderBoard();
+        }
+      }
+    }
+    return true;
+  }
+
+  function logoutAccount(){
+    currentAccountId = null;
+    try{ localStorage.removeItem('kl_account_id'); }catch(e){}
+    if(els.authUser) { els.authUser.textContent = ''; els.authUser.style.display = 'none'; }
+    if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'none';
+  }
+
+  async function saveToAccount(){
+    if(!firebaseDB) throw new Error('Firebase 未初期化');
+    if(!currentAccountId) return alert('先に学籍番号でログインしてください');
+    await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').set({ testRecords, savedAt: new Date().toISOString() });
+    alert('アカウントへ保存しました');
+  }
+
+  async function loadFromAccount(){
+    if(!firebaseDB) throw new Error('Firebase 未初期化');
+    if(!currentAccountId) return alert('先に学籍番号でログインしてください');
+    const dataSnap = await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').get();
+    if(!dataSnap.exists) return alert('アカウントに保存されたデータはありません');
+    const payload = dataSnap.data();
+    if(payload && payload.testRecords){ testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; save(); refreshTestSelect(); renderBoard(); alert('アカウントのデータを読み込みました'); }
+    else alert('アカウントデータの形式が不正です');
+  }
+
   // デバッグ用に同期関数と Firebase オブジェクトをグローバルに露出
   try{
     if(typeof window !== 'undefined'){
@@ -1003,6 +1118,8 @@
       Object.assign(window._debug, {
         syncToCloud: syncToCloud,
         loadFromCloud: loadFromCloud,
+        saveToAccount: saveToAccount,
+        loadFromAccount: loadFromAccount,
         firebaseAuth: () => firebaseAuth,
         firebaseDB: () => firebaseDB,
         firebaseApp: () => firebaseApp,
