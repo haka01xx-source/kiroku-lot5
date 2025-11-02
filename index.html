@@ -71,6 +71,17 @@
       </div>
 
       <div class="row small">
+        <label>短縮コードで共有（6桁）
+          <input id="shortCodeInput" placeholder="コードを入力（例: Ab12CD）" />
+        </label>
+        <div class="btn-group">
+          <button id="genShortCodeBtn" class="btn">コード生成</button>
+          <button id="applyShortCodeBtn" class="btn">コードで読み込み</button>
+        </div>
+        <small class="muted">※ 匿名で一時的に保存されます（短いコードで共有）。</small>
+      </div>
+
+      <div class="row small">
         <button id="shareBtn" class="btn">共有リンクを作成</button>
         <input id="shareLink" placeholder="共有リンクがここに表示されます" readonly />
         <button id="copyShareBtn" class="btn">コピー</button>

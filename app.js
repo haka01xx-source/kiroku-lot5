@@ -729,6 +729,10 @@
     els.showTemplateQRBtn = $('showTemplateQRBtn');
     els.downloadTemplateQRBtn = $('downloadTemplateQRBtn');
     els.templateQR = $('templateQR');
+    // short code UI
+    els.shortCodeInput = $('shortCodeInput');
+    els.genShortCodeBtn = $('genShortCodeBtn');
+    els.applyShortCodeBtn = $('applyShortCodeBtn');
   // auth UI
   els.signInBtn = $('signInBtn');
   els.signOutBtn = $('signOutBtn');
@@ -811,6 +815,22 @@
       const templateId = els.templateSelect.value;
       if(!templateId) return alert('テンプレートを選択してください');
       shareTemplate(templateId);
+    });
+
+    // short code handlers
+    if(els.genShortCodeBtn) els.genShortCodeBtn.addEventListener('click', async ()=>{
+      try{
+        const code = await generateShortCodeForCurrent();
+        if(code) { prompt('このコードを共有先に教えてください（6桁）', code); }
+      }catch(e){ alert('コード生成に失敗しました: ' + e.message); }
+    });
+    if(els.applyShortCodeBtn) els.applyShortCodeBtn.addEventListener('click', async ()=>{
+      const code = els.shortCodeInput.value.trim();
+      if(!code) return alert('コードを入力してください');
+      try{
+        const ok = await loadByShortCode(code);
+        if(ok) alert('コードから読み込みました');
+      }catch(e){ alert('読み込みに失敗しました: ' + e.message); }
     });
 
     // auth handlers (may be hidden if firebase not configured)
@@ -928,6 +948,68 @@
       }
     }).catch(e=>{ alert('クラウド読み込みに失敗しました: ' + e.message); });
   }
+
+  // --- Short code sharing (6桁) ---
+  function randomCode(len=6){
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; // avoid ambiguous chars
+    let s='';
+    for(let i=0;i<len;i++) s += alphabet.charAt(Math.floor(Math.random()*alphabet.length));
+    return s;
+  }
+
+  async function ensureAuthForShortCode(){
+    if(!firebaseAuth) throw new Error('Firebase 未初期化');
+    if(firebaseAuth.currentUser) return firebaseAuth.currentUser;
+    // try anonymous sign-in
+    try{
+      const res = await firebaseAuth.signInAnonymously();
+      return res.user;
+    }catch(e){ throw new Error('匿名サインインに失敗しました: ' + e.message); }
+  }
+
+  async function generateShortCodeForCurrent(){
+    if(!firebaseDB) throw new Error('Firebase 未初期化');
+    const user = await ensureAuthForShortCode();
+    const payload = { testRecords, createdAt: new Date().toISOString(), ownerUid: user.uid };
+    // try generating unique code
+    for(let attempts=0; attempts<5; attempts++){
+      const code = randomCode(6);
+      const docRef = firebaseDB.collection('shortLinks').doc(code);
+      const snap = await docRef.get();
+      if(snap.exists) continue; // collision, rare
+      await docRef.set(payload);
+      return code;
+    }
+    throw new Error('コード生成ができませんでした。もう一度試してください。');
+  }
+
+  async function loadByShortCode(code){
+    if(!firebaseDB) throw new Error('Firebase 未初期化');
+    code = String(code).trim();
+    const docRef = firebaseDB.collection('shortLinks').doc(code);
+    const snap = await docRef.get();
+    if(!snap.exists) throw new Error('コードが見つかりません');
+    const data = snap.data();
+    if(!data || !data.testRecords) throw new Error('コードに関連するデータが不正です');
+    data.testRecords.forEach(tr => { if(!testRecords.find(t=>t.id===tr.id)) testRecords.push(tr); });
+    save(); refreshTestSelect(); renderBoard();
+    return true;
+  }
+
+  // デバッグ用に同期関数と Firebase オブジェクトをグローバルに露出
+  try{
+    if(typeof window !== 'undefined'){
+      window._debug = window._debug || {};
+      Object.assign(window._debug, {
+        syncToCloud: syncToCloud,
+        loadFromCloud: loadFromCloud,
+        firebaseAuth: () => firebaseAuth,
+        firebaseDB: () => firebaseDB,
+        firebaseApp: () => firebaseApp,
+        refreshSubjectNameOptions: refreshSubjectNameOptions
+      });
+    }
+  }catch(e){ console.warn('expose debug failed', e); }
 
   // バージョン表示の更新
   function updateVersionLabel() {
