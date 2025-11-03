@@ -795,6 +795,7 @@
   // account save/load buttons in header
   els.saveAcctBtn = $('saveAcctBtn');
   els.loadAcctBtn = $('loadAcctBtn');
+  els.loginLink = $('loginLink');
     // NOTE: short-code UI removed (we keep account-based sync only)
   els.acctIdInput = $('acctIdInput');
   els.acctBirthdayInput = $('acctBirthdayInput');
@@ -898,7 +899,7 @@
       if(!sid || !bday) return alert('学籍番号と誕生日を入力してください');
       try{ const ok = await loginAccount(sid, bday); if(ok) notify('ログインしました'); }catch(e){ alert('ログインに失敗しました: ' + e.message); }
     });
-    if(els.logoutAcctBtn) els.logoutAcctBtn.addEventListener('click', ()=>{ logoutAccount(); notify('ログアウトしました'); });
+    if(els.logoutAcctBtn) els.logoutAcctBtn.addEventListener('click', ()=>{ logoutAccount(); notify('ログアウトしました'); if(els.loginLink) els.loginLink.textContent = 'アカウントでログイン'; if(els.loginLink) els.loginLink.href = 'login.html'; });
     if(els.saveAcctBtn) els.saveAcctBtn.addEventListener('click', async ()=>{
       try{ await saveToAccount(); }catch(e){ alert('アカウント保存に失敗しました: ' + e.message); }
     });
@@ -995,26 +996,17 @@
   try{ localStorage.setItem('kl_account_id', currentAccountId); }catch(e){}
   // start realtime listener for this account if possible
   try{ if(firebaseDB) startRealtimeSyncForAccount(currentAccountId); }catch(e){ console.warn('startRealtime after login failed', e); }
-  // If this page doesn't have the main UI (e.g., login.html), skip DOM updates and defer loading until index loads
+  // update UI (if elements exist on this page)
+  try{
+    if(els.loginLink) { els.loginLink.textContent = `acct:${currentAccountId}`; els.loginLink.href = 'login.html'; }
+    if(els.authUser) { els.authUser.textContent = `acct:${currentAccountId}`; els.authUser.style.display = 'inline-block'; }
+    if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'inline-block';
+  }catch(e){}
+  // automatically load account data (merge) without prompting
+  try{ await autoLoadAccountData(); }catch(e){ console.warn('auto load after login failed', e); }
+  // If this page doesn't have the main UI (e.g., login.html), defer UI rendering (index init will handle)
   if(!document.getElementById('testSelect') && !document.getElementById('testsGrid')) return true;
-      // update UI
-      if(els.authUser) { els.authUser.textContent = `acct:${currentAccountId}`; els.authUser.style.display = 'inline-block'; }
-      if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'inline-block';
-      // load account data if exists
-      const dataSnap = await firebaseDB.collection('accounts').doc(id).collection('meta').doc('data').get();
-      if(dataSnap.exists){
-        const payload = dataSnap.data();
-        if(payload && payload.testRecords){
-          if(confirm('アカウントに保存されたデータをローカルに読み込みますか？(OK = 上書き, Cancel = マージ)')){
-            testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; save(); refreshTestSelect(); renderBoard();
-          } else {
-            // merge
-            payload.testRecords.forEach(tr => { if(!testRecords.find(t=>t.id===tr.id)) testRecords.push(tr); });
-            save(); refreshTestSelect(); renderBoard();
-          }
-        }
-      }
-      return true;
+  return true;
     }
     // Fallback: check localStorage accounts
     try{
@@ -1031,16 +1023,16 @@
     try{ if(firebaseDB) startRealtimeSyncForAccount(currentAccountId); }catch(e){ console.warn('startRealtime after local login', e); }
       if(els.authUser) { els.authUser.textContent = `acct:${currentAccountId}`; els.authUser.style.display = 'inline-block'; }
       if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'inline-block';
-      // load saved data if present
-      const payload = rec.meta && rec.meta.data ? rec.meta.data : null;
-      if(payload && payload.testRecords){
-        if(confirm('アカウントに保存されたデータをローカルに読み込みますか？(OK = 上書き, Cancel = マージ)')){
-          testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; save(); refreshTestSelect(); renderBoard();
-        } else {
-          payload.testRecords.forEach(tr => { if(!testRecords.find(t=>t.id===tr.id)) testRecords.push(tr); });
-          save(); refreshTestSelect(); renderBoard();
-        }
-      }
+      // update UI
+      try{
+        if(els.loginLink) { els.loginLink.textContent = `acct:${currentAccountId}`; els.loginLink.href = 'login.html'; }
+        if(els.authUser) { els.authUser.textContent = `acct:${currentAccountId}`; els.authUser.style.display = 'inline-block'; }
+        if(els.logoutAcctBtn) els.logoutAcctBtn.style.display = 'inline-block';
+      }catch(e){}
+      // automatically load account data (merge) without prompting
+      try{ await autoLoadAccountData(); }catch(e){ console.warn('auto load after local login failed', e); }
+      // push current merged data back to account storage to keep cloud up-to-date
+      try{ await saveToAccount(); }catch(e){ /* ignore */ }
       return true;
     }catch(e){ throw new Error('ローカルアカウント読み込みに失敗しました: ' + e.message); }
   }
