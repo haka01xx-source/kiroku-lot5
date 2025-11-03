@@ -139,39 +139,20 @@
   function saveAsTemplate() {
     const test = testRecords.find(t => t.id === currentTestId);
     if(!test) return alert('テンプレートとして保存するテストがありません');
-    const name = prompt('テンプレート名を入力してください', test.name + 'のテンプレート');
-    if(!name) return;
-    
-    const template = {
-      id: uid(),
-      name: name,
-      subjects: test.subjects.map(s => ({name: s.name})) // 点数は含めない
-    };
-    
+    // Save current test as template for this page without prompting
+    const name = `${test.name}のテンプレート`;
+    // ensure unique name
+    let finalName = name;
+    let idx = 1;
+    while(templates.find(t => t.name === finalName)){
+      finalName = name + ' (' + (idx++) + ')';
+    }
+    const template = { id: uid(), name: finalName, subjects: test.subjects.map(s => ({name: s.name})) };
     templates.push(template);
     saveTemplates();
-    // テンプレート選択肢を更新し、教科候補を再構築
     if(els && els.templateSelect) refreshTemplateSelect();
     refreshSubjectNameOptions();
-
-    // さらに、テンプレートを元に新しいテスト種類を自動追加する
-    try{
-      const newTest = {
-        id: uid(),
-        name: name,
-        subjects: template.subjects.map(s => ({name: s.name, score: null})),
-        previous: []
-      };
-      testRecords.push(newTest);
-      // 選択を追加したテストに切り替えて保存・再描画
-      currentTestId = newTest.id;
-      save();
-      refreshTestSelect();
-      renderBoard();
-      localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId);
-    }catch(e){ console.error('saveAsTemplate add test', e); }
-
-  notify('テンプレートを保存し、新しいテスト種類を追加しました');
+    notify('このページのテンプレートを保存しました');
   }
 
   function applyTemplate(templateId) {
@@ -372,6 +353,15 @@
     // If page doesn't have the board elements (e.g., on login.html), skip rendering
     if(!els || !els.boardTitle || !els.scoreTableBody) return;
     const test = testRecords.find(t=>t.id===currentTestId);
+    // If the test exists but has no subjects, try to auto-apply a template named "{test.name}のテンプレート"
+    if(test && (!test.subjects || test.subjects.length === 0)){
+      const tplName = `${test.name}のテンプレート`;
+      const tpl = templates.find(t => t.name === tplName);
+      if(tpl && tpl.subjects && tpl.subjects.length){
+        test.subjects = tpl.subjects.map(s => ({name: s.name, score: null}));
+        save();
+      }
+    }
     if(!test){
       els.boardTitle.textContent = '—';
       els.scoreTableBody.innerHTML = '';
