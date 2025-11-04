@@ -14,8 +14,8 @@
         <p class="subtitle">暗記カード（デッキ）を作成し、学習モードと穴埋めテストを切り替えられます</p>
       </div>
       <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
-        <a href="memorization.html" class="btn">暗記モード</a>
-        <button id="openResultsBtn" class="btn">記録モード</button>
+  <a id="openMemHeaderBtn" href="memorization.html" class="btn">暗記モード</a>
+  <button id="openResultsBtn" class="btn">記録モード</button>
         <button id="toggleEditBtn" class="btn" style="margin-left:8px">カード編集</button>
       </nav>
     </header>
@@ -125,6 +125,7 @@
   let currentMode = 'learn';
   const topControls = document.getElementById('topControls');
   const cardRegister = document.getElementById('cardRegister');
+  const openMemHeaderBtn = document.getElementById('openMemHeaderBtn');
   const testSummary = document.getElementById('testSummary');
   const summaryPercent = document.getElementById('summaryPercent');
   const previousPercent = document.getElementById('previousPercent');
@@ -145,8 +146,22 @@
   const toggleEditBtn = document.getElementById('toggleEditBtn');
     if(toggleEditBtn) toggleEditBtn.addEventListener('click', ()=>{
       const showing = topControls.style.display !== 'none';
-      if(showing){ topControls.style.display = 'none'; cardRegister.style.display='none'; document.getElementById('deckArea').style.display='none'; }
-      else { topControls.style.display = 'block'; cardRegister.style.display='block'; document.getElementById('deckArea').style.display='block'; studyArea.style.display='none'; testArea.style.display='none'; }
+      if(showing){
+        // hide edit UI
+        topControls.style.display = 'none'; cardRegister.style.display='none'; document.getElementById('deckArea').style.display='none';
+        isEditing = false;
+        // show memorization header button when leaving edit
+        if(openMemHeaderBtn) openMemHeaderBtn.style.display = '';
+        updateOpenResultsBtn();
+        updateMode();
+      } else {
+        // show edit UI
+        topControls.style.display = 'block'; cardRegister.style.display='block'; document.getElementById('deckArea').style.display='block'; studyArea.style.display='none'; testArea.style.display='none';
+        isEditing = true;
+        // hide memorization header button while editing
+        if(openMemHeaderBtn) openMemHeaderBtn.style.display = 'none';
+        updateOpenResultsBtn();
+      }
     });
 
     let currentDeckId = null;
@@ -161,8 +176,10 @@
       isEditing = true;
       topControls.style.display = 'block'; cardRegister.style.display = 'block'; document.getElementById('deckArea').style.display = 'block';
       studyArea.style.display = 'none'; testArea.style.display = 'none';
+      if(openMemHeaderBtn) openMemHeaderBtn.style.display = 'none';
       if(deckId){ try{ deckSelect.value = deckId; }catch(e){} }
       loadDeck();
+      updateOpenResultsBtn();
     }
 
     function renderCardsList(){ cardsList.innerHTML=''; deckCards.forEach((c,i)=>{ const el=document.createElement('div'); el.style.display='flex'; el.style.justifyContent='space-between'; el.style.alignItems='center'; el.style.gap='8px'; const left=document.createElement('div'); left.textContent=(i+1)+'. '+(c.front.slice(0,80)); const btns=document.createElement('div'); btns.style.display='flex'; btns.style.gap='6px'; const edit=document.createElement('button'); edit.className='btn'; edit.textContent='編集'; edit.addEventListener('click', ()=>{ cardFront.value=c.front; cardBack.value=c.back; }); const del=document.createElement('button'); del.className='btn danger'; del.textContent='削除'; del.addEventListener('click', ()=>{ if(!confirm('カードを削除しますか？'))return; deckCards.splice(i,1); persistDeck(); renderCardsList(); }); btns.appendChild(edit); btns.appendChild(del); el.appendChild(left); el.appendChild(btns); cardsList.appendChild(el); }); }
@@ -270,7 +287,9 @@
 
   // mode toggle: when switching to learn/test, hide creation UI and deck list so study/test use full screen
   function updateMode(){ if(isEditing) return; const hasCards = deckCards.length>0; const mode = currentMode || 'learn';
-      // hide edit UI
+    // ensure header memorization button visible when not editing
+    if(openMemHeaderBtn) openMemHeaderBtn.style.display = '';
+    // hide edit UI
       topControls.style.display = 'none'; cardRegister.style.display='none'; document.getElementById('deckArea').style.display='none';
       if(mode==='learn'){
         studyArea.style.display = hasCards ? 'block' : 'none';
@@ -301,7 +320,8 @@
   const openResultsBtn = document.getElementById('openResultsBtn');
   function updateOpenResultsBtn(){
     if(!openResultsBtn) return;
-    if(currentDeckId){ openResultsBtn.disabled = false; openResultsBtn.title = 'このデッキの記録を見る'; }
+    // enable when editing (always allow leaving to record mode) or when a deck is selected
+    if(isEditing || currentDeckId){ openResultsBtn.disabled = false; openResultsBtn.title = 'このデッキの記録を見る'; }
     else { openResultsBtn.disabled = true; openResultsBtn.title = '先にデッキを選択してください'; }
   }
   // update when deck changes
