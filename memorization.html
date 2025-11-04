@@ -298,16 +298,19 @@
       if(firstInput) setTimeout(()=>{ firstInput.focus(); },50);
       // attach handler
       action.onclick = ()=>{ evaluateCurrentAnswer(); };
-      // allow Enter key on inputs to submit
-      testInputs.querySelectorAll('.mem-input').forEach(inp=> inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); evaluateCurrentAnswer(); } }));
-      // store answers for debug
-      testFront.dataset.answers = JSON.stringify(built.answers);
+  // allow Enter key on inputs to submit
+  testInputs.querySelectorAll('.mem-input').forEach(inp=> inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); evaluateCurrentAnswer(); } }));
+  // store answers and card metadata for evaluation and results page
+  testFront.dataset.answers = JSON.stringify(built.answers);
+  testFront.dataset.cardid = c.id || '';
+  testFront.dataset.front = c.front || '';
+  testFront.dataset.back = c.back || '';
     }
 
     // test mode flow with session tracking, big emoji feedback and final summary
     function showFeedback(isCorrect){ feedbackEmoji.textContent = isCorrect ? '⭕️' : '❌'; feedbackOverlay.style.display = 'flex'; setTimeout(()=>{ feedbackOverlay.style.display = 'none'; }, 800); }
 
-    function startTestSession(){ testSession = { total: deckCards.length, correct: 0, seen: 0 }; }
+  function startTestSession(){ testSession = { total: deckCards.length, correct: 0, seen: 0, entries: [] }; }
 
     // evaluate answer typed into the single input and then advance
     function evaluateCurrentAnswer(){ if(!deckCards.length) return; const c = deckCards[currentIndex]; const inputs = Array.from(document.querySelectorAll('#testInputs .mem-input'));
@@ -320,6 +323,12 @@
       const isCorrect = (correct === answers.length);
       // update session
       testSession.seen++; if(isCorrect) testSession.correct++;
+      // record per-card entry for results
+      try{
+        const entry = { cardId: testFront.dataset.cardid || c.id, front: testFront.dataset.front || c.front, back: testFront.dataset.back || c.back, expected: answers, entered: entered, correct: isCorrect };
+        if(!testSession.entries) testSession.entries = [];
+        testSession.entries.push(entry);
+      }catch(e){ console.warn('record entry failed', e); }
       // show feedback
       showFeedback(isCorrect);
       testResult.style.color = isCorrect ? 'green' : 'red'; testResult.textContent = `正答 ${correct}/${answers.length}`;
@@ -377,9 +386,12 @@
   const openResultsBtn = document.getElementById('openResultsBtn');
   function updateOpenResultsBtn(){
     if(!openResultsBtn) return;
-    // enable when editing (always allow leaving to record mode) or when a deck is selected
-    if(isEditing || currentDeckId){ openResultsBtn.disabled = false; openResultsBtn.title = 'このデッキの記録を見る'; }
-    else { openResultsBtn.disabled = true; openResultsBtn.title = '先にデッキを選択してください'; }
+    // enable when there is at least one deck, when editing, or when a deck is selected
+    if(isEditing || currentDeckId || (store && Array.isArray(store.decks) && store.decks.length>0)){
+      openResultsBtn.disabled = false; openResultsBtn.title = 'このデッキの記録を見る';
+    } else {
+      openResultsBtn.disabled = true; openResultsBtn.title = '先にデッキを選択してください';
+    }
   }
   // update when deck changes
   deckSelect.addEventListener('change', ()=>{ loadDeck(); updateOpenResultsBtn(); });
@@ -414,7 +426,7 @@
         saveResultsHistory(hist);
       }catch(e){ console.warn('save history failed', e); }
       // save last result to sessionStorage for the results page
-      try{ sessionStorage.setItem('kiroku_lot_last_result', JSON.stringify({ deckId: currentDeckId, pct: pct, prev: typeof prev === 'number' ? prev : null, correct, incorrect })); }catch(e){}
+  try{ sessionStorage.setItem('kiroku_lot_last_result', JSON.stringify({ deckId: currentDeckId, pct: pct, prev: typeof prev === 'number' ? prev : null, correct, incorrect, entries: testSession.entries || [] })); }catch(e){}
       // set a flag so the results->memorization flow can open the editor reliably
       try{ sessionStorage.setItem('kiroku_lot_open_edit', currentDeckId); }catch(e){}
       // navigate to results page and request that results page show edit UI link

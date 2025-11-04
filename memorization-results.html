@@ -43,6 +43,7 @@
     const lineCanvas = document.getElementById('lineChart');
     const pieCanvas = document.getElementById('resultChart');
     try{
+      function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       // get deck id from query or sessionStorage
       const params = new URLSearchParams(window.location.search);
       let deckId = params.get('deck');
@@ -77,7 +78,8 @@
           // normalize times and values
           const points = series.map(s=>({t:s.t, v: s.pct}));
           const tmin = points[0].t; const tmax = points[points.length-1].t;
-          const vmin = Math.min(...points.map(p=>p.v)); const vmax = Math.max(...points.map(p=>p.v));
+          // values are percentages; fix scale to 0-100 for stable plotting
+          const vmin = 0; const vmax = 100;
           const pad = 24; const gx0 = pad; const gy0 = lh - pad; const gw = lw - pad*2; const gh = lh - pad*2;
           // axes
           lc.strokeStyle = '#e6eef8'; lc.lineWidth = 1; lc.beginPath(); lc.moveTo(gx0, pad); lc.lineTo(gx0, gy0); lc.lineTo(gx0+gw, gy0); lc.stroke();
@@ -85,13 +87,34 @@
           lc.strokeStyle = '#3b82f6'; lc.lineWidth = 2; lc.beginPath();
           points.forEach((p,i)=>{
             const x = gx0 + ( (p.t - tmin) / Math.max(1, tmax - tmin) ) * gw;
-            const y = gy0 - ( (p.v - vmin) / Math.max(0.0001, vmax - vmin || 100) ) * gh;
+            const y = gy0 - ( (p.v - vmin) / Math.max(0.0001, vmax - vmin) ) * gh;
             if(i===0) lc.moveTo(x,y); else lc.lineTo(x,y);
           }); lc.stroke();
           // dots
           lc.fillStyle = '#ef4444'; points.forEach((p)=>{ const x = gx0 + ((p.t - tmin) / Math.max(1, tmax - tmin)) * gw; const y = gy0 - ((p.v - vmin) / Math.max(0.0001, vmax - vmin || 100)) * gh; lc.beginPath(); lc.arc(x,y,3,0,Math.PI*2); lc.fill(); });
         }
       }catch(e){ console.warn('draw history failed', e); }
+      // show per-card breakdown if provided
+      try{
+        const entries = obj && obj.entries ? obj.entries : [];
+        if(entries && entries.length){
+          const list = document.createElement('div'); list.style.textAlign='left'; list.style.marginTop='16px';
+          list.innerHTML = '<h4 style="margin:8px 0 6px">カード別結果</h4>';
+          const ul = document.createElement('div'); ul.style.display='flex'; ul.style.flexDirection='column'; ul.style.gap='8px';
+          entries.forEach((e,i)=>{
+            const row = document.createElement('div'); row.style.padding='8px'; row.style.border='1px solid #eef3fb'; row.style.borderRadius='6px'; row.style.background='#fff';
+            const ok = e.correct ? '✅' : '❌';
+            const title = document.createElement('div'); title.style.fontWeight='600'; title.textContent = `${i+1}. ${ok} ${e.front}`;
+            const details = document.createElement('div'); details.style.fontSize='0.95rem'; details.style.color='var(--muted)';
+            const exp = Array.isArray(e.expected) ? e.expected.join(' | ') : (e.expected||'');
+            const ent = Array.isArray(e.entered) ? e.entered.join(' | ') : (e.entered||'');
+            details.innerHTML = `<div>期待: ${escapeHtml(exp)}</div><div>解答: ${escapeHtml(ent)}</div>`;
+            row.appendChild(title); row.appendChild(details); ul.appendChild(row);
+          });
+          list.appendChild(ul);
+          extra.appendChild(list);
+        }
+      }catch(e){ console.warn('render entries failed', e); }
       // update open-memorize button to include deck id and edit flag
       const openBtn = document.getElementById('openMemorizeBtn'); if(openBtn){ openBtn.addEventListener('click', ()=>{
         try{ sessionStorage.setItem('kiroku_lot_open_edit', deckId || ''); }catch(e){}
