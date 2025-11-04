@@ -68,6 +68,7 @@
         <button id="refreshAccess">再取得</button>
         <button id="clearAccess">クリア</button>
         <button id="downloadAccess">CSV ダウンロード</button>
+        <button id="fetchServerLogs">サーバーログ取得</button>
         <span id="accessSummary" class="muted"></span>
       </div>
       <div id="accessCounts"></div>
@@ -411,6 +412,19 @@ function downloadAccessCsv(){
 el('refreshAccess').addEventListener('click', async ()=>{ const d = await refreshAndRender(); renderAccessLogs(d); });
 el('clearAccess').addEventListener('click', ()=>{ if(!confirm('アクセスログを本当にクリアしますか？')) return; localStorage.removeItem('kiroku_access_logs_v1'); refreshAndRender(); });
 el('downloadAccess').addEventListener('click', ()=>{ downloadAccessCsv(); });
+el('fetchServerLogs').addEventListener('click', async ()=>{
+  try{
+    const r = await fetch('/.netlify/functions/log-access');
+    if(!r.ok) return alert('サーバーログの取得に失敗しました: ' + r.status);
+    const json = await r.json();
+    // show server logs in raw textarea as well
+    el('raw').value = JSON.stringify({ server: json }, null, 2);
+    // render counts and table with server logs
+    const data = { localStorage: {} };
+    data.localStorage['server_access_logs'] = json;
+    renderAccessLogs(data);
+  }catch(e){ alert('サーバーログ取得中にエラー: ' + e.message); }
+});
 
 function downloadJson(obj){
   const blob = new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
