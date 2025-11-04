@@ -414,7 +414,17 @@ el('clearAccess').addEventListener('click', ()=>{ if(!confirm('アクセスロ�
 el('downloadAccess').addEventListener('click', ()=>{ downloadAccessCsv(); });
 el('fetchServerLogs').addEventListener('click', async ()=>{
   try{
-    const r = await fetch('/.netlify/functions/log-access');
+    // include admin secret header if provided (kept in memory when logging in)
+    const headers = { 'Accept': 'application/json' };
+    const secret = window.__adminSecret || null;
+    if(!secret){
+      // ask admin to enter secret (not stored persistently)
+      const v = prompt('サーバーログ取得用の管理シークレットを入力してください');
+      if(!v) return alert('シークレットが必要です');
+      window.__adminSecret = v;
+    }
+    headers['x-admin-secret'] = window.__adminSecret;
+    const r = await fetch('/.netlify/functions/log-access', { headers });
     if(!r.ok) return alert('サーバーログの取得に失敗しました: ' + r.status);
     const json = await r.json();
     // show server logs in raw textarea as well

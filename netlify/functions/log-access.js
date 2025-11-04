@@ -11,6 +11,9 @@ exports.handler = async function(event, context) {
   const repo = process.env.GITHUB_REPO; // format: owner/repo
   const filePath = 'server-logs/access_logs.json';
 
+  // optional admin secret to protect GET access
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || null;
+
   if(!repo || !token){
     return { statusCode: 500, body: JSON.stringify({ error: 'GITHUB_TOKEN or GITHUB_REPO not configured' }) };
   }
@@ -39,6 +42,13 @@ exports.handler = async function(event, context) {
 
   try{
     if(method === 'GET'){
+      // protect GET with ADMIN_SECRET if configured
+      if(ADMIN_SECRET){
+        const provided = (event.headers && (event.headers['x-admin-secret'] || event.headers['x-admin_secret'])) || null;
+        if(!provided || provided !== ADMIN_SECRET){
+          return { statusCode: 403, body: JSON.stringify({ error: 'forbidden' }) };
+        }
+      }
       const f = await getFile();
       if(!f) return { statusCode: 200, body: JSON.stringify([]), headers: { 'Content-Type': 'application/json' } };
       const content = Buffer.from(f.content, 'base64').toString('utf8');
