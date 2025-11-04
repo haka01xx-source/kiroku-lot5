@@ -25,7 +25,7 @@
         <label>デッキ
           <select id="deckSelect"></select>
         </label>
-        <button id="closeEditBtn" class="btn" style="display:none">編集を閉じる</button>
+        
         <input id="newDeckName" placeholder="新しいデッキ名を入力" />
         <button id="createDeckBtn" class="btn">デッキ作成</button>
         <button id="deleteDeckBtn" class="btn danger">デッキ削除</button>
@@ -41,12 +41,12 @@
       <p class="subtitle">表（出題）と裏（解答）を入力。穴埋め箇所は表に <strong>()</strong> を挿入してください。裏が複数の空欄に対応する場合は <code>||</code> で区切ってください（例: 答1||答2）。</p>
       <div style="display:flex;gap:12px;flex-direction:column">
         <textarea id="cardFront" placeholder="表（問題）を入力: 例）日本の首都は () です" rows="3"></textarea>
+        <textarea id="cardBack" placeholder="裏（解答）。複数は改行・カンマ・スペースでも区切れます（例: 東京 大阪）" rows="2"></textarea>
         <div style="display:flex;gap:8px;align-items:center">
           <button id="insertBlankBtn" class="btn">() を挿入</button>
-          <button id="saveCardBtn" class="btn">カードを保存</button>
           <button id="clearCardBtn" class="btn">クリア</button>
+          <button id="saveCardBtn" class="btn">カードを保存</button>
         </div>
-        <textarea id="cardBack" placeholder="裏（解答）。複数は || で区切る" rows="2"></textarea>
       </div>
     </section>
 
@@ -145,7 +145,6 @@
   const showEditOnLoad = urlParams.get('edit') === '1';
   let isEditing = false;
   const toggleEditBtn = document.getElementById('toggleEditBtn');
-    const closeEditBtn = document.getElementById('closeEditBtn');
     if(toggleEditBtn) toggleEditBtn.addEventListener('click', ()=>{
       // Enter edit mode
       isEditing = true;
@@ -153,20 +152,7 @@
       // hide header edit button while editing
       toggleEditBtn.style.display = 'none';
       if(openMemHeaderBtn) openMemHeaderBtn.style.display = 'none';
-      // show close button inside edit UI
-      if(closeEditBtn) closeEditBtn.style.display = '';
       updateOpenResultsBtn();
-    });
-    if(closeEditBtn) closeEditBtn.addEventListener('click', ()=>{
-      // Exit edit mode
-      isEditing = false;
-      topControls.style.display = 'none'; cardRegister.style.display='none'; document.getElementById('deckArea').style.display='none';
-      // restore header buttons
-      toggleEditBtn.style.display = '';
-      if(openMemHeaderBtn) openMemHeaderBtn.style.display = '';
-      if(closeEditBtn) closeEditBtn.style.display = 'none';
-      updateOpenResultsBtn();
-      updateMode();
     });
 
     let currentDeckId = null;
@@ -235,36 +221,57 @@
     });
 
     // test mode (穴埋め)
-    function buildTestForCard(c){ // returns {htmlFront, answers[]}
+    function buildTestForCard(c){ // returns {htmlFront, answers[], blanks}
       // find occurrences of () in front and create inputs
       const parts = c.front.split('()');
-      const blanks = parts.length - 1;
-      const answers = (c.back||'').split('||').map(s=>s.trim()).filter(x=>x!=='');
+      const blanks = Math.max(0, parts.length - 1);
+      // parse answers: prefer explicit '||', otherwise try common separators (改行, カンマ, 読点, セミコロン, パイプ), then whitespace
+      function parseAnswers(back, expected){
+        if(!back) return [];
+        if(back.indexOf('||') !== -1) return back.split('||').map(s=>s.trim()).filter(x=>x!=='');
+        let parts = back.split(/\s*[\n、,，;；|]\s*/).map(s=>s.trim()).filter(x=>x!=='');
+        if(parts.length === 1 && expected > 1){ // try whitespace split if user just typed space-separated
+          parts = back.split(/\s+/).map(s=>s.trim()).filter(x=>x!=='');
+        }
+        return parts;
+      }
+      const rawAnswers = parseAnswers(c.back||'', blanks);
+      // pad or trim to match blanks count (use blanks as source of truth)
+      const answers = [];
+      for(let i=0;i<blanks;i++) answers.push(rawAnswers[i] || '');
       let html = '';
       for(let i=0;i<parts.length;i++){
         html += '<span>'+escapeHtml(parts[i])+'</span>';
-        if(i<blanks) html += `<span class="mem-blank" style="display:inline-block;min-width:80px;padding:6px;border-bottom:2px dashed var(--muted);margin:4px;height:1.2em;vertical-align:middle"></span>`;
+        if(i<blanks) html += `<span class="mem-blank" style="display:inline-block;min-width:80px;padding:6px;border-bottom:2px dashed var(--muted);margin:4px;height:1.2em;vertical-align:middle;text-align:center;color:var(--muted)">(${i+1})</span>`;
       }
-      return { htmlFront: html, answers };
+      return { htmlFront: html, answers, blanks };
     }
     function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     function showTest(i){ if(!deckCards.length) return; currentIndex = (i+deckCards.length)%deckCards.length; const c = deckCards[currentIndex]; const built = buildTestForCard(c);
       testFront.innerHTML = ''; testFront.appendChild(document.createElement('div')).innerHTML = built.htmlFront;
       testInputs.innerHTML = '';
-      // create a single long input at bottom and a single action button that also serves as 次へ
-      const wrapper = document.createElement('div'); wrapper.style.display='flex'; wrapper.style.gap='8px'; wrapper.style.alignItems='center'; wrapper.style.marginTop='12px'; wrapper.style.width='100%';
-      const input = document.createElement('input'); input.id = 'mem-single-input'; input.className = 'btn'; input.style.flex = '1'; input.style.padding = '12px'; input.style.fontSize = '1.05rem'; input.style.border = '2px solid #3b82f6'; input.style.borderRadius = '8px'; input.placeholder = 'ここに回答を入力（複数は || で区切る）';
+      // create inputs equal to blanks/answers
+      const inputsWrapper = document.createElement('div'); inputsWrapper.style.display='flex'; inputsWrapper.style.gap='8px'; inputsWrapper.style.alignItems='center'; inputsWrapper.style.marginTop='12px'; inputsWrapper.style.width='100%';
+      const answerCount = built.answers.length || 0;
+      let firstInput = null;
+      for(let k=0;k<answerCount;k++){
+        const inp = document.createElement('input'); inp.className = 'mem-input'; inp.dataset.idx = k; inp.style.minWidth = '160px'; inp.style.padding='10px'; inp.style.border='2px solid #3b82f6'; inp.style.borderRadius='8px'; inp.style.fontSize='1rem'; inp.placeholder = `空欄 ${k+1}`;
+        inputsWrapper.appendChild(inp);
+        if(k===0) firstInput = inp;
+      }
+      // action button
       const action = document.createElement('button'); action.id = 'mem-action-btn'; action.className = 'btn'; action.textContent = '判定／次へ'; action.style.flex = '0 0 auto';
-      wrapper.appendChild(input); wrapper.appendChild(action); testInputs.appendChild(wrapper);
+      inputsWrapper.appendChild(action);
+      testInputs.appendChild(inputsWrapper);
       testResult.textContent=''; testSummary.style.display='none';
-      // focus input
-      setTimeout(()=>{ input.focus(); },50);
+      // focus first input
+      if(firstInput) setTimeout(()=>{ firstInput.focus(); },50);
       // attach handler
       action.onclick = ()=>{ evaluateCurrentAnswer(); };
-      // allow Enter key to submit
-      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); evaluateCurrentAnswer(); } });
-      // store answers on the testFront element for evaluation
+      // allow Enter key on inputs to submit
+      testInputs.querySelectorAll('.mem-input').forEach(inp=> inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); evaluateCurrentAnswer(); } }));
+      // store answers for debug
       testFront.dataset.answers = JSON.stringify(built.answers);
     }
 
@@ -274,8 +281,12 @@
     function startTestSession(){ testSession = { total: deckCards.length, correct: 0, seen: 0 }; }
 
     // evaluate answer typed into the single input and then advance
-    function evaluateCurrentAnswer(){ if(!deckCards.length) return; const c = deckCards[currentIndex]; const input = document.getElementById('mem-single-input'); if(!input) return; const raw = input.value.trim(); const entered = raw === '' ? [] : raw.split('||').map(s=>s.trim()); const answers = (c.back||'').split('||').map(s=>s.trim()).filter(x=>x!=='');
-      if(entered.length !== answers.length){ testResult.style.color='orange'; testResult.textContent = `空欄数と解答数が一致しません（入力: ${entered.length} 期待: ${answers.length}）。複数は || で区切ってください`; return; }
+    function evaluateCurrentAnswer(){ if(!deckCards.length) return; const c = deckCards[currentIndex]; const inputs = Array.from(document.querySelectorAll('#testInputs .mem-input'));
+      // read answers computed when building the test (ensures we use blanks-based splitting/padding)
+      let answers = [];
+      try{ answers = JSON.parse(testFront.dataset.answers || '[]'); }catch(e){ answers = []; }
+      const entered = inputs.map(i=>i.value.trim());
+      if(entered.length !== answers.length){ testResult.style.color='orange'; testResult.textContent = `空欄数と解答数が一致しません（入力: ${entered.length} 期待: ${answers.length}）。`; return; }
       let correct = 0; for(let i=0;i<answers.length;i++){ if(entered[i] === answers[i]) correct++; }
       const isCorrect = (correct === answers.length);
       // update session
@@ -283,8 +294,8 @@
       // show feedback
       showFeedback(isCorrect);
       testResult.style.color = isCorrect ? 'green' : 'red'; testResult.textContent = `正答 ${correct}/${answers.length}`;
-      // disable input to avoid re-submit
-      input.disabled = true;
+      // disable inputs
+      inputs.forEach(inp=> inp.disabled = true);
       // advance after delay or show results if finished
       setTimeout(()=>{ if(testSession.seen >= testSession.total){ showResults(); } else { showTest(currentIndex+1); } }, 800);
     }
