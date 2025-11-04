@@ -13,6 +13,10 @@
         <h1>テスト詳細</h1>
         <p class="subtitle">タイルから遷移しました。ここで点数入力やグラフができます。</p>
       </div>
+      <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
+        <a href="index.html" class="btn">一覧</a>
+  <a href="memorization.html?edit=1" class="btn">暗記モード</a>
+      </nav>
       <div class="header-right">
         <a href="index.html" class="btn">一覧に戻る</a>
       </div>
@@ -21,13 +25,19 @@
     <!-- Top actions: templates, share, publish — kept horizontal and aligned -->
     <div class="top-actions card">
       <div class="template-actions">
-        <select id="templateSelect">
-          <option value="">テンプレートを選択...</option>
-        </select>
+        <!-- テンプレート選択ボックスを廃止しました。
+             操作は常に「現在表示しているテスト」に対して行われます。
+             ・テンプレートとして保存 = 今のテストをテンプレート化
+             ・テンプレートを適用 = 同名テンプレートがあれば現在のテストに適用（別テンプレ選択は不要） -->
         <div class="btn-group">
           <button id="saveTemplateBtn" class="btn">テンプレートとして保存</button>
-          <button id="applyTemplateBtn" class="btn">テンプレートを適用</button>
+          <button id="applyTemplateBtn" class="btn">テンプレートを適用（同名があれば）</button>
         </div>
+      </div>
+
+      <!-- Delete current test (moved here from index page) -->
+      <div style="margin-left:auto;">
+        <button id="deleteTestBtn" class="btn danger">このテストを削除</button>
       </div>
 
       <div class="share-actions">

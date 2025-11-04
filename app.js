@@ -305,6 +305,18 @@
       if(currentTestId) els.testSelect.value = currentTestId;
     }
 
+    // If a template exists matching the current test name, preselect it so user doesn't have to re-pick
+    try{
+      if(els && els.templateSelect && currentTestId){
+        const curTest = testRecords.find(t => t.id === currentTestId);
+        if(curTest){
+          const tplName = `${curTest.name}のテンプレート`;
+          const tpl = templates.find(t => t.name === tplName);
+          if(tpl) els.templateSelect.value = tpl.id;
+        }
+      }
+    }catch(e){/* ignore */}
+
     // Render responsive tile grid if present (new UI)
     const grid = document.getElementById('testsGrid');
     if(grid){
@@ -612,6 +624,13 @@
     currentTestId = testRecords.length ? testRecords[0].id : null;
     try{ if(currentTestId) localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId); else localStorage.removeItem(SELECTED_TEST_LS_KEY); }catch(e){}
     save(); refreshTestSelect(); renderBoard();
+    // If we're on the test detail page, redirect back to the index (一覧) after deletion
+    try{
+      const path = window.location.pathname || '';
+      if(/test\.html$/.test(path) || path.endsWith('/test') ){
+        window.location.href = 'index.html';
+      }
+    }catch(e){}
   }
 
   function addSubjectToCurrent(name, score){
@@ -835,7 +854,22 @@
     });
     if(els.renameTestBtn) els.renameTestBtn.addEventListener('click', renameCurrentTest);
     if(els.deleteTestBtn) els.deleteTestBtn.addEventListener('click', deleteCurrentTest);
-  if(els.testSelect) els.testSelect.addEventListener('change', e=>{ currentTestId = e.target.value; try{ localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId); }catch(e){} renderBoard(); });
+  if(els.testSelect) els.testSelect.addEventListener('change', e=>{
+    currentTestId = e.target.value;
+    try{ localStorage.setItem(SELECTED_TEST_LS_KEY, currentTestId); }catch(e){}
+    // If a template exists with the same base name, preselect it so user doesn't need to pick again
+    try{
+      if(els.templateSelect && currentTestId){
+        const curTest = testRecords.find(t => t.id === currentTestId);
+        if(curTest){
+          const tplName = `${curTest.name}のテンプレート`;
+          const tpl = templates.find(t => t.name === tplName);
+          if(tpl) els.templateSelect.value = tpl.id;
+        }
+      }
+    }catch(e){}
+    renderBoard();
+  });
     if(els.addSubjectBtn) els.addSubjectBtn.addEventListener('click', ()=>{
       const name = (els.newSubjectName && els.newSubjectName.value) ? els.newSubjectName.value.trim() : '';
       const score = els.newSubjectScore ? els.newSubjectScore.value : '';
@@ -867,34 +901,46 @@
       if(shared) saveSharedAsTest(shared);
     });
 
-    // テンプレートセレクトで選択したら自動で共有リンクを生成
-    if(els.templateSelect) els.templateSelect.addEventListener('change', (e) => {
-      const tid = e.target.value;
-      if(!tid){ if(els.templateShareLink) els.templateShareLink.value = ''; return; }
-      shareTemplate(tid);
-    });
-
+    // テンプレート関連のイベントハンドラ
+    // UI 上の選択ボックスを廃止したため、すべて "現在表示中のテスト" を基準に動作します。
     if(els.copyTemplateShareBtn) els.copyTemplateShareBtn.addEventListener('click', copyTemplateShareLink);
     if(els.showTemplateQRBtn) els.showTemplateQRBtn.addEventListener('click', ()=>{
       const link = els.templateShareLink?.value || els.shareLink?.value;
       if(!link) return alert('先にテンプレート共有リンクを生成してください');
-      // toggle display (but update QR first)
       updateTemplateQR(link);
-      els.templateQR.style.display = 'inline-block';
+      if(els.templateQR) els.templateQR.style.display = 'inline-block';
     });
     if(els.downloadTemplateQRBtn) els.downloadTemplateQRBtn.addEventListener('click', downloadTemplateQR);
 
-    // テンプレート関連のイベントハンドラ
-    els.saveTemplateBtn.addEventListener('click', saveAsTemplate);
-    els.applyTemplateBtn.addEventListener('click', () => {
-      const templateId = els.templateSelect.value;
-      if(!templateId) return alert('テンプレートを選択してください');
-      applyTemplate(templateId);
+    // Save current test as template
+    if(els.saveTemplateBtn) els.saveTemplateBtn.addEventListener('click', saveAsTemplate);
+
+    // Apply: apply a template that corresponds to current test name if it exists
+    if(els.applyTemplateBtn) els.applyTemplateBtn.addEventListener('click', () => {
+      const test = testRecords.find(t => t.id === currentTestId);
+      if(!test) return alert('適用するテストが選択されていません');
+      const tplName = `${test.name}のテンプレート`;
+      const tpl = templates.find(x => x.name === tplName);
+      if(!tpl) return alert('このテストに対応するテンプレートが見つかりません');
+      applyTemplate(tpl.id);
     });
-    els.shareTemplateBtn.addEventListener('click', () => {
-      const templateId = els.templateSelect.value;
-      if(!templateId) return alert('テンプレートを選択してください');
-      shareTemplate(templateId);
+
+    // Share: share the template corresponding to current test. If it doesn't exist, create it then share.
+    if(els.shareTemplateBtn) els.shareTemplateBtn.addEventListener('click', () => {
+      const test = testRecords.find(t => t.id === currentTestId);
+      if(!test) return alert('共有するテストが選択されていません');
+      const tplName = `${test.name}のテンプレート`;
+      let tpl = templates.find(x => x.name === tplName);
+      if(!tpl){
+        // create and persist
+        const newTpl = { id: uid(), name: tplName, subjects: test.subjects.map(s => ({name: s.name})) };
+        templates.push(newTpl);
+        saveTemplates();
+        tpl = newTpl;
+        if(els.templateSelect) refreshTemplateSelect();
+      }
+      const url = shareTemplate(tpl.id);
+      if(url && els.templateShareLink) els.templateShareLink.value = url;
     });
 
     // short-code feature removed. Sharing is handled viaテンプレート/共有リンクまたはアカウント保存を使ってください。
@@ -1017,6 +1063,8 @@
     }catch(e){}
   // automatically load account data (merge) without prompting
   try{ await autoLoadAccountData(); }catch(e){ console.warn('auto load after login failed', e); }
+  // after merging cloud data into local, push merged local data back to cloud so other devices see it
+  try{ await saveToAccount(); }catch(e){ console.warn('saveToAccount after login failed', e); }
   // If this page doesn't have the main UI (e.g., login.html), defer UI rendering (index init will handle)
   if(!document.getElementById('testSelect') && !document.getElementById('testsGrid')) return true;
   return true;

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>暗記モード - 結果</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="site-header card">
+      <div class="header-left">
+        <h1>テスト結果</h1>
+        <p class="subtitle">今回の成績を表示します</p>
+      </div>
+      <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
+        <button id="openMemorizeBtn" class="btn">暗記モードに戻る（編集）</button>
+      </nav>
+    </header>
+
+    <section class="card" id="resultArea" style="text-align:center">
+      <h3>結果</h3>
+      <div style="font-size:1.2rem">正答率: <strong id="percent">-</strong>% （前回: <span id="prev">-</span>）</div>
+      <div style="display:flex;gap:18px;align-items:flex-start;justify-content:center;margin-top:18px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px;max-width:640px;text-align:left">
+          <div style="font-size:0.95rem;color:var(--muted);margin-bottom:6px">履歴（折れ線グラフ）</div>
+          <canvas id="lineChart" width="640" height="260" style="width:100%;height:auto;border:1px solid rgba(0,0,0,0.04);background:#fff"></canvas>
+        </div>
+        <div style="width:320px;text-align:center">
+          <div style="font-size:0.95rem;color:var(--muted);margin-bottom:6px">今回の内訳</div>
+          <canvas id="resultChart" width="300" height="300" style="background:#fff;border-radius:8px"></canvas>
+        </div>
+      </div>
+      <div id="extra" style="margin-top:12px;color:var(--muted)"></div>
+    </section>
+  </main>
+
+  <script>
+  (function(){
+    const pctEl = document.getElementById('percent');
+    const prevEl = document.getElementById('prev');
+    const extra = document.getElementById('extra');
+    const lineCanvas = document.getElementById('lineChart');
+    const pieCanvas = document.getElementById('resultChart');
+    try{
+      // get deck id from query or sessionStorage
+      const params = new URLSearchParams(window.location.search);
+      let deckId = params.get('deck');
+      const raw = sessionStorage.getItem('kiroku_lot_last_result');
+      if(!raw && !deckId){ extra.textContent = '結果データが見つかりません。'; return; }
+      const obj = raw ? JSON.parse(raw) : null;
+      if(!deckId && obj) deckId = obj.deckId;
+      const pct = obj && (typeof obj.pct === 'number') ? obj.pct : 0;
+      const prev = obj && (typeof obj.prev === 'number') ? obj.prev.toFixed(2) + '%' : '-';
+      pctEl.textContent = (pct||0).toFixed(2);
+      prevEl.textContent = prev;
+
+      // draw pie
+      const correct = obj ? (obj.correct||0) : 0; const incorrect = obj ? (obj.incorrect||0) : 0;
+      const c = pieCanvas.getContext('2d'); const cx = pieCanvas.width/2; const cy = pieCanvas.height/2; const r = Math.min(cx,cy)-12;
+      const total = (correct + incorrect) || 1; const angle = (correct/total) * Math.PI * 2;
+      c.clearRect(0,0,pieCanvas.width,pieCanvas.height);
+      c.beginPath(); c.moveTo(cx,cy); c.fillStyle = '#ef4444'; c.arc(cx,cy,r,-Math.PI/2, -Math.PI/2 + angle); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(cx,cy); c.fillStyle = '#3b82f6'; c.arc(cx,cy,r,-Math.PI/2 + angle, -Math.PI/2 + Math.PI*2); c.closePath(); c.fill();
+      extra.textContent = `正答 ${correct} / ${correct+incorrect}`;
+
+      // draw line chart from history
+      try{
+        const HIST_KEY = 'kiroku_lot_cards_results_history_v1';
+        const rawHist = localStorage.getItem(HIST_KEY);
+        const histObj = rawHist ? JSON.parse(rawHist) : {};
+        const series = histObj[deckId] || [];
+        const lc = lineCanvas.getContext('2d'); const lw = lineCanvas.width; const lh = lineCanvas.height;
+        lc.clearRect(0,0,lw,lh);
+        if(!series.length){ lc.fillStyle = 'var(--muted)'; lc.font = '14px sans-serif'; lc.fillText('履歴がありません', 12, 24); }
+        else{
+          // normalize times and values
+          const points = series.map(s=>({t:s.t, v: s.pct}));
+          const tmin = points[0].t; const tmax = points[points.length-1].t;
+          const vmin = Math.min(...points.map(p=>p.v)); const vmax = Math.max(...points.map(p=>p.v));
+          const pad = 24; const gx0 = pad; const gy0 = lh - pad; const gw = lw - pad*2; const gh = lh - pad*2;
+          // axes
+          lc.strokeStyle = '#e6eef8'; lc.lineWidth = 1; lc.beginPath(); lc.moveTo(gx0, pad); lc.lineTo(gx0, gy0); lc.lineTo(gx0+gw, gy0); lc.stroke();
+          // plot
+          lc.strokeStyle = '#3b82f6'; lc.lineWidth = 2; lc.beginPath();
+          points.forEach((p,i)=>{
+            const x = gx0 + ( (p.t - tmin) / Math.max(1, tmax - tmin) ) * gw;
+            const y = gy0 - ( (p.v - vmin) / Math.max(0.0001, vmax - vmin || 100) ) * gh;
+            if(i===0) lc.moveTo(x,y); else lc.lineTo(x,y);
+          }); lc.stroke();
+          // dots
+          lc.fillStyle = '#ef4444'; points.forEach((p)=>{ const x = gx0 + ((p.t - tmin) / Math.max(1, tmax - tmin)) * gw; const y = gy0 - ((p.v - vmin) / Math.max(0.0001, vmax - vmin || 100)) * gh; lc.beginPath(); lc.arc(x,y,3,0,Math.PI*2); lc.fill(); });
+        }
+      }catch(e){ console.warn('draw history failed', e); }
+      // update open-memorize button to include deck id and edit flag
+      const openBtn = document.getElementById('openMemorizeBtn'); if(openBtn){ openBtn.addEventListener('click', ()=>{
+        try{ sessionStorage.setItem('kiroku_lot_open_edit', deckId || ''); }catch(e){}
+        window.location.href = 'memorization.html?edit=1' + (deckId ? '&deck=' + encodeURIComponent(deckId) : '');
+      }); }
+    }catch(e){ extra.textContent = '結果の読み込みに失敗しました'; console.warn(e); }
+  })();
+  </script>
+</body>
+</html>

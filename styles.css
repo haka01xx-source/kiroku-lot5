@@ -251,22 +251,31 @@ footer.tiny ul{
 /* Template QR styling (small inline) */
 #templateQR{width:88px;height:88px;border-radius:8px;object-fit:contain;border:1px solid #eef3fb;padding:6px;background:#fff}
 
-/* Tests tile grid */
-.tests-grid, #testsGrid{display:grid;gap:12px;margin-top:8px}
-.test-tile{background:#fff;border:1px solid var(--control-border);padding:12px;border-radius:10px;box-shadow:var(--shadow-sm);cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-height:72px}
+/* Tests tile grid - use auto-fit for robust responsive layout */
+.tests-grid, #testsGrid{
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+  /* Responsive columns: each tile is at least 220px, grow to fill space */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: start;
+}
+.test-tile{
+  background: #fff;
+  border: 1px solid var(--control-border);
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 72px;
+}
 .test-tile:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
 .test-tile .tile-name{font-weight:700;margin-bottom:6px}
 .test-tile .tile-meta{color:var(--muted);font-size:0.9rem}
-
-@media(min-width:980px){ /* desktop */
-  #testsGrid{grid-template-columns:repeat(3,1fr)}
-}
-@media(min-width:680px) and (max-width:979px){ /* tablet */
-  #testsGrid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:679px){ /* mobile */
-  #testsGrid{grid-template-columns:repeat(1,1fr)}
-}
 
 /* Top actions bar (template/share/publish) */
 .top-actions{display:flex;gap:12px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding:12px}

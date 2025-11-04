@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>暗記モード - テスト点数記録表</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="site-header card">
+      <div class="header-left">
+        <h1>暗記モード</h1>
+        <p class="subtitle">暗記カード（デッキ）を作成し、学習モードと穴埋めテストを切り替えられます</p>
+      </div>
+      <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
+        <a href="memorization.html" class="btn">暗記モード</a>
+        <button id="openResultsBtn" class="btn">記録モード</button>
+        <button id="toggleEditBtn" class="btn" style="margin-left:8px">カード編集</button>
+      </nav>
+    </header>
+
+  <section class="card" id="topControls">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <label>デッキ
+          <select id="deckSelect"></select>
+        </label>
+        <input id="newDeckName" placeholder="新しいデッキ名を入力" />
+        <button id="createDeckBtn" class="btn">デッキ作成</button>
+        <button id="deleteDeckBtn" class="btn danger">デッキ削除</button>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <button id="learnModeBtn" class="btn">学習</button>
+          <button id="testModeBtn" class="btn">テスト</button>
+        </div>
+      </div>
+    </section>
+
+  <section class="card" id="cardRegister">
+      <h3>カード登録</h3>
+      <p class="subtitle">表（出題）と裏（解答）を入力。穴埋め箇所は表に <strong>()</strong> を挿入してください。裏が複数の空欄に対応する場合は <code>||</code> で区切ってください（例: 答1||答2）。</p>
+      <div style="display:flex;gap:12px;flex-direction:column">
+        <textarea id="cardFront" placeholder="表（問題）を入力: 例）日本の首都は () です" rows="3"></textarea>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="insertBlankBtn" class="btn">() を挿入</button>
+          <button id="saveCardBtn" class="btn">カードを保存</button>
+          <button id="clearCardBtn" class="btn">クリア</button>
+        </div>
+        <textarea id="cardBack" placeholder="裏（解答）。複数は || で区切る" rows="2"></textarea>
+      </div>
+    </section>
+
+    <section class="card" id="deckArea">
+      <h3>カード一覧</h3>
+      <div id="cardsList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </section>
+
+    <section class="card" id="studyArea" style="display:none;text-align:center">
+      <div id="studyCard" style="padding:24px;font-size:2.6rem;border-radius:8px;border:1px solid #eef3fb;background:#fff;min-height:calc(100vh - 200px);display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%">
+        <div id="studyFront" style="font-weight:700;margin-bottom:12px">表</div>
+        <div id="studyBack" style="color:var(--muted);display:none">裏</div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button id="revealBtn" class="btn">答えを見る</button>
+        <button id="prevBtn" class="btn">前へ</button>
+        <button id="nextBtn" class="btn">次へ</button>
+      </div>
+      <div id="progress" style="margin-top:8px;color:var(--muted)"></div>
+    </section>
+
+    <section class="card" id="testArea" style="display:none;text-align:center">
+      <div id="testCard" style="padding:24px;font-size:2.6rem;border-radius:8px;border:1px solid #eef3fb;background:#fff;min-height:calc(100vh - 240px);display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%">
+        <div id="testFront" style="font-weight:700;margin-bottom:12px"></div>
+        <div id="testInputs" style="margin-top:8px"></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button id="testPrevBtn" class="btn">前へ</button>
+      </div>
+      <div id="testResult" style="margin-top:8px;color:var(--muted)"></div>
+      <div id="testSummary" style="display:none;margin-top:16px;text-align:center">
+        <div style="font-size:1.1rem">正答率: <strong id="summaryPercent"></strong>% （前回: <span id="previousPercent">-</span>）</div>
+        <canvas id="resultChart" width="220" height="220" style="margin-top:12px"></canvas>
+      </div>
+    </section>
+
+  <div id="feedbackOverlay" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;font-size:8rem;pointer-events:none">
+    <div id="feedbackEmoji" style="filter:drop-shadow(0 6px 30px rgba(0,0,0,0.2));">⭕️</div>
+  </div>
+
+  </main>
+
+  <script>
+  (function(){
+    const LS_KEY = 'kiroku_lot_cards_v1';
+    function uid(){return Math.random().toString(36).slice(2,9);}    
+    function load(){ try{ const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):{decks:[]}; }catch(e){return {decks:[]};} }
+    function save(data){ try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){}
+    }
+
+    let store = load();
+    const deckSelect = document.getElementById('deckSelect');
+    const createDeckBtn = document.getElementById('createDeckBtn');
+    const deleteDeckBtn = document.getElementById('deleteDeckBtn');
+    const newDeckName = document.getElementById('newDeckName');
+    const cardFront = document.getElementById('cardFront');
+    const cardBack = document.getElementById('cardBack');
+    const insertBlankBtn = document.getElementById('insertBlankBtn');
+    const saveCardBtn = document.getElementById('saveCardBtn');
+    const clearCardBtn = document.getElementById('clearCardBtn');
+    const cardsList = document.getElementById('cardsList');
+    const studyArea = document.getElementById('studyArea');
+    const testArea = document.getElementById('testArea');
+    const studyFront = document.getElementById('studyFront');
+    const studyBack = document.getElementById('studyBack');
+    const revealBtn = document.getElementById('revealBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressEl = document.getElementById('progress');
+  const testFront = document.getElementById('testFront');
+  const testInputs = document.getElementById('testInputs');
+  const testResult = document.getElementById('testResult');
+
+  // mode buttons (radio inputs were removed; use buttons)
+  const learnModeBtn = document.getElementById('learnModeBtn');
+  const testModeBtn = document.getElementById('testModeBtn');
+  let currentMode = 'learn';
+  const topControls = document.getElementById('topControls');
+  const cardRegister = document.getElementById('cardRegister');
+  const testSummary = document.getElementById('testSummary');
+  const summaryPercent = document.getElementById('summaryPercent');
+  const previousPercent = document.getElementById('previousPercent');
+  const resultChart = document.getElementById('resultChart');
+  const feedbackOverlay = document.getElementById('feedbackOverlay');
+  const feedbackEmoji = document.getElementById('feedbackEmoji');
+
+  const RESULTS_KEY = 'kiroku_lot_cards_results_v1';
+  function loadResults(){ try{ const r = localStorage.getItem(RESULTS_KEY); return r?JSON.parse(r):{}; }catch(e){return{};} }
+  function saveResults(obj){ try{ localStorage.setItem(RESULTS_KEY, JSON.stringify(obj)); }catch(e){} }
+  let resultsStore = loadResults();
+
+  let testSession = null; // {total, correct, seen}
+  // detect url param to show edit UI when coming from results page
+  const urlParams = new URLSearchParams(window.location.search);
+  const showEditOnLoad = urlParams.get('edit') === '1';
+  let isEditing = false;
+  const toggleEditBtn = document.getElementById('toggleEditBtn');
+    if(toggleEditBtn) toggleEditBtn.addEventListener('click', ()=>{
+      const showing = topControls.style.display !== 'none';
+      if(showing){ topControls.style.display = 'none'; cardRegister.style.display='none'; document.getElementById('deckArea').style.display='none'; }
+      else { topControls.style.display = 'block'; cardRegister.style.display='block'; document.getElementById('deckArea').style.display='block'; studyArea.style.display='none'; testArea.style.display='none'; }
+    });
+
+    let currentDeckId = null;
+    let currentIndex = 0;
+    let deckCards = [];
+
+    function renderDeckSelect(){ deckSelect.innerHTML = ''; store.decks.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; deckSelect.appendChild(o); }); if(deckSelect.options.length) deckSelect.value = deckSelect.options[0].value; currentDeckId = deckSelect.value; loadDeck(); }
+
+    function loadDeck(){ const d = store.decks.find(x=>x.id===deckSelect.value); if(!d){ deckCards=[]; cardsList.innerHTML=''; currentDeckId=null; return;} currentDeckId=d.id; deckCards=d.cards||[]; renderCardsList(); }
+
+    function showEditUI(deckId){
+      isEditing = true;
+      topControls.style.display = 'block'; cardRegister.style.display = 'block'; document.getElementById('deckArea').style.display = 'block';
+      studyArea.style.display = 'none'; testArea.style.display = 'none';
+      if(deckId){ try{ deckSelect.value = deckId; }catch(e){} }
+      loadDeck();
+    }
+
+    function renderCardsList(){ cardsList.innerHTML=''; deckCards.forEach((c,i)=>{ const el=document.createElement('div'); el.style.display='flex'; el.style.justifyContent='space-between'; el.style.alignItems='center'; el.style.gap='8px'; const left=document.createElement('div'); left.textContent=(i+1)+'. '+(c.front.slice(0,80)); const btns=document.createElement('div'); btns.style.display='flex'; btns.style.gap='6px'; const edit=document.createElement('button'); edit.className='btn'; edit.textContent='編集'; edit.addEventListener('click', ()=>{ cardFront.value=c.front; cardBack.value=c.back; }); const del=document.createElement('button'); del.className='btn danger'; del.textContent='削除'; del.addEventListener('click', ()=>{ if(!confirm('カードを削除しますか？'))return; deckCards.splice(i,1); persistDeck(); renderCardsList(); }); btns.appendChild(edit); btns.appendChild(del); el.appendChild(left); el.appendChild(btns); cardsList.appendChild(el); }); }
+
+    function persistDeck(){ const idx = store.decks.findIndex(d=>d.id===currentDeckId); if(idx===-1) return; store.decks[idx].cards = deckCards; save(store); }
+
+    createDeckBtn.addEventListener('click', ()=>{
+      const name = newDeckName.value.trim(); if(!name) return alert('デッキ名を入力してください');
+      const d = { id: uid(), name, cards: [] }; store.decks.push(d); save(store); newDeckName.value=''; renderDeckSelect(); deckSelect.value = d.id; loadDeck();
+    });
+    deleteDeckBtn.addEventListener('click', ()=>{
+      if(!currentDeckId) return alert('デッキが選択されていません');
+      if(!confirm('デッキを削除しますか？この操作は取り消せません')) return;
+      store.decks = store.decks.filter(d=>d.id!==currentDeckId); save(store); renderDeckSelect(); loadDeck();
+    });
+
+    deckSelect.addEventListener('change', ()=>{ loadDeck(); });
+
+    insertBlankBtn.addEventListener('click', ()=>{
+      const el = cardFront; const start = el.selectionStart||0; const end = el.selectionEnd||0; const v = el.value; el.value = v.slice(0,start) + '()' + v.slice(end); el.selectionStart = el.selectionEnd = start + 1; el.focus();
+    });
+
+    saveCardBtn.addEventListener('click', ()=>{
+      if(!currentDeckId) return alert('先にデッキを選択または作成してください');
+      const f = cardFront.value.trim(); const b = cardBack.value.trim(); if(!f) return alert('表を入力してください');
+      const card = { id: uid(), front: f, back: b };
+      deckCards.push(card); persistDeck(); renderCardsList(); cardFront.value=''; cardBack.value='';
+    });
+    clearCardBtn.addEventListener('click', ()=>{ cardFront.value=''; cardBack.value=''; });
+
+  // study mode (full-screen style)
+  function showStudy(i){ if(!deckCards.length) return; currentIndex = (i+deckCards.length)%deckCards.length; const c = deckCards[currentIndex]; studyFront.textContent = c.front; studyBack.textContent = c.back; studyBack.style.display='none'; progressEl.textContent = `${currentIndex+1}/${deckCards.length}`; }
+  revealBtn.addEventListener('click', ()=>{ studyBack.style.display='block'; });
+    prevBtn.addEventListener('click', ()=>{ showStudy(currentIndex-1); });
+    nextBtn.addEventListener('click', ()=>{
+      // in learn mode, when advancing past the last card return to index list
+      if(currentMode === 'learn'){
+        if(currentIndex + 1 >= deckCards.length){
+          // 学習完了: カード編集画面に戻す
+          topControls.style.display = 'block'; cardRegister.style.display = 'block'; document.getElementById('deckArea').style.display = 'block';
+          studyArea.style.display = 'none'; testArea.style.display = 'none';
+          return;
+        }
+        showStudy(currentIndex+1);
+      } else {
+        showStudy(currentIndex+1);
+      }
+    });
+
+    // test mode (穴埋め)
+    function buildTestForCard(c){ // returns {htmlFront, answers[]}
+      // find occurrences of () in front and create inputs
+      const parts = c.front.split('()');
+      const blanks = parts.length - 1;
+      const answers = (c.back||'').split('||').map(s=>s.trim()).filter(x=>x!=='');
+      let html = '';
+      for(let i=0;i<parts.length;i++){
+        html += '<span>'+escapeHtml(parts[i])+'</span>';
+        if(i<blanks) html += `<span class="mem-blank" style="display:inline-block;min-width:80px;padding:6px;border-bottom:2px dashed var(--muted);margin:4px;height:1.2em;vertical-align:middle"></span>`;
+      }
+      return { htmlFront: html, answers };
+    }
+    function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function showTest(i){ if(!deckCards.length) return; currentIndex = (i+deckCards.length)%deckCards.length; const c = deckCards[currentIndex]; const built = buildTestForCard(c);
+      testFront.innerHTML = ''; testFront.appendChild(document.createElement('div')).innerHTML = built.htmlFront;
+      testInputs.innerHTML = '';
+      // create a single long input at bottom and a single action button that also serves as 次へ
+      const wrapper = document.createElement('div'); wrapper.style.display='flex'; wrapper.style.gap='8px'; wrapper.style.alignItems='center'; wrapper.style.marginTop='12px'; wrapper.style.width='100%';
+      const input = document.createElement('input'); input.id = 'mem-single-input'; input.className = 'btn'; input.style.flex = '1'; input.style.padding = '12px'; input.style.fontSize = '1.05rem'; input.style.border = '2px solid #3b82f6'; input.style.borderRadius = '8px'; input.placeholder = 'ここに回答を入力（複数は || で区切る）';
+      const action = document.createElement('button'); action.id = 'mem-action-btn'; action.className = 'btn'; action.textContent = '判定／次へ'; action.style.flex = '0 0 auto';
+      wrapper.appendChild(input); wrapper.appendChild(action); testInputs.appendChild(wrapper);
+      testResult.textContent=''; testSummary.style.display='none';
+      // focus input
+      setTimeout(()=>{ input.focus(); },50);
+      // attach handler
+      action.onclick = ()=>{ evaluateCurrentAnswer(); };
+      // allow Enter key to submit
+      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); evaluateCurrentAnswer(); } });
+      // store answers on the testFront element for evaluation
+      testFront.dataset.answers = JSON.stringify(built.answers);
+    }
+
+    // test mode flow with session tracking, big emoji feedback and final summary
+    function showFeedback(isCorrect){ feedbackEmoji.textContent = isCorrect ? '⭕️' : '❌'; feedbackOverlay.style.display = 'flex'; setTimeout(()=>{ feedbackOverlay.style.display = 'none'; }, 800); }
+
+    function startTestSession(){ testSession = { total: deckCards.length, correct: 0, seen: 0 }; }
+
+    // evaluate answer typed into the single input and then advance
+    function evaluateCurrentAnswer(){ if(!deckCards.length) return; const c = deckCards[currentIndex]; const input = document.getElementById('mem-single-input'); if(!input) return; const raw = input.value.trim(); const entered = raw === '' ? [] : raw.split('||').map(s=>s.trim()); const answers = (c.back||'').split('||').map(s=>s.trim()).filter(x=>x!=='');
+      if(entered.length !== answers.length){ testResult.style.color='orange'; testResult.textContent = `空欄数と解答数が一致しません（入力: ${entered.length} 期待: ${answers.length}）。複数は || で区切ってください`; return; }
+      let correct = 0; for(let i=0;i<answers.length;i++){ if(entered[i] === answers[i]) correct++; }
+      const isCorrect = (correct === answers.length);
+      // update session
+      testSession.seen++; if(isCorrect) testSession.correct++;
+      // show feedback
+      showFeedback(isCorrect);
+      testResult.style.color = isCorrect ? 'green' : 'red'; testResult.textContent = `正答 ${correct}/${answers.length}`;
+      // disable input to avoid re-submit
+      input.disabled = true;
+      // advance after delay or show results if finished
+      setTimeout(()=>{ if(testSession.seen >= testSession.total){ showResults(); } else { showTest(currentIndex+1); } }, 800);
+    }
+    document.getElementById('testPrevBtn').addEventListener('click', ()=>{ showTest(currentIndex-1); });
+
+  // mode toggle: when switching to learn/test, hide creation UI and deck list so study/test use full screen
+  function updateMode(){ if(isEditing) return; const hasCards = deckCards.length>0; const mode = currentMode || 'learn';
+      // hide edit UI
+      topControls.style.display = 'none'; cardRegister.style.display='none'; document.getElementById('deckArea').style.display='none';
+      if(mode==='learn'){
+        studyArea.style.display = hasCards ? 'block' : 'none';
+        testArea.style.display='none';
+        // ensure test prev button hidden in learn mode area
+        const testPrev = document.getElementById('testPrevBtn'); if(testPrev) testPrev.style.display = 'inline-block';
+        if(hasCards) { showStudy(0); }
+      } else {
+        testArea.style.display = hasCards ? 'block' : 'none';
+        studyArea.style.display='none';
+        // hide the test "前へ" button during test mode if desired
+        const testPrev = document.getElementById('testPrevBtn'); if(testPrev) testPrev.style.display = 'none';
+        if(hasCards) { startTestSession(); showTest(0); }
+      }
+    }
+    if(learnModeBtn) learnModeBtn.addEventListener('click', ()=>{ currentMode = 'learn'; updateMode(); });
+    if(testModeBtn) testModeBtn.addEventListener('click', ()=>{ currentMode = 'test'; updateMode(); });
+
+  // init
+  renderDeckSelect();
+  // prefer sessionStorage flag (set by showResults) as it's more reliable than query params
+  const pendingEdit = sessionStorage.getItem('kiroku_lot_open_edit');
+  if(pendingEdit){ try{ sessionStorage.removeItem('kiroku_lot_open_edit'); showEditUI(pendingEdit); }catch(e){ showEditUI(pendingEdit); } }
+  else if(showEditOnLoad){ const deckIdFromUrl = urlParams.get('deck'); showEditUI(deckIdFromUrl); }
+  else { updateMode(); }
+
+  // wire the header '記録モード' button to open results for current deck
+  const openResultsBtn = document.getElementById('openResultsBtn');
+  function updateOpenResultsBtn(){
+    if(!openResultsBtn) return;
+    if(currentDeckId){ openResultsBtn.disabled = false; openResultsBtn.title = 'このデッキの記録を見る'; }
+    else { openResultsBtn.disabled = true; openResultsBtn.title = '先にデッキを選択してください'; }
+  }
+  // update when deck changes
+  deckSelect.addEventListener('change', ()=>{ loadDeck(); updateOpenResultsBtn(); });
+  updateOpenResultsBtn();
+  if(openResultsBtn){ openResultsBtn.addEventListener('click', ()=>{
+    // clear any pending edit flag
+    try{ sessionStorage.removeItem('kiroku_lot_open_edit'); }catch(e){}
+    // navigate to the score recording (一覧) page
+    window.location.href = 'index.html';
+  }); }
+
+    // Results display
+    function drawResultChart(correct, incorrect){ try{ const c = resultChart.getContext('2d'); const total = correct + incorrect; const angle = (correct/total) * Math.PI * 2; c.clearRect(0,0,resultChart.width,resultChart.height); const cx = resultChart.width/2; const cy = resultChart.height/2; const r = Math.min(cx,cy)-8; // background
+        // correct (red)
+        c.beginPath(); c.moveTo(cx,cy); c.fillStyle = '#ef4444'; c.arc(cx,cy,r,-Math.PI/2, -Math.PI/2 + angle); c.closePath(); c.fill();
+        // incorrect (blue)
+        c.beginPath(); c.moveTo(cx,cy); c.fillStyle = '#3b82f6'; c.arc(cx,cy,r,-Math.PI/2 + angle, -Math.PI/2 + Math.PI*2); c.closePath(); c.fill();
+      }catch(e){ console.warn('draw chart failed', e); } }
+
+    const RESULTS_HISTORY_KEY = 'kiroku_lot_cards_results_history_v1';
+    function loadResultsHistory(){ try{ const r = localStorage.getItem(RESULTS_HISTORY_KEY); return r?JSON.parse(r):{}; }catch(e){return{};} }
+    function saveResultsHistory(obj){ try{ localStorage.setItem(RESULTS_HISTORY_KEY, JSON.stringify(obj)); }catch(e){} }
+
+    function showResults(){ if(!testSession) return; const total = testSession.total; const correct = testSession.correct; const incorrect = total - correct; const pct = total? (correct/total*100) : 0; const prev = resultsStore[currentDeckId]; // persist current result
+      resultsStore[currentDeckId] = pct; saveResults(resultsStore);
+      // append to history
+      try{
+        const hist = loadResultsHistory(); if(!hist[currentDeckId]) hist[currentDeckId]=[];
+        hist[currentDeckId].push({ t: Date.now(), pct: pct });
+        // keep recent 100
+        if(hist[currentDeckId].length>100) hist[currentDeckId]=hist[currentDeckId].slice(-100);
+        saveResultsHistory(hist);
+      }catch(e){ console.warn('save history failed', e); }
+      // save last result to sessionStorage for the results page
+      try{ sessionStorage.setItem('kiroku_lot_last_result', JSON.stringify({ deckId: currentDeckId, pct: pct, prev: typeof prev === 'number' ? prev : null, correct, incorrect })); }catch(e){}
+      // set a flag so the results->memorization flow can open the editor reliably
+      try{ sessionStorage.setItem('kiroku_lot_open_edit', currentDeckId); }catch(e){}
+      // navigate to results page and request that results page show edit UI link
+      window.location.href = 'memorization-results.html?deck=' + encodeURIComponent(currentDeckId) + '&edit=1';
+    }
+
+  })();
+  </script>
+</body>
+</html>
