@@ -1137,8 +1137,13 @@
 
   async function saveToAccount(){
     if(!currentAccountId) return alert('先に学籍番号でログインしてください');
+    // gather memorization-related data from localStorage
+    const memKeys = ['kiroku_lot_cards_v1','kiroku_lot_cards_results_v1','kiroku_lot_cards_results_history_v1'];
+    const memorizationData = {};
+    try{ memKeys.forEach(k=>{ const v = localStorage.getItem(k); memorizationData[k]= v ? JSON.parse(v) : null; }); }catch(e){ /* ignore parse errors */ }
+
     if(firebaseDB){
-      await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').set({ testRecords, savedAt: new Date().toISOString() });
+      await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').set({ testRecords, memorizationData, savedAt: new Date().toISOString() });
       notify('アカウントへ保存しました');
       return;
     }
@@ -1149,7 +1154,7 @@
       const map = raw ? JSON.parse(raw) : {};
       map[currentAccountId] = map[currentAccountId] || {};
       map[currentAccountId].meta = map[currentAccountId].meta || {};
-      map[currentAccountId].meta.data = { testRecords, savedAt: new Date().toISOString() };
+  map[currentAccountId].meta.data = { testRecords, memorizationData, savedAt: new Date().toISOString() };
       localStorage.setItem(key, JSON.stringify(map));
       notify('アカウントへ保存しました (ローカル)');
     }catch(e){ alert('ローカル保存に失敗しました: ' + e.message); }
@@ -1161,8 +1166,17 @@
       const dataSnap = await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').get();
       if(!dataSnap.exists) return alert('アカウントに保存されたデータはありません');
       const payload = dataSnap.data();
-      if(payload && payload.testRecords){ testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; save(); refreshTestSelect(); renderBoard(); notify('アカウントのデータを読み込みました'); }
-      else alert('アカウントデータの形式が不正です');
+      if(payload){
+        if(payload.testRecords){ testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; }
+        if(payload.memorizationData){
+          try{
+            const md = payload.memorizationData;
+            // write memorization keys back to localStorage so memorization pages can pick them up
+            Object.keys(md).forEach(k=>{ if(md[k]!==null) localStorage.setItem(k, JSON.stringify(md[k])); });
+          }catch(e){ console.warn('apply memorizationData failed', e); }
+        }
+        save(); refreshTestSelect(); renderBoard(); notify('アカウントのデータを読み込みました');
+      }else alert('アカウントデータの形式が不正です');
       return;
     }
     // local fallback
@@ -1173,8 +1187,11 @@
       const rec = map[currentAccountId];
       if(!rec || !rec.meta || !rec.meta.data) return alert('アカウントに保存されたデータはありません');
       const payload = rec.meta.data;
-      if(payload && payload.testRecords){ testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; save(); refreshTestSelect(); renderBoard(); notify('アカウントのデータを読み込みました (ローカル)'); }
-      else alert('アカウントデータの形式が不正です');
+      if(payload){
+        if(payload.testRecords){ testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; }
+        if(payload.memorizationData){ try{ const md = payload.memorizationData; Object.keys(md).forEach(k=>{ if(md[k]!==null) localStorage.setItem(k, JSON.stringify(md[k])); }); }catch(e){} }
+        save(); refreshTestSelect(); renderBoard(); notify('アカウントのデータを読み込みました (ローカル)');
+      }else alert('アカウントデータの形式が不正です');
     }catch(e){ alert('ローカル読み込みに失敗しました: ' + e.message); }
   }
 
@@ -1188,10 +1205,16 @@
         if(!snap.exists) return;
         try{
           const payload = snap.data();
-          if(!payload || !payload.testRecords) return;
-          // merge incoming records that don't exist locally
+          if(!payload) return;
+          // merge incoming testRecords that don't exist locally
           let added = 0;
-          payload.testRecords.forEach(tr => { if(!testRecords.find(t=>t.id===tr.id)){ testRecords.push(tr); added++; } });
+          if(payload.testRecords){
+            payload.testRecords.forEach(tr => { if(!testRecords.find(t=>t.id===tr.id)){ testRecords.push(tr); added++; } });
+          }
+          // if memorization data present, merge into localStorage (overwrite keys)
+          if(payload.memorizationData){
+            try{ const md = payload.memorizationData; Object.keys(md).forEach(k=>{ if(md[k]!==null) localStorage.setItem(k, JSON.stringify(md[k])); }); }catch(e){ console.warn('realtime apply memorizationData failed', e); }
+          }
           if(added){ save(); refreshTestSelect(); renderBoard(); notify('他の端末の変更を受信しました'); }
         }catch(e){ console.warn('realtime onSnapshot handler error', e); }
       }, err => { console.warn('realtime onSnapshot error', err); });
