@@ -29,6 +29,7 @@
         <input id="newDeckName" placeholder="新しいデッキ名を入力" />
   <button type="button" id="createDeckBtn" class="btn">デッキ作成</button>
   <button type="button" id="deleteDeckBtn" class="btn danger">デッキ削除</button>
+  <button type="button" id="shareDeckBtn" class="btn">デッキ共有</button>
         <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
           <button type="button" id="learnModeBtn" class="btn">学習</button>
           <button type="button" id="testModeBtn" class="btn">テスト</button>
@@ -289,22 +290,23 @@
         inputsWrapper.appendChild(inp);
         if(k===0) firstInput = inp;
       }
-      // action button
-      const action = document.createElement('button'); action.id = 'mem-action-btn'; action.className = 'btn'; action.textContent = '判定／次へ'; action.style.flex = '0 0 auto';
-      inputsWrapper.appendChild(action);
+  // action button (starts as 判定, becomes 次へ after判定)
+  const action = document.createElement('button'); action.id = 'mem-action-btn'; action.type='button'; action.className = 'btn'; action.textContent = '判定'; action.style.flex = '0 0 auto';
+  inputsWrapper.appendChild(action);
       testInputs.appendChild(inputsWrapper);
       testResult.textContent=''; testSummary.style.display='none';
       // focus first input
       if(firstInput) setTimeout(()=>{ firstInput.focus(); },50);
-      // attach handler
-      action.onclick = ()=>{ evaluateCurrentAnswer(); };
+  // attach handler
+  action.onclick = ()=>{ evaluateCurrentAnswer(); };
   // allow Enter key on inputs to submit
   testInputs.querySelectorAll('.mem-input').forEach(inp=> inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); evaluateCurrentAnswer(); } }));
-  // store answers and card metadata for evaluation and results page
-  testFront.dataset.answers = JSON.stringify(built.answers);
-  testFront.dataset.cardid = c.id || '';
-  testFront.dataset.front = c.front || '';
-  testFront.dataset.back = c.back || '';
+      // store answers and card metadata for evaluation and results page
+      testFront.dataset.answers = JSON.stringify(built.answers);
+      testFront.dataset.cardid = c.id || '';
+      testFront.dataset.front = c.front || '';
+      testFront.dataset.back = c.back || '';
+      testFront.dataset.blanks = built.blanks || 0;
     }
 
     // test mode flow with session tracking, big emoji feedback and final summary
@@ -334,8 +336,15 @@
       testResult.style.color = isCorrect ? 'green' : 'red'; testResult.textContent = `正答 ${correct}/${answers.length}`;
       // disable inputs
       inputs.forEach(inp=> inp.disabled = true);
-      // advance after delay or show results if finished
-      setTimeout(()=>{ if(testSession.seen >= testSession.total){ showResults(); } else { showTest(currentIndex+1); } }, 800);
+      // reveal correct answers inline
+      try{
+        const blanksEls = testFront.querySelectorAll('.mem-blank');
+        blanksEls.forEach((el, idx)=>{ el.textContent = answers[idx] || ''; el.style.color = 'var(--muted)'; el.style.borderBottom = 'none'; });
+      }catch(e){ /* ignore */ }
+      // change action button to '次へ' so user advances manually; if last, it will show results
+      try{
+        const action = document.getElementById('mem-action-btn'); if(action){ action.textContent = (testSession.seen >= testSession.total) ? '結果を見る' : '次へ'; action.onclick = ()=>{ if(testSession.seen >= testSession.total){ showResults(); } else { showTest(currentIndex+1); } }; }
+      }catch(e){ }
     }
     document.getElementById('testPrevBtn').addEventListener('click', ()=>{ showTest(currentIndex-1); });
 
@@ -376,6 +385,17 @@
 
   // init
   renderDeckSelect();
+  // handle importDeck param (shared links)
+  const importParam = urlParams.get('importDeck');
+  if(importParam){
+    try{
+      function decodeSharedDeck(s){
+        try{ const b64 = decodeURIComponent(s); const json = decodeURIComponent(escape(atob(b64))); return JSON.parse(json); }catch(e){ try{ const b64 = decodeURIComponent(s); return JSON.parse(atob(b64)); }catch(err){ return null; } }
+      }
+      const imported = decodeSharedDeck(importParam);
+      if(imported){ imported.id = uid(); imported.name = (imported.name||'共有デッキ') + ' (共有)'; store.decks.push(imported); save(store); renderDeckSelect(); deckSelect.value = imported.id; loadDeck(); notify('共有デッキをインポートしました'); showEditUI(imported.id); }
+    }catch(e){ console.warn('import failed', e); }
+  }
   // prefer sessionStorage flag (set by showResults) as it's more reliable than query params
   const pendingEdit = sessionStorage.getItem('kiroku_lot_open_edit');
   if(pendingEdit){ try{ sessionStorage.removeItem('kiroku_lot_open_edit'); showEditUI(pendingEdit); }catch(e){ showEditUI(pendingEdit); } }
@@ -398,6 +418,8 @@
     // navigate to the score recording (一覧) page
     window.location.href = 'index.html';
   }); }
+  // share current deck to clipboard as a link
+  if(shareDeckBtn){ shareDeckBtn.addEventListener('click', async (e)=>{ e.preventDefault(); e.stopPropagation(); if(!currentDeckId){ alert('先にデッキを選択してください'); return; } const deck = store.decks.find(d=>d.id===currentDeckId); if(!deck){ alert('選択中のデッキが見つかりません'); return; } try{ const s = JSON.stringify(deck); const b64 = btoa(unescape(encodeURIComponent(s))); const enc = encodeURIComponent(b64); const link = location.origin + location.pathname + '?importDeck=' + enc; if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(link); notify('共有リンクをクリップボードにコピーしました'); } else { const ta = document.createElement('textarea'); ta.value = link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); notify('共有リンクをコピーしました（フォールバック）'); } }catch(err){ console.warn('share failed', err); alert('共有リンクの作成に失敗しました'); } }); }
 
     // Results display
     function drawResultChart(correct, incorrect){ try{ const c = resultChart.getContext('2d'); const total = correct + incorrect; const angle = (correct/total) * Math.PI * 2; c.clearRect(0,0,resultChart.width,resultChart.height); const cx = resultChart.width/2; const cy = resultChart.height/2; const r = Math.min(cx,cy)-8; // background
