@@ -1506,45 +1506,46 @@
         // Create embed player
         const embedUrl = `https://open.spotify.com/embed/${type}/${id}`;
         
+        // Determine height based on type
+        const height = type === 'playlist' ? '380' : '152';
+        
         // Show player in a modal or fixed position
         let playerContainer = document.getElementById('spotifyEmbedContainer');
         if (!playerContainer) {
           playerContainer = document.createElement('div');
           playerContainer.id = 'spotifyEmbedContainer';
-          playerContainer.style.cssText = `
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            background: rgba(20, 20, 30, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 102, 170, 0.3);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            gap: 12px;
-          `;
           document.body.appendChild(playerContainer);
         }
         
+        playerContainer.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          width: 400px;
+          max-width: calc(100vw - 40px);
+          background: transparent;
+          z-index: 1000;
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        `;
+        
         playerContainer.innerHTML = `
-          <iframe 
-            src="${embedUrl}?utm_source=generator&theme=0" 
-            width="100%" 
-            height="80" 
-            frameBorder="0" 
-            allowfullscreen="" 
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-            loading="lazy"
-            style="border-radius: 12px; max-width: 1200px;">
-          </iframe>
-          <button onclick="document.getElementById('spotifyEmbedContainer').remove()" 
-                  style="padding: 8px 16px; background: #ff4444; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-size: 0.9rem;">
-            閉じる
-          </button>
+          <div style="position: relative;">
+            <iframe 
+              src="${embedUrl}?utm_source=generator&theme=0" 
+              width="100%" 
+              height="${height}" 
+              frameBorder="0" 
+              allowfullscreen="" 
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+              loading="lazy"
+              style="border-radius: 12px;">
+            </iframe>
+            <button onclick="document.getElementById('spotifyEmbedContainer').remove()" 
+                    style="position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0, 0, 0, 0.7); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+              ×
+            </button>
+          </div>
         `;
       }
     }
