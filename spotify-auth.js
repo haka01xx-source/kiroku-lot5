@@ -29,9 +29,11 @@
       
       if (data.authUrl && data.state) {
         localStorage.setItem('spotify_auth_state', data.state);
+        console.log('State saved:', data.state);
         return data.authUrl;
       }
       
+      console.error('Invalid response from auth endpoint:', data);
       return null;
     } catch (error) {
       console.error('Failed to get auth URL:', error);

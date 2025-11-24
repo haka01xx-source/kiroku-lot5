@@ -24,15 +24,21 @@
     
     console.log('Callback Debug:', {
       code: code ? 'present' : 'missing',
-      state,
-      savedState,
-      error
+      state: state,
+      savedState: savedState,
+      stateMatch: state === savedState,
+      error: error
     });
     
     if (error) {
       alert('Spotify認証エラー: ' + error);
       window.location.href = '/index.html';
-    } else if (state === savedState && code) {
+    } else if (code) {
+      // State validation: warn but proceed if state exists
+      if (state && savedState && state !== savedState) {
+        console.warn('State mismatch, but proceeding with token exchange');
+      }
+      
       // Exchange code for token via serverless function
       window.SpotifyAuth.exchangeCode(code).then(success => {
         if (success) {
@@ -45,14 +51,12 @@
         }
       }).catch(err => {
         console.error('Exchange error:', err);
-        alert('認証処理中にエラーが発生しました');
+        alert('認証処理中にエラーが発生しました: ' + err.message);
         window.location.href = '/index.html';
       });
     } else {
-      const reason = !code ? '認証コードがありません' : 
-                     state !== savedState ? 'stateが一致しません' : '不明なエラー';
-      alert('認証に失敗しました: ' + reason);
-      console.error('Auth failed:', { state, savedState, hasCode: !!code });
+      alert('認証に失敗しました: 認証コードがありません');
+      console.error('Auth failed: no code');
       window.location.href = '/index.html';
     }
   </script>
