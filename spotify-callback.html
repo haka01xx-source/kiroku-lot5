@@ -20,20 +20,37 @@
     const accessToken = params.get('access_token');
     const expiresIn = params.get('expires_in');
     const state = params.get('state');
+    const error = params.get('error');
     
     const savedState = localStorage.getItem('spotify_auth_state');
     
-    if (state === savedState && accessToken) {
+    console.log('Callback Debug:', {
+      hash,
+      accessToken: accessToken ? 'present' : 'missing',
+      state,
+      savedState,
+      error
+    });
+    
+    if (error) {
+      alert('Spotify認証エラー: ' + error);
+      window.location.href = '/index.html';
+    } else if (state === savedState && accessToken) {
       // Save token
       const expiryTime = Date.now() + (parseInt(expiresIn) * 1000);
       localStorage.setItem('spotify_access_token', accessToken);
       localStorage.setItem('spotify_token_expiry', expiryTime.toString());
       localStorage.removeItem('spotify_auth_state');
       
+      console.log('Token saved successfully');
+      
       // Redirect back to main page
       window.location.href = '/index.html';
     } else {
-      alert('認証に失敗しました');
+      const reason = !accessToken ? 'アクセストークンがありません' : 
+                     state !== savedState ? 'stateが一致しません' : '不明なエラー';
+      alert('認証に失敗しました: ' + reason);
+      console.error('Auth failed:', { state, savedState, hasToken: !!accessToken });
       window.location.href = '/index.html';
     }
   </script>
