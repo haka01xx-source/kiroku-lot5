@@ -166,6 +166,8 @@ body::before{
   box-shadow: 0 4px 20px rgba(255, 102, 170, 0.4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 1.2rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .fullscreen-btn:hover{
   transform: scale(1.1) rotate(90deg);
@@ -173,6 +175,13 @@ body::before{
 }
 .fullscreen-btn:active{
   transform: scale(0.95) rotate(90deg);
+}
+/* iOS specific: ensure button is above safe area */
+@supports (padding: max(0px)) {
+  .fullscreen-btn {
+    bottom: max(20px, env(safe-area-inset-bottom));
+    right: max(20px, env(safe-area-inset-right));
+  }
 }
 
 .controls{

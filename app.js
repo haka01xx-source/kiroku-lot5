@@ -1421,15 +1421,45 @@
     }
   }
 
-  // Fullscreen toggle function
+  // Fullscreen toggle function with iOS support
   function toggleFullscreen(){
-    if(!document.fullscreenElement){
-      document.documentElement.requestFullscreen().catch(err => {
-        console.warn('Fullscreen request failed:', err);
-      });
+    const elem = document.documentElement;
+    
+    // Check if already in fullscreen
+    const isFullscreen = document.fullscreenElement || 
+                         document.webkitFullscreenElement || 
+                         document.mozFullScreenElement || 
+                         document.msFullscreenElement;
+    
+    if (!isFullscreen) {
+      // Request fullscreen with vendor prefixes
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(err => console.warn('Fullscreen failed:', err));
+      } else if (elem.webkitRequestFullscreen) {
+        // iOS Safari
+        elem.webkitRequestFullscreen();
+      } else if (elem.webkitEnterFullscreen) {
+        // Older iOS
+        elem.webkitEnterFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      } else {
+        // Fallback for iOS: hide address bar by scrolling
+        window.scrollTo(0, 1);
+        alert('このデバイスでは全画面表示がサポートされていません。\n画面を回転させるか、ブラウザのメニューから全画面表示を選択してください。');
+      }
     } else {
-      if(document.exitFullscreen){
+      // Exit fullscreen with vendor prefixes
+      if (document.exitFullscreen) {
         document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
       }
     }
   }
