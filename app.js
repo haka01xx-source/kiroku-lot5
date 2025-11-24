@@ -1485,39 +1485,78 @@
         spotifyLoginBtn.style.display = 'inline-block';
       }
       
-      spotifyLoginBtn.addEventListener('click', async () => {
-        if (window.SpotifyAuth) {
-          if (window.SpotifyAuth.isDemoMode()) {
-            // Show mode selection
-            const choice = confirm(
-              'Spotifyモードを選択してください:\n\n' +
-              'OK = 本物のSpotify連携（要アカウント）\n' +
-              'キャンセル = デモモード（すぐ試せる）'
-            );
-            
-            if (choice) {
-              // Real Spotify mode
-              const authUrl = await window.SpotifyAuth.getAuthUrl();
-              if (authUrl) {
-                window.location.href = authUrl;
-              } else {
-                alert('認証URLの取得に失敗しました');
-              }
-            } else {
-              // Demo mode
-              window.SpotifyAuth.enableDemoMode();
-              window.location.reload();
-            }
+      spotifyLoginBtn.addEventListener('click', () => {
+        const url = prompt(
+          'SpotifyのプレイリストURLを入力してください:\n\n' +
+          '例: https://open.spotify.com/playlist/37i9dQZF1DX8Uebhn9wzrS\n' +
+          'または: https://open.spotify.com/album/...\n' +
+          'または: https://open.spotify.com/track/...'
+        );
+        
+        if (url && url.trim()) {
+          // Extract Spotify ID from URL
+          const match = url.match(/spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/);
+          if (match) {
+            const [, type, id] = match;
+            showSpotifyEmbed(type, id);
           } else {
-            const authUrl = await window.SpotifyAuth.getAuthUrl();
-            if (authUrl) {
-              window.location.href = authUrl;
-            }
+            alert('無効なSpotify URLです');
           }
-        } else {
-          alert('Spotify認証モジュールが読み込まれていません');
         }
       });
+      
+      function showSpotifyEmbed(type, id) {
+        // Create embed player
+        const embedUrl = `https://open.spotify.com/embed/${type}/${id}`;
+        
+        // Show player in a modal or fixed position
+        let playerContainer = document.getElementById('spotifyEmbedContainer');
+        if (!playerContainer) {
+          playerContainer = document.createElement('div');
+          playerContainer.id = 'spotifyEmbedContainer';
+          playerContainer.style.cssText = `
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 102, 170, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            gap: 12px;
+          `;
+          document.body.appendChild(playerContainer);
+        }
+        
+        playerContainer.innerHTML = `
+          <iframe 
+            src="${embedUrl}?utm_source=generator&theme=0" 
+            width="100%" 
+            height="80" 
+            frameBorder="0" 
+            allowfullscreen="" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+            loading="lazy"
+            style="border-radius: 12px; max-width: 1200px;">
+          </iframe>
+          <button onclick="document.getElementById('spotifyEmbedContainer').remove()" 
+                  style="padding: 8px 16px; background: var(--danger); color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">
+            閉じる
+          </button>
+        `;
+        
+        // Hide the login button, show disconnect
+        spotifyLoginBtn.style.display = 'none';
+      }
+    }
+    if(spotifyLoginBtn){
+      spotifyLoginBtn.style.display = 'inline-block';
+    }
     }
     // record page view for admin analytics (client-side)
     try{ 

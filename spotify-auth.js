@@ -3,26 +3,21 @@
   const SPOTIFY_TOKEN_KEY = 'spotify_access_token';
   const SPOTIFY_REFRESH_KEY = 'spotify_refresh_token';
   const SPOTIFY_EXPIRY_KEY = 'spotify_token_expiry';
-  const USE_DEMO = localStorage.getItem('spotify_use_demo') === 'true';
 
   // Get authorization URL from serverless function
   async function getAuthUrl() {
-    if (USE_DEMO) {
-      return null;
-    }
-
     try {
       const response = await fetch('/api/spotify-auth?action=login');
       const data = await response.json();
       
       if (data.error === 'not_configured') {
-        // Credentials not configured, show helpful message
         alert(
           'Spotify連携が設定されていません。\n\n' +
-          '管理者向け:\n' +
-          'Vercelの環境変数でSPOTIFY_CLIENT_IDとSPOTIFY_CLIENT_SECRETを設定してください。\n' +
-          '詳細はSPOTIFY_SETUP.mdを参照。\n\n' +
-          'デモモードを試すには、もう一度Spotifyボタンをクリックして「キャンセル」を選択してください。'
+          'Vercelの環境変数で以下を設定してください:\n' +
+          '- SPOTIFY_CLIENT_ID\n' +
+          '- SPOTIFY_CLIENT_SECRET\n' +
+          '- SPOTIFY_REDIRECT_URI\n\n' +
+          '詳細はSPOTIFY_SETUP.mdを参照してください。'
         );
         return null;
       }
@@ -37,6 +32,7 @@
       return null;
     } catch (error) {
       console.error('Failed to get auth URL:', error);
+      alert('Spotify認証サーバーへの接続に失敗しました');
       return null;
     }
   }
@@ -92,26 +88,7 @@
     }
   }
 
-  // Demo data
-  function getDemoPlayback() {
-    return {
-      is_playing: true,
-      item: {
-        name: 'Lofi Study Beats',
-        artists: [{ name: 'Chill Hop Music' }],
-        album: {
-          images: [{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ff66aa" width="100" height="100"/%3E%3C/svg%3E' }]
-        }
-      }
-    };
-  }
 
-  // Enable demo mode
-  function enableDemoMode() {
-    localStorage.setItem('spotify_use_demo', 'true');
-    localStorage.setItem(SPOTIFY_TOKEN_KEY, 'DEMO_TOKEN');
-    localStorage.setItem(SPOTIFY_EXPIRY_KEY, (Date.now() + 3600000).toString());
-  }
 
   // Check if token is valid
   function isTokenValid() {
@@ -156,18 +133,12 @@
     localStorage.removeItem(SPOTIFY_REFRESH_KEY);
     localStorage.removeItem(SPOTIFY_EXPIRY_KEY);
     localStorage.removeItem('spotify_auth_state');
-    localStorage.removeItem('spotify_use_demo');
   }
 
   // API: Get current playback
   async function getCurrentPlayback() {
     const token = await getToken();
     if (!token) return null;
-
-    // Demo mode
-    if (token === 'DEMO_TOKEN') {
-      return getDemoPlayback();
-    }
 
     try {
       const response = await fetch('https://api.spotify.com/v1/me/player', {
@@ -262,8 +233,6 @@
     getCurrentPlayback,
     togglePlayback,
     nextTrack,
-    previousTrack,
-    enableDemoMode,
-    isDemoMode: () => USE_DEMO
+    previousTrack
   };
 })();
