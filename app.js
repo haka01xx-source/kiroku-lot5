@@ -1485,28 +1485,31 @@
         spotifyLoginBtn.style.display = 'inline-block';
       }
       
-      spotifyLoginBtn.addEventListener('click', () => {
+      spotifyLoginBtn.addEventListener('click', async () => {
         if (window.SpotifyAuth) {
           if (window.SpotifyAuth.isDemoMode()) {
-            // Show setup dialog
-            const clientId = prompt(
-              'Spotify Client IDを入力してください。\n\n' +
-              '取得方法:\n' +
-              '1. https://developer.spotify.com/dashboard でアプリを作成\n' +
-              '2. Client IDをコピー\n' +
-              '3. Redirect URIに以下を追加:\n' +
-              window.location.origin + '/spotify-callback.html\n\n' +
-              'デモモードを試す場合は「demo」と入力してください。'
+            // Show mode selection
+            const choice = confirm(
+              'Spotifyモードを選択してください:\n\n' +
+              'OK = 本物のSpotify連携（要アカウント）\n' +
+              'キャンセル = デモモード（すぐ試せる）'
             );
             
-            if (clientId === 'demo') {
+            if (choice) {
+              // Real Spotify mode
+              const authUrl = await window.SpotifyAuth.getAuthUrl();
+              if (authUrl) {
+                window.location.href = authUrl;
+              } else {
+                alert('認証URLの取得に失敗しました');
+              }
+            } else {
+              // Demo mode
               window.SpotifyAuth.enableDemoMode();
               window.location.reload();
-            } else if (clientId && clientId.trim()) {
-              window.SpotifyAuth.setClientId(clientId.trim());
             }
           } else {
-            const authUrl = window.SpotifyAuth.getAuthUrl();
+            const authUrl = await window.SpotifyAuth.getAuthUrl();
             if (authUrl) {
               window.location.href = authUrl;
             }

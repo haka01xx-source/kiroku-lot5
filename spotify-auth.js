@@ -1,52 +1,69 @@
-// Spotify Web API Integration
+// Spotify Web API Integration with Serverless Backend
 (function() {
-  // Spotify App Credentials
-  // デモモード: Client IDが設定されていない場合はデモデータを使用
-  const CLIENT_ID = localStorage.getItem('spotify_client_id') || '';
-  const REDIRECT_URI = window.location.origin + '/spotify-callback.html';
-  const SCOPES = [
-    'user-read-playback-state',
-    'user-modify-playback-state',
-    'user-read-currently-playing',
-    'streaming'
-  ].join(' ');
-
-  const DEMO_MODE = !CLIENT_ID || CLIENT_ID === 'YOUR_SPOTIFY_CLIENT_ID';
-
   const SPOTIFY_TOKEN_KEY = 'spotify_access_token';
   const SPOTIFY_REFRESH_KEY = 'spotify_refresh_token';
   const SPOTIFY_EXPIRY_KEY = 'spotify_token_expiry';
+  const USE_DEMO = localStorage.getItem('spotify_use_demo') === 'true';
 
-  // Generate random string for state
-  function generateRandomString(length) {
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let text = '';
-    for (let i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-  }
-
-  // Get authorization URL
-  function getAuthUrl() {
-    if (DEMO_MODE) {
-      // デモモード: 設定画面を表示
+  // Get authorization URL from serverless function
+  async function getAuthUrl() {
+    if (USE_DEMO) {
       return null;
     }
-    
-    const state = generateRandomString(16);
-    localStorage.setItem('spotify_auth_state', state);
-    
-    const params = new URLSearchParams({
-      client_id: CLIENT_ID,
-      response_type: 'token',
-      redirect_uri: REDIRECT_URI,
-      state: state,
-      scope: SCOPES,
-      show_dialog: true
-    });
 
-    return `https://accounts.spotify.com/authorize?${params.toString()}`;
+    try {
+      const response = await fetch('/api/spotify-auth?action=login');
+      const data = await response.json();
+      
+      if (data.authUrl && data.state) {
+        localStorage.setItem('spotify_auth_state', data.state);
+        return data.authUrl;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Failed to get auth URL:', error);
+      return null;
+    }
+  }
+
+  // Exchange code for token
+  async function exchangeCode(code) {
+    try {
+      const response = await fetch(`/api/spotify-auth?action=token&code=${encodeURIComponent(code)}`);
+      const data = await response.json();
+      
+      if (data.access_token) {
+        saveToken(data.access_token, data.expires_in, data.refresh_token);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Failed to exchange code:', error);
+      return false;
+    }
+  }
+
+  // Refresh access token
+  async function refreshToken() {
+    const refreshToken = localStorage.getItem(SPOTIFY_REFRESH_KEY);
+    if (!refreshToken) return false;
+
+    try {
+      const response = await fetch(`/api/spotify-auth?action=refresh&refresh_token=${encodeURIComponent(refreshToken)}`);
+      const data = await response.json();
+      
+      if (data.access_token) {
+        saveToken(data.access_token, data.expires_in, refreshToken);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      return false;
+    }
   }
 
   // Demo data
@@ -65,6 +82,7 @@
 
   // Enable demo mode
   function enableDemoMode() {
+    localStorage.setItem('spotify_use_demo', 'true');
     localStorage.setItem(SPOTIFY_TOKEN_KEY, 'DEMO_TOKEN');
     localStorage.setItem(SPOTIFY_EXPIRY_KEY, (Date.now() + 3600000).toString());
   }
@@ -80,30 +98,44 @@
   }
 
   // Get current token
-  function getToken() {
+  async function getToken() {
     if (isTokenValid()) {
       return localStorage.getItem(SPOTIFY_TOKEN_KEY);
     }
+    
+    // Try to refresh token
+    if (localStorage.getItem(SPOTIFY_REFRESH_KEY)) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        return localStorage.getItem(SPOTIFY_TOKEN_KEY);
+      }
+    }
+    
     return null;
   }
 
   // Save token
-  function saveToken(accessToken, expiresIn) {
+  function saveToken(accessToken, expiresIn, refreshToken) {
     const expiryTime = Date.now() + (expiresIn * 1000);
     localStorage.setItem(SPOTIFY_TOKEN_KEY, accessToken);
     localStorage.setItem(SPOTIFY_EXPIRY_KEY, expiryTime.toString());
+    if (refreshToken) {
+      localStorage.setItem(SPOTIFY_REFRESH_KEY, refreshToken);
+    }
   }
 
   // Logout
   function logout() {
     localStorage.removeItem(SPOTIFY_TOKEN_KEY);
+    localStorage.removeItem(SPOTIFY_REFRESH_KEY);
     localStorage.removeItem(SPOTIFY_EXPIRY_KEY);
     localStorage.removeItem('spotify_auth_state');
+    localStorage.removeItem('spotify_use_demo');
   }
 
   // API: Get current playback
   async function getCurrentPlayback() {
-    const token = getToken();
+    const token = await getToken();
     if (!token) return null;
 
     // Demo mode
@@ -130,7 +162,7 @@
 
   // API: Play/Pause
   async function togglePlayback() {
-    const token = getToken();
+    const token = await getToken();
     if (!token) return false;
 
     try {
@@ -155,7 +187,7 @@
 
   // API: Next track
   async function nextTrack() {
-    const token = getToken();
+    const token = await getToken();
     if (!token) return false;
 
     try {
@@ -175,7 +207,7 @@
 
   // API: Previous track
   async function previousTrack() {
-    const token = getToken();
+    const token = await getToken();
     if (!token) return false;
 
     try {
@@ -193,15 +225,10 @@
     }
   }
 
-  // Set Client ID
-  function setClientId(clientId) {
-    localStorage.setItem('spotify_client_id', clientId);
-    window.location.reload();
-  }
-
   // Export functions
   window.SpotifyAuth = {
     getAuthUrl,
+    exchangeCode,
     isTokenValid,
     getToken,
     saveToken,
@@ -211,7 +238,6 @@
     nextTrack,
     previousTrack,
     enableDemoMode,
-    setClientId,
-    isDemoMode: () => DEMO_MODE
+    isDemoMode: () => USE_DEMO
   };
 })();
