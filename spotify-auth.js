@@ -47,6 +47,18 @@
       const response = await fetch(`/api/spotify-auth?action=token&code=${encodeURIComponent(code)}`);
       const data = await response.json();
       
+      console.log('Token exchange response:', {
+        status: response.status,
+        hasToken: !!data.access_token,
+        error: data.error,
+        message: data.message
+      });
+      
+      if (data.error) {
+        console.error('Token exchange error:', data.error, data.message);
+        throw new Error(data.message || data.error);
+      }
+      
       if (data.access_token) {
         saveToken(data.access_token, data.expires_in, data.refresh_token);
         return true;

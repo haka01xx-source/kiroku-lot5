@@ -65,7 +65,11 @@ module.exports = async (req, res) => {
       const data = await response.json();
       
       if (!response.ok) {
-        return res.status(400).json({ error: data.error || 'Token exchange failed' });
+        console.error('Spotify token exchange failed:', data);
+        return res.status(400).json({ 
+          error: data.error || 'Token exchange failed',
+          message: data.error_description || 'Failed to exchange authorization code for access token'
+        });
       }
 
       return res.json({
