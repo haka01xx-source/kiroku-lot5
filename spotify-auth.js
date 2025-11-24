@@ -15,6 +15,18 @@
       const response = await fetch('/api/spotify-auth?action=login');
       const data = await response.json();
       
+      if (data.error === 'not_configured') {
+        // Credentials not configured, show helpful message
+        alert(
+          'Spotify連携が設定されていません。\n\n' +
+          '管理者向け:\n' +
+          'Vercelの環境変数でSPOTIFY_CLIENT_IDとSPOTIFY_CLIENT_SECRETを設定してください。\n' +
+          '詳細はSPOTIFY_SETUP.mdを参照。\n\n' +
+          'デモモードを試すには、もう一度Spotifyボタンをクリックして「キャンセル」を選択してください。'
+        );
+        return null;
+      }
+      
       if (data.authUrl && data.state) {
         localStorage.setItem('spotify_auth_state', data.state);
         return data.authUrl;

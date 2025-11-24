@@ -22,6 +22,14 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
+  // Check if credentials are configured
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    return res.status(503).json({ 
+      error: 'not_configured',
+      message: 'Spotify credentials not configured. Please set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET environment variables in Vercel.'
+    });
+  }
+
   const { action, code, refresh_token } = req.query;
 
   // Get authorization URL
