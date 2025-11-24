@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>勉強タイマー - テスト点数記録表</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .timer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 200px);
+      padding: 40px 20px;
+    }
+    .timer-display {
+      font-size: 6rem;
+      font-weight: 300;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 30px rgba(255, 102, 170, 0.5);
+    }
+    .timer-sub-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 1.2rem;
+      font-weight: 300;
+      font-family: 'Courier New', monospace;
+    }
+    .timer-controls {
+      display: flex;
+      gap: 16px;
+      margin-top: 30px;
+    }
+    .timer-btn {
+      background: linear-gradient(135deg, #ff66aa 0%, #ff4488 100%);
+      border: 1px solid rgba(255, 102, 170, 0.3);
+      color: white;
+      padding: 16px 40px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .timer-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255, 102, 170, 0.5);
+    }
+    .timer-btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .timer-input-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .timer-input {
+      width: 80px;
+      padding: 12px;
+      font-size: 1.5rem;
+      text-align: center;
+      background: rgba(20, 20, 30, 0.6);
+      color: #e8e8f0;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+    }
+    .mode-toggle {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .mode-btn {
+      padding: 10px 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .mode-btn.active {
+      background: rgba(255, 102, 170, 0.2);
+      border-color: rgba(255, 102, 170, 0.5);
+      color: #fff;
+    }
+    .subject-chip {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .subject-chip.active {
+      background: rgba(255, 102, 170, 0.3);
+      border-color: rgba(255, 102, 170, 0.6);
+      color: #fff;
+    }
+    .subject-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .stats-section {
+      margin-top: 40px;
+      padding: 20px;
+    }
+    .stats-toggle {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .chart-container {
+      background: rgba(20, 20, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .stats-summary {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ff66aa;
+      font-family: 'Courier New', monospace;
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="site-header">
+      <div class="header-left">
+        <h1>勉強タイマー</h1>
+        <p class="subtitle">集中して勉強するためのタイマー</p>
+      </div>
+      <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+        <a href="index.html" class="btn">点数記録</a>
+        <a href="memorization.html?edit=1" class="btn">暗記</a>
+        <a href="timer.html" class="btn">タイマー</a>
+      </nav>
+      <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
+        <a id="loginLink" href="login.html" class="btn" style="display:none">ログイン</a>
+        <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
+        <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
+      </div>
+      <!-- Clock Display in Header -->
+      <div class="clock-display">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <div class="clock-date" id="clockDate">2024/01/01</div>
+        <div class="clock-runtime" id="clockRuntime">runtime 0:00</div>
+      </div>
+    </header>
+
+    <!-- Subject Management Section -->
+    <section class="controls">
+      <div class="row">
+        <label style="color:var(--muted);font-size:0.85rem">教科</label>
+        <div id="subjectChips" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
+        <input type="text" id="newSubjectInput" placeholder="新しい教科" style="max-width:150px" />
+        <button class="btn" id="addSubjectBtn">追加</button>
+      </div>
+    </section>
+
+    <section class="timer-container">
+      <!-- Mode Toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="stopwatchModeBtn">ストップウォッチ</button>
+        <button class="mode-btn" id="timerModeBtn">タイマー</button>
+      </div>
+
+      <!-- Timer Input (only for timer mode) -->
+      <div class="timer-input-group" id="timerInputGroup" style="display:none">
+        <input type="number" class="timer-input" id="hoursInput" min="0" max="23" value="0" placeholder="時">
+        <span style="color:var(--muted);font-size:1.5rem">:</span>
+        <input type="number" class="timer-input" id="minutesInput" min="0" max="59" value="25" placeholder="分">
+        <span style="color:var(--muted);font-size:1.5rem">:</span>
+        <input type="number" class="timer-input" id="secondsInput" min="0" max="59" value="0" placeholder="秒">
+      </div>
+
+      <!-- Timer Display -->
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <div class="timer-display" id="timerDisplay">00h 00m 00s</div>
+        <div style="font-size:2rem;color:var(--muted);font-family:'Courier New',monospace;font-weight:300" id="timerMs">.00</div>
+      </div>
+
+      <!-- Sub Info -->
+      <div class="timer-sub-info" id="subInfo">
+        <div id="subStopwatch" style="display:none">経過時間: 00:00:00</div>
+        <div id="subClock">現在時刻: 00:00:00</div>
+      </div>
+
+      <!-- Controls -->
+      <div class="timer-controls">
+        <button class="timer-btn" id="startBtn">開始</button>
+        <button class="timer-btn secondary" id="pauseBtn" style="display:none">一時停止</button>
+        <button class="timer-btn secondary" id="resetBtn">リセット</button>
+        <button class="timer-btn secondary" id="stopBtn">終了</button>
+      </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+      <div class="stats-toggle">
+        <button class="mode-btn active" id="weekBtn">週間</button>
+        <button class="mode-btn" id="monthBtn">月間</button>
+        <button class="mode-btn" id="yearBtn">年間</button>
+      </div>
+
+      <div class="stats-toggle">
+        <button class="mode-btn active" id="lineChartBtn">時系列</button>
+        <button class="mode-btn" id="barChartBtn">教科別</button>
+      </div>
+
+      <div class="stats-summary" id="statsSummary">
+        <div class="stat-item">
+          <div class="stat-value" id="totalTime">0h 0m</div>
+          <div class="stat-label">総勉強時間</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgTime">0h 0m</div>
+          <div class="stat-label">平均時間/日</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="statsChart" width="800" height="400"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      const STUDY_LOG_KEY = 'kiroku_study_log_v1';
+      const SUBJECTS_KEY = 'kiroku_subjects_v1';
+      
+      let mode = 'stopwatch'; // 'stopwatch' or 'timer'
+      let isRunning = false;
+      let startTime = 0;
+      let elapsedTime = 0;
+      let timerDuration = 0;
+      let timerRemaining = 0;
+      let intervalId = null;
+      let appStartTime = Date.now();
+      let currentSubject = null;
+      let sessionStartTime = null;
+      let subjects = loadSubjects();
+      let studyLog = loadStudyLog();
+
+      const stopwatchModeBtn = document.getElementById('stopwatchModeBtn');
+      const timerModeBtn = document.getElementById('timerModeBtn');
+      const timerInputGroup = document.getElementById('timerInputGroup');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const subInfo = document.getElementById('subInfo');
+      const subStopwatch = document.getElementById('subStopwatch');
+      const subClock = document.getElementById('subClock');
+      const startBtn = document.getElementById('startBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const hoursInput = document.getElementById('hoursInput');
+      const minutesInput = document.getElementById('minutesInput');
+      const secondsInput = document.getElementById('secondsInput');
+
+      function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const milliseconds = Math.floor((ms % 1000) / 10); // 2桁のミリ秒
+        return {
+          main: `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`,
+          ms: String(milliseconds).padStart(2, '0')
+        };
+      }
+
+      function formatRuntime(ms){
+        const sec = Math.floor(ms / 1000);
+        const min = Math.floor(sec / 60);
+        const hr = Math.floor(min / 60);
+        if(hr > 0) return `${hr}:${String(min % 60).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+        return `${min}:${String(sec % 60).padStart(2, '0')}`;
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const clockTime = document.getElementById('clockTime');
+        const clockDate = document.getElementById('clockDate');
+        const clockRuntime = document.getElementById('clockRuntime');
+        
+        if(clockTime) {
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const seconds = String(now.getSeconds()).padStart(2, '0');
+          clockTime.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        if(clockDate) {
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+          const weekday = weekdays[now.getDay()];
+          clockDate.textContent = `${year}/${month}/${day} (${weekday})`;
+        }
+        if(clockRuntime) {
+          const runtime = Date.now() - appStartTime;
+          clockRuntime.textContent = `runtime ${formatRuntime(runtime)}`;
+        }
+
+        // Update sub clock
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        subClock.textContent = `現在時刻: ${hours}:${minutes}:${seconds}`;
+      }
+
+      const timerMs = document.getElementById('timerMs');
+
+      function updateDisplay() {
+        if (mode === 'stopwatch') {
+          const current = isRunning ? Date.now() - startTime + elapsedTime : elapsedTime;
+          const formatted = formatTime(current);
+          timerDisplay.textContent = formatted.main;
+          timerMs.textContent = '.' + formatted.ms;
+        } else {
+          const remaining = isRunning ? Math.max(0, timerRemaining - (Date.now() - startTime)) : timerRemaining;
+          const formatted = formatTime(remaining);
+          timerDisplay.textContent = formatted.main;
+          timerMs.textContent = '.' + formatted.ms;
+          
+          // Update sub stopwatch
+          const elapsed = isRunning ? Date.now() - startTime + elapsedTime : elapsedTime;
+          const elapsedFormatted = formatTime(elapsed);
+          subStopwatch.textContent = `経過時間: ${elapsedFormatted.main}.${elapsedFormatted.ms}`;
+          
+          // Check if timer finished
+          if (isRunning && remaining <= 0) {
+            stop();
+            alert('タイマー終了！');
+          }
+        }
+      }
+
+      function start() {
+        if (mode === 'timer' && !isRunning && timerRemaining === 0) {
+          // Set timer duration from inputs
+          const hours = parseInt(hoursInput.value) || 0;
+          const minutes = parseInt(minutesInput.value) || 0;
+          const seconds = parseInt(secondsInput.value) || 0;
+          timerDuration = (hours * 3600 + minutes * 60 + seconds) * 1000;
+          timerRemaining = timerDuration;
+          elapsedTime = 0;
+        }
+        
+        isRunning = true;
+        startTime = Date.now();
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        
+        if (!intervalId) {
+          intervalId = setInterval(updateDisplay, 10); // 10msごとに更新
+        }
+      }
+
+      function pause() {
+        if (!isRunning) return;
+        isRunning = false;
+        
+        if (mode === 'stopwatch') {
+          elapsedTime += Date.now() - startTime;
+        } else {
+          timerRemaining -= Date.now() - startTime;
+          elapsedTime += Date.now() - startTime;
+        }
+        
+        startBtn.style.display = 'inline-block';
+        pauseBtn.style.display = 'none';
+      }
+
+      function stop() {
+        isRunning = false;
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        startBtn.style.display = 'inline-block';
+        pauseBtn.style.display = 'none';
+      }
+
+      function reset() {
+        stop();
+        elapsedTime = 0;
+        timerRemaining = 0;
+        updateDisplay();
+      }
+
+      function switchMode(newMode) {
+        reset();
+        mode = newMode;
+        
+        if (mode === 'stopwatch') {
+          stopwatchModeBtn.classList.add('active');
+          timerModeBtn.classList.remove('active');
+          timerInputGroup.style.display = 'none';
+          subStopwatch.style.display = 'none';
+          subClock.style.display = 'block';
+        } else {
+          stopwatchModeBtn.classList.remove('active');
+          timerModeBtn.classList.add('active');
+          timerInputGroup.style.display = 'flex';
+          subStopwatch.style.display = 'block';
+          subClock.style.display = 'block';
+        }
+        
+        updateDisplay();
+      }
+
+      stopwatchModeBtn.addEventListener('click', () => switchMode('stopwatch'));
+      timerModeBtn.addEventListener('click', () => switchMode('timer'));
+
+      // Study log functions
+      function loadSubjects() {
+        try {
+          const raw = localStorage.getItem(SUBJECTS_KEY);
+          return raw ? JSON.parse(raw) : ['数学', '英語', '国語'];
+        } catch(e) {
+          return ['数学', '英語', '国語'];
+        }
+      }
+
+      function saveSubjects() {
+        localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+      }
+
+      function loadStudyLog() {
+        try {
+          const raw = localStorage.getItem(STUDY_LOG_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch(e) {
+          return [];
+        }
+      }
+
+      function saveStudyLog() {
+        localStorage.setItem(STUDY_LOG_KEY, JSON.stringify(studyLog));
+      }
+
+      function recordStudySession(subject, duration) {
+        studyLog.push({
+          subject: subject,
+          duration: duration,
+          timestamp: Date.now()
+        });
+        saveStudyLog();
+      }
+
+      // Subject UI
+      const subjectChips = document.getElementById('subjectChips');
+      const newSubjectInput = document.getElementById('newSubjectInput');
+      const addSubjectBtn = document.getElementById('addSubjectBtn');
+
+      function renderSubjects() {
+        subjectChips.innerHTML = '';
+        subjects.forEach(sub => {
+          const chipContainer = document.createElement('div');
+          chipContainer.style.display = 'flex';
+          chipContainer.style.alignItems = 'center';
+          chipContainer.style.gap = '4px';
+          
+          const chip = document.createElement('div');
+          chip.className = 'subject-chip';
+          if (currentSubject === sub) chip.classList.add('active');
+          chip.textContent = sub;
+          chip.addEventListener('click', () => {
+            currentSubject = sub;
+            renderSubjects();
+          });
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '×';
+          deleteBtn.style.cssText = 'background:rgba(255,68,102,0.3);border:1px solid rgba(255,68,102,0.5);color:#fff;border-radius:50%;width:20px;height:20px;padding:0;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center';
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!confirm(`教科「${sub}」を削除しますか？`)) return;
+            const index = subjects.indexOf(sub);
+            if (index > -1) {
+              subjects.splice(index, 1);
+              if (currentSubject === sub) currentSubject = null;
+              saveSubjects();
+              syncToAccount();
+              renderSubjects();
+            }
+          });
+          
+          chipContainer.appendChild(chip);
+          chipContainer.appendChild(deleteBtn);
+          subjectChips.appendChild(chipContainer);
+        });
+      }
+
+      addSubjectBtn.addEventListener('click', () => {
+        const name = newSubjectInput.value.trim();
+        if (!name) return;
+        if (subjects.includes(name)) return alert('既に存在します');
+        subjects.push(name);
+        saveSubjects();
+        newSubjectInput.value = '';
+        renderSubjects();
+      });
+
+      // Modified start/pause/reset to track study time
+      startBtn.addEventListener('click', () => {
+        if (!currentSubject) {
+          alert('教科を選択してください');
+          return;
+        }
+        sessionStartTime = Date.now();
+        start();
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        if (sessionStartTime && currentSubject) {
+          const duration = Date.now() - sessionStartTime;
+          recordStudySession(currentSubject, duration);
+          sessionStartTime = null;
+          renderStats();
+          syncToAccount();
+        }
+        pause();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        if (sessionStartTime && currentSubject && isRunning) {
+          const duration = Date.now() - sessionStartTime;
+          recordStudySession(currentSubject, duration);
+          sessionStartTime = null;
+          renderStats();
+          syncToAccount();
+        }
+        reset();
+      });
+
+      const stopBtn = document.getElementById('stopBtn');
+      stopBtn.addEventListener('click', () => {
+        // Record current session if running
+        if (sessionStartTime && currentSubject) {
+          const duration = isRunning ? (Date.now() - sessionStartTime + elapsedTime) : elapsedTime;
+          if (duration > 0) {
+            recordStudySession(currentSubject, duration);
+            renderStats();
+            syncToAccount();
+          }
+          sessionStartTime = null;
+        }
+        stop();
+        elapsedTime = 0;
+        timerRemaining = 0;
+        updateDisplay();
+      });
+
+      // Statistics
+      let statsPeriod = 'week'; // 'week', 'month', 'year'
+      let statsChartType = 'line'; // 'line', 'bar'
+
+      const weekBtn = document.getElementById('weekBtn');
+      const monthBtn = document.getElementById('monthBtn');
+      const yearBtn = document.getElementById('yearBtn');
+      const lineChartBtn = document.getElementById('lineChartBtn');
+      const barChartBtn = document.getElementById('barChartBtn');
+      const statsChart = document.getElementById('statsChart');
+      const totalTime = document.getElementById('totalTime');
+      const avgTime = document.getElementById('avgTime');
+
+      function switchPeriod(period) {
+        statsPeriod = period;
+        weekBtn.classList.toggle('active', period === 'week');
+        monthBtn.classList.toggle('active', period === 'month');
+        yearBtn.classList.toggle('active', period === 'year');
+        renderStats();
+      }
+
+      function switchChartType(type) {
+        statsChartType = type;
+        lineChartBtn.classList.toggle('active', type === 'line');
+        barChartBtn.classList.toggle('active', type === 'bar');
+        renderStats();
+      }
+
+      weekBtn.addEventListener('click', () => switchPeriod('week'));
+      monthBtn.addEventListener('click', () => switchPeriod('month'));
+      yearBtn.addEventListener('click', () => switchPeriod('year'));
+      lineChartBtn.addEventListener('click', () => switchChartType('line'));
+      barChartBtn.addEventListener('click', () => switchChartType('bar'));
+
+      function renderStats() {
+        const now = Date.now();
+        const periodMs = statsPeriod === 'week' ? 7 * 24 * 60 * 60 * 1000 :
+                         statsPeriod === 'month' ? 30 * 24 * 60 * 60 * 1000 :
+                         365 * 24 * 60 * 60 * 1000;
+        
+        const filtered = studyLog.filter(log => now - log.timestamp < periodMs);
+        const total = filtered.reduce((sum, log) => sum + log.duration, 0);
+        const days = statsPeriod === 'week' ? 7 : statsPeriod === 'month' ? 30 : 365;
+        const avg = total / days;
+
+        totalTime.textContent = formatDuration(total);
+        avgTime.textContent = formatDuration(avg);
+
+        if (statsChartType === 'line') {
+          drawLineChart(filtered, periodMs);
+        } else {
+          drawBarChart(filtered);
+        }
+      }
+
+      function formatDuration(ms) {
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${minutes}m`;
+      }
+
+      function drawLineChart(logs, periodMs) {
+        const ctx = statsChart.getContext('2d');
+        const w = statsChart.width;
+        const h = statsChart.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const now = Date.now();
+        const days = statsPeriod === 'week' ? 7 : statsPeriod === 'month' ? 30 : 365;
+        const dayMs = 24 * 60 * 60 * 1000;
+        
+        // Aggregate by day
+        const dailyData = [];
+        for (let i = 0; i < days; i++) {
+          const dayStart = now - (days - i) * dayMs;
+          const dayEnd = dayStart + dayMs;
+          const dayLogs = logs.filter(log => log.timestamp >= dayStart && log.timestamp < dayEnd);
+          const dayTotal = dayLogs.reduce((sum, log) => sum + log.duration, 0);
+          dailyData.push(dayTotal / (1000 * 60 * 60)); // hours
+        }
+
+        // Check if there's any data
+        const hasData = dailyData.some(d => d > 0);
+        if (!hasData) {
+          ctx.fillStyle = 'var(--muted)';
+          ctx.font = '16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('データがありません', w / 2, h / 2);
+          return;
+        }
+
+        const maxHours = Math.max(...dailyData, 1);
+        const padding = 40;
+        const chartW = w - padding * 2;
+        const chartH = h - padding * 2;
+
+        // Grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+          const y = padding + (chartH * i / 5);
+          ctx.beginPath();
+          ctx.moveTo(padding, y);
+          ctx.lineTo(padding + chartW, y);
+          ctx.stroke();
+        }
+
+        // Line
+        ctx.strokeStyle = '#ff66aa';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        dailyData.forEach((hours, i) => {
+          const x = padding + (chartW * i / (days - 1));
+          const y = padding + chartH - (chartH * hours / maxHours);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // Points
+        ctx.fillStyle = '#ff66aa';
+        dailyData.forEach((hours, i) => {
+          const x = padding + (chartW * i / (days - 1));
+          const y = padding + chartH - (chartH * hours / maxHours);
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Labels
+        ctx.fillStyle = 'var(--muted)';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 5; i++) {
+          const val = (maxHours * (5 - i) / 5).toFixed(1);
+          const y = padding + (chartH * i / 5) + 4;
+          ctx.fillText(val + 'h', padding - 8, y);
+        }
+      }
+
+      function drawBarChart(logs) {
+        const ctx = statsChart.getContext('2d');
+        const w = statsChart.width;
+        const h = statsChart.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // Aggregate by subject
+        const subjectData = {};
+        subjects.forEach(sub => subjectData[sub] = 0);
+        logs.forEach(log => {
+          if (subjectData[log.subject] !== undefined) {
+            subjectData[log.subject] += log.duration;
+          }
+        });
+
+        const entries = Object.entries(subjectData).map(([sub, dur]) => ({
+          subject: sub,
+          hours: dur / (1000 * 60 * 60)
+        }));
+
+        const maxHours = Math.max(...entries.map(e => e.hours), 1);
+        const padding = 40;
+        const chartW = w - padding * 2;
+        const chartH = h - padding * 2;
+        const barWidth = chartW / entries.length * 0.7;
+        const gap = chartW / entries.length * 0.3;
+
+        // Bars
+        entries.forEach((entry, i) => {
+          const x = padding + (chartW / entries.length) * i + gap / 2;
+          const barH = (entry.hours / maxHours) * chartH;
+          const y = padding + chartH - barH;
+
+          const gradient = ctx.createLinearGradient(0, y, 0, y + barH);
+          gradient.addColorStop(0, '#ff66aa');
+          gradient.addColorStop(1, '#66ccff');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x, y, barWidth, barH);
+
+          // Label
+          ctx.fillStyle = '#e8e8f0';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(entry.subject, x + barWidth / 2, padding + chartH + 20);
+          ctx.fillText(entry.hours.toFixed(1) + 'h', x + barWidth / 2, y - 8);
+        });
+
+        // Grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+          const y = padding + (chartH * i / 5);
+          ctx.beginPath();
+          ctx.moveTo(padding, y);
+          ctx.lineTo(padding + chartW, y);
+          ctx.stroke();
+        }
+      }
+
+      // Account sync (using existing account system from app.js)
+      function syncToAccount() {
+        try {
+          const accountId = localStorage.getItem('kl_account_id');
+          if (!accountId) return;
+          
+          // Save to localStorage with account prefix
+          const accountKey = `kiroku_study_log_${accountId}_v1`;
+          const accountSubjectsKey = `kiroku_subjects_${accountId}_v1`;
+          localStorage.setItem(accountKey, JSON.stringify(studyLog));
+          localStorage.setItem(accountSubjectsKey, JSON.stringify(subjects));
+        } catch(e) {
+          console.warn('sync to account failed', e);
+        }
+      }
+
+      function loadFromAccount() {
+        try {
+          const accountId = localStorage.getItem('kl_account_id');
+          if (!accountId) return;
+          
+          const accountKey = `kiroku_study_log_${accountId}_v1`;
+          const accountSubjectsKey = `kiroku_subjects_${accountId}_v1`;
+          
+          const logRaw = localStorage.getItem(accountKey);
+          const subjectsRaw = localStorage.getItem(accountSubjectsKey);
+          
+          if (logRaw) {
+            studyLog = JSON.parse(logRaw);
+            saveStudyLog();
+          }
+          if (subjectsRaw) {
+            subjects = JSON.parse(subjectsRaw);
+            saveSubjects();
+          }
+          
+          renderSubjects();
+          renderStats();
+        } catch(e) {
+          console.warn('load from account failed', e);
+        }
+      }
+
+      // Auth UI
+      function updateAuthUI() {
+        const accountId = localStorage.getItem('kl_account_id');
+        const loginLink = document.getElementById('loginLink');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const authUser = document.getElementById('authUser');
+        
+        if (accountId) {
+          if (loginLink) loginLink.style.display = 'none';
+          if (logoutBtn) logoutBtn.style.display = 'inline-block';
+          if (authUser) {
+            authUser.textContent = `acct:${accountId}`;
+            authUser.style.display = 'inline-block';
+          }
+        } else {
+          if (loginLink) loginLink.style.display = 'inline-block';
+          if (logoutBtn) logoutBtn.style.display = 'none';
+          if (authUser) authUser.style.display = 'none';
+        }
+      }
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('kl_account_id');
+          updateAuthUI();
+          alert('ログアウトしました');
+        });
+      }
+
+      // Initialize
+      updateClock();
+      setInterval(updateClock, 1000);
+      updateDisplay();
+      updateAuthUI();
+      loadFromAccount(); // Load account data first
+      renderSubjects();
+      renderStats();
+    })();
+  </script>
+</body>
+</html>

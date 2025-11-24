@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify認証中...</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:20px">
+    <h1 style="color:#fff">Spotify認証中...</h1>
+    <p style="color:var(--muted)">しばらくお待ちください</p>
+  </div>
+
+  <script>
+    // Parse hash parameters
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    
+    const accessToken = params.get('access_token');
+    const expiresIn = params.get('expires_in');
+    const state = params.get('state');
+    
+    const savedState = localStorage.getItem('spotify_auth_state');
+    
+    if (state === savedState && accessToken) {
+      // Save token
+      const expiryTime = Date.now() + (parseInt(expiresIn) * 1000);
+      localStorage.setItem('spotify_access_token', accessToken);
+      localStorage.setItem('spotify_token_expiry', expiryTime.toString());
+      localStorage.removeItem('spotify_auth_state');
+      
+      // Redirect back to main page
+      window.location.href = '/index.html';
+    } else {
+      alert('認証に失敗しました');
+      window.location.href = '/index.html';
+    }
+  </script>
+</body>
+</html>

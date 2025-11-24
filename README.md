@@ -71,6 +71,41 @@ firebase login
 
 注意: CLI の実行はユーザー側の環境で行ってください。CI での自動化も可能ですが、サービスアカウントやその他の認証設定が必要になります。
 
+Vercelへのデプロイ
+------------------
+このアプリはVercelで簡単にデプロイできます。
+
+### 方法1: Vercel CLI（推奨）
+
+```bash
+# Vercel CLIをインストール
+npm install -g vercel
+
+# ログイン
+vercel login
+
+# デプロイ（初回）
+vercel
+
+# 本番環境へデプロイ
+vercel --prod
+```
+
+### 方法2: GitHub連携
+
+1. GitHubにリポジトリをpush
+2. [Vercel](https://vercel.com)にアクセス
+3. "Import Project"をクリック
+4. GitHubリポジトリを選択
+5. 自動的にデプロイされます
+
+### デプロイ後の設定
+
+**Spotify連携を使用する場合:**
+1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)でアプリを作成
+2. Redirect URIに`https://your-app.vercel.app/spotify-callback.html`を追加
+3. アプリでSpotifyボタンをクリックし、Client IDを入力
+
 Netlify 自動デプロイ
 --------------------
 このリポジトリには Netlify へ自動デプロイするための GitHub Actions ワークフローを追加しています。セットアップ手順:
@@ -82,10 +117,21 @@ Netlify 自動デプロイ
 
 ワークフロー定義: `.github/workflows/netlify-deploy.yml`
 
+機能一覧
+--------
+- ✅ テスト点数記録・管理
+- ✅ 暗記カード（デッキ）作成・学習・テスト
+- ✅ 勉強タイマー（ストップウォッチ/タイマー）
+- ✅ 教科別勉強時間記録・統計グラフ
+- ✅ Spotify連携（音楽再生コントロール）
+- ✅ アカウント同期（学籍番号ベース）
+- ✅ 管理ダッシュボード
+- ✅ osu!(lazer)風UIデザイン
+- ✅ モバイル対応（iPad/iPhone）
 
 今後の拡張案
 - CSV エクスポート／印刷レイアウト
 - 教科ごとの配点（重み付け）・合計満点の設定
-- クラウド同期（認証付き）
+- より高度なクラウド同期
 
 Made with haka

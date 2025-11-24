@@ -13,50 +13,31 @@
         <h1>テスト詳細</h1>
         <p class="subtitle">タイルから遷移しました。ここで点数入力やグラフができます。</p>
       </div>
-      <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
-        <a href="index.html" class="btn">一覧</a>
-  <a href="memorization.html?edit=1" class="btn">暗記モード</a>
+      <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+        <a href="index.html" class="btn">点数記録</a>
+        <a href="memorization.html?edit=1" class="btn">暗記</a>
+        <a href="timer.html" class="btn">タイマー</a>
       </nav>
-      <div class="header-right">
-        <a href="index.html" class="btn">一覧に戻る</a>
+      <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
+        <a id="loginLink" href="login.html" class="btn" style="display:none">ログイン</a>
+        <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
+        <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
       </div>
     </header>
 
-    <!-- Top actions: templates, share, publish — kept horizontal and aligned -->
-    <div class="top-actions card">
-      <div class="template-actions">
-        <!-- テンプレート選択ボックスを廃止しました。
-             操作は常に「現在表示しているテスト」に対して行われます。
-             ・テンプレートとして保存 = 今のテストをテンプレート化
-             ・テンプレートを適用 = 同名テンプレートがあれば現在のテストに適用（別テンプレ選択は不要） -->
-        <div class="btn-group">
-          <button id="saveTemplateBtn" class="btn">テンプレートとして保存</button>
-          <button id="applyTemplateBtn" class="btn">テンプレートを適用（同名があれば）</button>
+    <!-- Actions section -->
+    <section class="controls">
+      <div class="row" style="justify-content:space-between">
+        <div style="display:flex;gap:12px;align-items:center">
+          <button id="saveTemplateBtn" class="btn">テンプレート保存</button>
+          <button id="applyTemplateBtn" class="btn">テンプレート適用</button>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <input id="shareLink" placeholder="共有リンク（自動生成）" readonly style="min-width:300px" />
+          <button id="copyShareBtn" class="btn">コピー</button>
         </div>
       </div>
-
-      <!-- Delete current test (moved here from index page) -->
-      <div style="margin-left:auto;">
-        <button id="deleteTestBtn" class="btn danger">このテストを削除</button>
-      </div>
-
-      <div class="share-actions">
-        <input id="templateShareLink" placeholder="テンプレート共有URLがここに表示されます" readonly />
-        <div class="btn-group">
-          <button id="shareTemplateBtn" class="btn">共有</button>
-          <button id="copyTemplateShareBtn" class="btn">コピー</button>
-          <button id="showTemplateQRBtn" class="btn">QR表示</button>
-          <button id="downloadTemplateQRBtn" class="btn">QRダウンロード</button>
-        </div>
-      </div>
-
-      <div class="publish-actions">
-        <button id="shareBtn" class="btn">共有リンクを作成</button>
-        <input id="shareLink" placeholder="共有リンクがここに表示されます" readonly />
-        <button id="copyShareBtn" class="btn">コピー</button>
-        <button id="publishBtn" class="btn">公開（Issue）</button>
-      </div>
-    </div>
+    </section>
 
     <section class="scoreboard card">
       <div class="score-header">
@@ -84,18 +65,18 @@
         <input id="newSubjectName" placeholder="教科名を入力（例：数学）" list="subjectNameOptions" />
         <datalist id="subjectNameOptions"></datalist>
         <input id="newSubjectScore" placeholder="点数" type="number" min="0" max="100" />
-        <button id="addSubjectBtn" class="btn">教科を追加</button>
+        <button id="addSubjectBtn" class="btn">追加</button>
       </div>
+    </section>
 
-      <!-- template/share/publish controls moved to top-actions to keep UI compact -->
-
-      <div class="compare-card card" id="compareCard">
+    <section class="card">
+      <div class="compare-card" id="compareCard">
         <h3>他の人のデータと比較</h3>
         <div class="compare-controls">
           <textarea id="pasteShared" placeholder="ここに共有された JSON 文字列 (または共有 URL) を貼り付け"></textarea>
           <div class="compare-actions">
-            <button id="loadSharedBtn" class="btn">読み込みして比較</button>
-            <button id="saveSharedBtn" class="btn">読み込んだデータをテストとして保存</button>
+            <button id="loadSharedBtn" class="btn">比較</button>
+            <button id="saveSharedBtn" class="btn">保存</button>
           </div>
         </div>
         <div id="compareResult"></div>

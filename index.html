@@ -7,42 +7,174 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Fullscreen Button -->
+  <button class="fullscreen-btn" id="fullscreenBtn" title="全画面表示">⛶</button>
+
   <main class="container">
-    <header class="site-header card">
+    <header class="site-header">
       <div class="header-left">
         <h1>テスト点数記録表</h1>
         <p class="subtitle">テスト種類ごとに教科を追加して合計・平均と前回比較ができます</p>
       </div>
-      <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
-        <a href="index.html" class="btn">一覧</a>
-  <a href="memorization.html?edit=1" class="btn">暗記モード</a>
+      <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+        <a href="index.html" class="btn">点数記録</a>
+        <a href="memorization.html?edit=1" class="btn">暗記</a>
+        <a href="timer.html" class="btn">タイマー</a>
       </nav>
-      <div class="header-right">
-        <label class="small-label">データ保存: ブラウザ（ローカルストレージ）</label>
-        <div class="version-label" id="versionLabel"></div>
-        <div id="authControls" class="auth-controls">
-          <span id="authUser" class="auth-user" style="display:none"></span>
-            <a id="loginLink" href="login.html" class="btn">アカウントでログイン</a>
-            <button id="logoutAcctBtn" class="btn" style="display:none">ログアウト</button>
-        </div>
+      <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
+        <button id="spotifyLoginBtn" class="btn" style="background:linear-gradient(135deg,#1DB954 0%,#1ed760 100%);display:none">
+          <span style="display:flex;align-items:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            Spotify
+          </span>
+        </button>
+        <a id="loginLink" href="login.html" class="btn" style="display:none">ログイン</a>
+        <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
+        <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
+      </div>
+      <div class="version-label" id="versionLabel"></div>
+      <!-- Clock Display in Header -->
+      <div class="clock-display">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <div class="clock-date" id="clockDate">2024/01/01</div>
+        <div class="clock-runtime" id="clockRuntime">runtime 0:00</div>
       </div>
     </header>
+    </header>
 
-    <section class="controls card">
+    <section class="controls">
       <div class="row">
-        <label>テスト種類（タイルを押すと詳細ページに移動します）</label>
-        <div id="testsGrid" style="width:100%"></div>
-        <input id="newTestName" placeholder="新しいテスト名を入力（例：中間テスト1）" />
+        <label style="color:var(--muted);font-size:0.85rem">テスト種類</label>
+        <input id="newTestName" placeholder="新しいテスト名を入力" style="flex:1;max-width:400px" />
         <button id="addTestBtn" class="btn">追加</button>
       </div>
     </section>
+    
+    <div id="testsGrid"></div>
 
-    <footer class="card tiny">
-      <small>データはローカルストレージに保存されます。バックアップは JSON エクスポートを使用してください。</small>
-    </footer>
+
   </main>
 
+  <!-- Spotify Player Bar -->
+  <div id="spotifyPlayer" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(20,20,30,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,102,170,0.3);padding:12px 20px;z-index:1000">
+    <div style="display:flex;align-items:center;gap:16px;max-width:1400px;margin:0 auto">
+      <img id="spotifyAlbumArt" src="" alt="" style="width:48px;height:48px;border-radius:4px;display:none">
+      <div style="flex:1;min-width:0">
+        <div id="spotifyTrackName" style="color:#fff;font-weight:600;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div>
+        <div id="spotifyArtistName" style="color:var(--muted);font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <button id="spotifyPrev" class="btn secondary" style="padding:8px 12px;font-size:0.9rem">⏮</button>
+        <button id="spotifyPlayPause" class="btn" style="padding:8px 16px;font-size:0.9rem">▶</button>
+        <button id="spotifyNext" class="btn secondary" style="padding:8px 12px;font-size:0.9rem">⏭</button>
+      </div>
+      <button id="spotifyDisconnect" class="btn danger" style="padding:6px 12px;font-size:0.8rem">切断</button>
+    </div>
+  </div>
+
+  <script src="spotify-auth.js"></script>
   <script src="app.js" defer></script>
+  <script>
+    // Spotify Player Integration
+    (function() {
+      const playerBar = document.getElementById('spotifyPlayer');
+      const albumArt = document.getElementById('spotifyAlbumArt');
+      const trackName = document.getElementById('spotifyTrackName');
+      const artistName = document.getElementById('spotifyArtistName');
+      const playPauseBtn = document.getElementById('spotifyPlayPause');
+      const prevBtn = document.getElementById('spotifyPrev');
+      const nextBtn = document.getElementById('spotifyNext');
+      const disconnectBtn = document.getElementById('spotifyDisconnect');
+
+      let updateInterval = null;
+
+      async function updatePlayer() {
+        if (!window.SpotifyAuth || !window.SpotifyAuth.isTokenValid()) {
+          hidePlayer();
+          return;
+        }
+
+        const playback = await window.SpotifyAuth.getCurrentPlayback();
+        
+        if (!playback || !playback.item) {
+          trackName.textContent = '再生中の曲はありません';
+          artistName.textContent = '-';
+          albumArt.style.display = 'none';
+          playPauseBtn.textContent = '▶';
+          return;
+        }
+
+        // Show player
+        playerBar.style.display = 'block';
+
+        // Update track info
+        trackName.textContent = playback.item.name;
+        artistName.textContent = playback.item.artists.map(a => a.name).join(', ');
+        
+        // Update album art
+        if (playback.item.album?.images?.[0]?.url) {
+          albumArt.src = playback.item.album.images[0].url;
+          albumArt.style.display = 'block';
+        } else {
+          albumArt.style.display = 'none';
+        }
+
+        // Update play/pause button
+        playPauseBtn.textContent = playback.is_playing ? '⏸' : '▶';
+      }
+
+      function hidePlayer() {
+        if (playerBar) playerBar.style.display = 'none';
+        if (updateInterval) {
+          clearInterval(updateInterval);
+          updateInterval = null;
+        }
+      }
+
+      function startPlayer() {
+        if (window.SpotifyAuth && window.SpotifyAuth.isTokenValid()) {
+          updatePlayer();
+          if (!updateInterval) {
+            updateInterval = setInterval(updatePlayer, 3000);
+          }
+        }
+      }
+
+      // Event listeners
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', async () => {
+          await window.SpotifyAuth.togglePlayback();
+          setTimeout(updatePlayer, 500);
+        });
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', async () => {
+          await window.SpotifyAuth.previousTrack();
+          setTimeout(updatePlayer, 500);
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', async () => {
+          await window.SpotifyAuth.nextTrack();
+          setTimeout(updatePlayer, 500);
+        });
+      }
+
+      if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', () => {
+          if (confirm('Spotifyとの連携を解除しますか？')) {
+            window.SpotifyAuth.logout();
+            hidePlayer();
+          }
+        });
+      }
+
+      // Start player on load
+      document.addEventListener('DOMContentLoaded', startPlayer);
+    })();
+  </script>
 </body>
 </html>
 

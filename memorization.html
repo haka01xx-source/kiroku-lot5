@@ -13,24 +13,36 @@
         <h1>暗記モード</h1>
         <p class="subtitle">暗記カード（デッキ）を作成し、学習モードと穴埋めテストを切り替えられます</p>
       </div>
-      <nav style="margin-left:16px;display:flex;gap:8px;align-items:center">
-  <a id="openMemHeaderBtn" href="memorization.html" class="btn">暗記モード</a>
-  <a id="openResultsBtn" class="btn" href="index.html">点数記録</a>
-    <button type="button" id="toggleEditBtn" class="btn" style="margin-left:8px">カード編集</button>
+      <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+        <a id="openMemHeaderBtn" href="memorization.html" class="btn">暗記</a>
+        <a id="openResultsBtn" class="btn" href="index.html">点数記録</a>
+        <a href="timer.html" class="btn">タイマー</a>
+        <button type="button" id="toggleEditBtn" class="btn">編集</button>
       </nav>
+      <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
+        <a id="loginLink" href="login.html" class="btn" style="display:none">ログイン</a>
+        <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
+        <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
+      </div>
+      <!-- Clock Display in Header -->
+      <div class="clock-display">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <div class="clock-date" id="clockDate">2024/01/01</div>
+        <div class="clock-runtime" id="clockRuntime">runtime 0:00</div>
+      </div>
     </header>
 
   <section class="card" id="topControls">
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <label>デッキ
-          <select id="deckSelect"></select>
+        <label style="color:var(--muted);font-size:0.85rem">デッキ
+          <select id="deckSelect" style="margin-left:8px;background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:8px"></select>
         </label>
         
-        <input id="newDeckName" placeholder="新しいデッキ名を入力" />
-  <button type="button" id="createDeckBtn" class="btn">デッキ作成</button>
-  <button type="button" id="deleteDeckBtn" class="btn danger">デッキ削除</button>
-  <button type="button" id="shareDeckBtn" class="btn">デッキ共有</button>
-        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <input id="newDeckName" placeholder="新しいデッキ名を入力" style="flex:1;max-width:250px" />
+        <button type="button" id="createDeckBtn" class="btn">作成</button>
+        <button type="button" id="deleteDeckBtn" class="btn danger">削除</button>
+        <button type="button" id="shareDeckBtn" class="btn">共有</button>
+        <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
           <button type="button" id="learnModeBtn" class="btn">学習</button>
           <button type="button" id="testModeBtn" class="btn">テスト</button>
         </div>
@@ -41,12 +53,12 @@
       <h3>カード登録</h3>
       <p class="subtitle">表（出題）と裏（解答）を入力。穴埋め箇所は表に <strong>()</strong> を挿入してください。裏が複数の空欄に対応する場合は <code>||</code> で区切ってください（例: 答1||答2）。</p>
       <div style="display:flex;gap:12px;flex-direction:column">
-        <textarea id="cardFront" placeholder="表（問題）を入力: 例）日本の首都は () です" rows="3"></textarea>
-        <textarea id="cardBack" placeholder="裏（解答）。複数は改行・カンマ・スペースでも区切れます（例: 東京 大阪）" rows="2"></textarea>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button type="button" id="insertBlankBtn" class="btn">() を挿入</button>
+        <textarea id="cardFront" placeholder="表（問題）を入力: 例）日本の首都は () です" rows="3" style="background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px"></textarea>
+        <textarea id="cardBack" placeholder="裏（解答）。複数は改行・カンマ・スペースでも区切れます（例: 東京 大阪）" rows="2" style="background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px"></textarea>
+        <div style="display:flex;gap:12px;align-items:center">
+          <button type="button" id="insertBlankBtn" class="btn">空欄挿入</button>
           <button type="button" id="clearCardBtn" class="btn">クリア</button>
-          <button type="button" id="saveCardBtn" class="btn">カードを保存</button>
+          <button type="button" id="saveCardBtn" class="btn">保存</button>
         </div>
       </div>
     </section>
@@ -92,6 +104,47 @@
 
   <script>
   (function(){
+    // Clock functionality - Initialize immediately
+    let appStartTime = Date.now();
+    
+    function formatRuntime(ms){
+      const sec = Math.floor(ms / 1000);
+      const min = Math.floor(sec / 60);
+      const hr = Math.floor(min / 60);
+      if(hr > 0) return `${hr}:${String(min % 60).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+      return `${min}:${String(sec % 60).padStart(2, '0')}`;
+    }
+    
+    function updateClock(){
+      const now = new Date();
+      const timeEl = document.getElementById('clockTime');
+      const dateEl = document.getElementById('clockDate');
+      const runtimeEl = document.getElementById('clockRuntime');
+      
+      if(timeEl){
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        timeEl.textContent = `${hours}:${minutes}:${seconds}`;
+      }
+      if(dateEl){
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+        const weekday = weekdays[now.getDay()];
+        dateEl.textContent = `${year}/${month}/${day} (${weekday})`;
+      }
+      if(runtimeEl){
+        const runtime = Date.now() - appStartTime;
+        runtimeEl.textContent = `runtime ${formatRuntime(runtime)}`;
+      }
+    }
+    
+    // Start clock immediately
+    updateClock();
+    setInterval(updateClock, 1000);
+
     const LS_KEY = 'kiroku_lot_cards_v1';
     function uid(){return Math.random().toString(36).slice(2,9);}    
     function load(){ try{ const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):{decks:[]}; }catch(e){return {decks:[]};} }
@@ -454,6 +507,40 @@
       window.location.href = 'memorization-results.html?deck=' + encodeURIComponent(currentDeckId) + '&edit=1';
     }
 
+    // Clock update
+
+
+    // Auth UI
+    function updateAuthUI() {
+      const accountId = localStorage.getItem('kl_account_id');
+      const loginLink = document.getElementById('loginLink');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const authUser = document.getElementById('authUser');
+      
+      if (accountId) {
+        if (loginLink) loginLink.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (authUser) {
+          authUser.textContent = `acct:${accountId}`;
+          authUser.style.display = 'inline-block';
+        }
+      } else {
+        if (loginLink) loginLink.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (authUser) authUser.style.display = 'none';
+      }
+    }
+
+    updateAuthUI();
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('kl_account_id');
+        updateAuthUI();
+        alert('ログアウトしました');
+        window.location.reload();
+      });
+    }
   })();
   </script>
 </body>

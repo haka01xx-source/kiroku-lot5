@@ -311,6 +311,39 @@
         saveToAccount().catch(e=>console.error('auto saveToAccount failed', e));
       }
     }catch(e){}
+    // 自動的に共有リンクとテンプレートリンクを更新
+    try{
+      autoGenerateShareLinks();
+    }catch(e){}
+  }
+  
+  // 自動的に共有リンクとテンプレートリンクを生成
+  function autoGenerateShareLinks(){
+    // 共有リンクを自動生成
+    if(els.shareLink && currentTestId){
+      try{
+        generateShareLink();
+      }catch(e){}
+    }
+    // テンプレートリンクを自動生成
+    if(els.templateShareLink && currentTestId){
+      try{
+        const test = testRecords.find(t => t.id === currentTestId);
+        if(test){
+          const tplName = `${test.name}のテンプレート`;
+          let tpl = templates.find(x => x.name === tplName);
+          if(!tpl){
+            // テンプレートが存在しない場合は作成
+            const newTpl = { id: uid(), name: tplName, subjects: test.subjects.map(s => ({name: s.name})) };
+            templates.push(newTpl);
+            saveTemplates();
+            tpl = newTpl;
+          }
+          const url = shareTemplate(tpl.id);
+          if(url && els.templateShareLink) els.templateShareLink.value = url;
+        }
+      }catch(e){}
+    }
   }
 
   function refreshTestSelect(){
@@ -379,9 +412,56 @@
       const tile = document.createElement('div');
       tile.className = 'test-tile';
       tile.dataset.id = t.id;
-      const name = document.createElement('div'); name.className = 'tile-name'; name.textContent = t.name;
-      const meta = document.createElement('div'); meta.className = 'tile-meta'; meta.textContent = `${(t.subjects||[]).length} 科目`;
-      tile.appendChild(name); tile.appendChild(meta);
+      
+      // Content container
+      const content = document.createElement('div');
+      content.className = 'tile-content';
+      
+      const name = document.createElement('div'); 
+      name.className = 'tile-name'; 
+      name.textContent = t.name;
+      
+      const meta = document.createElement('div'); 
+      meta.className = 'tile-meta'; 
+      meta.textContent = `${(t.subjects||[]).length} 科目`;
+      
+      content.appendChild(name); 
+      content.appendChild(meta);
+      
+      // Actions container
+      const actions = document.createElement('div');
+      actions.className = 'tile-actions';
+      actions.style.display = 'flex';
+      actions.style.gap = '8px';
+      actions.style.alignItems = 'center';
+      
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn danger';
+      deleteBtn.textContent = '削除';
+      deleteBtn.style.fontSize = '0.8rem';
+      deleteBtn.style.padding = '6px 12px';
+      deleteBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(!confirm(`テスト「${t.name}」を削除しますか？`)) return;
+        const idx = testRecords.findIndex(x=>x.id===t.id);
+        if(idx!==-1){
+          testRecords.splice(idx,1);
+          save();
+          renderTestsGrid();
+        }
+      });
+      
+      // Icon
+      const icon = document.createElement('div');
+      icon.className = 'tile-icon';
+      icon.textContent = '▶';
+      
+      actions.appendChild(deleteBtn);
+      actions.appendChild(icon);
+      
+      tile.appendChild(content);
+      tile.appendChild(actions);
       tile.addEventListener('click', ()=>{ window.location.href = 'test.html?testId=' + encodeURIComponent(t.id); });
       grid.appendChild(tile);
     });
@@ -908,10 +988,13 @@
     if(els.saveAsPrevBtn) els.saveAsPrevBtn.addEventListener('click', saveAsPrevious);
     if(els.exportBtn) els.exportBtn.addEventListener('click', exportJSON);
     if(els.importInput) els.importInput.addEventListener('change', (e)=>{ const file = e.target.files[0]; if(file) importJSON(file); });
-    // share / compare handlers
+    // share / compare handlers (keep buttons for manual trigger, but auto-generate on changes)
     if(els.shareBtn) els.shareBtn.addEventListener('click', ()=>{ generateShareLink(); });
     if(els.copyShareBtn) els.copyShareBtn.addEventListener('click', copyShareLink);
     if(els.publishBtn) els.publishBtn.addEventListener('click', publishToIssue);
+    
+    // 初回の共有リンク生成
+    try{ autoGenerateShareLinks(); }catch(e){}
     if(els.loadSharedBtn) els.loadSharedBtn.addEventListener('click', ()=>{
       const txt = els.pasteShared.value;
       const shared = loadSharedFromText(txt);
@@ -1294,11 +1377,145 @@
     }
   }
 
+  // Clock update function
+  // Runtime tracking
+  let appStartTime = Date.now();
+  
+  function formatRuntime(ms){
+    const sec = Math.floor(ms / 1000);
+    const min = Math.floor(sec / 60);
+    const hr = Math.floor(min / 60);
+    if(hr > 0) return `${hr}:${String(min % 60).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+    return `${min}:${String(sec % 60).padStart(2, '0')}`;
+  }
+
+  function updateClock(){
+    const now = new Date();
+    const timeEl = document.getElementById('clockTime');
+    const dateEl = document.getElementById('clockDate');
+    const runtimeEl = document.getElementById('clockRuntime');
+    
+    if(timeEl){
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      timeEl.textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    if(dateEl){
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      const weekday = weekdays[now.getDay()];
+      dateEl.textContent = `${year}/${month}/${day} (${weekday})`;
+    }
+    if(runtimeEl){
+      const runtime = Date.now() - appStartTime;
+      runtimeEl.textContent = `runtime ${formatRuntime(runtime)}`;
+    }
+  }
+
+  // Fullscreen toggle function
+  function toggleFullscreen(){
+    if(!document.fullscreenElement){
+      document.documentElement.requestFullscreen().catch(err => {
+        console.warn('Fullscreen request failed:', err);
+      });
+    } else {
+      if(document.exitFullscreen){
+        document.exitFullscreen();
+      }
+    }
+  }
+
+  // Auth UI update
+  function updateAuthUI() {
+    const accountId = localStorage.getItem('kl_account_id');
+    const loginLinks = document.querySelectorAll('#loginLink');
+    const logoutBtns = document.querySelectorAll('#logoutBtn');
+    const authUsers = document.querySelectorAll('#authUser');
+    
+    if (accountId) {
+      loginLinks.forEach(el => el.style.display = 'none');
+      logoutBtns.forEach(el => el.style.display = 'inline-block');
+      authUsers.forEach(el => {
+        el.textContent = `acct:${accountId}`;
+        el.style.display = 'inline-block';
+      });
+    } else {
+      loginLinks.forEach(el => el.style.display = 'inline-block');
+      logoutBtns.forEach(el => el.style.display = 'none');
+      authUsers.forEach(el => el.style.display = 'none');
+    }
+  }
+
   // 初期化
   document.addEventListener('DOMContentLoaded', ()=>{
     testRecords = load();
     templates = loadTemplates();
     updateVersionLabel();
+    
+    // Start clock
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // Fullscreen button handler
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    if(fullscreenBtn){
+      fullscreenBtn.addEventListener('click', toggleFullscreen);
+    }
+
+    // Auth UI
+    updateAuthUI();
+    const logoutBtns = document.querySelectorAll('#logoutBtn');
+    logoutBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        localStorage.removeItem('kl_account_id');
+        updateAuthUI();
+        alert('ログアウトしました');
+        window.location.reload();
+      });
+    });
+
+    // Spotify Login Button
+    const spotifyLoginBtn = document.getElementById('spotifyLoginBtn');
+    if (spotifyLoginBtn) {
+      // Show button if not connected
+      if (window.SpotifyAuth && !window.SpotifyAuth.isTokenValid()) {
+        spotifyLoginBtn.style.display = 'inline-block';
+      }
+      
+      spotifyLoginBtn.addEventListener('click', () => {
+        if (window.SpotifyAuth) {
+          if (window.SpotifyAuth.isDemoMode()) {
+            // Show setup dialog
+            const clientId = prompt(
+              'Spotify Client IDを入力してください。\n\n' +
+              '取得方法:\n' +
+              '1. https://developer.spotify.com/dashboard でアプリを作成\n' +
+              '2. Client IDをコピー\n' +
+              '3. Redirect URIに以下を追加:\n' +
+              window.location.origin + '/spotify-callback.html\n\n' +
+              'デモモードを試す場合は「demo」と入力してください。'
+            );
+            
+            if (clientId === 'demo') {
+              window.SpotifyAuth.enableDemoMode();
+              window.location.reload();
+            } else if (clientId && clientId.trim()) {
+              window.SpotifyAuth.setClientId(clientId.trim());
+            }
+          } else {
+            const authUrl = window.SpotifyAuth.getAuthUrl();
+            if (authUrl) {
+              window.location.href = authUrl;
+            }
+          }
+        } else {
+          alert('Spotify認証モジュールが読み込まれていません');
+        }
+      });
+    }
     // record page view for admin analytics (client-side)
     try{ 
       const entry = { path: window.location.pathname, ts: Date.now(), ua: navigator.userAgent, ref: document.referrer || null, accountId: currentAccountId || null };

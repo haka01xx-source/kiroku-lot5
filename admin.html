@@ -4,45 +4,144 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>管理ダッシュボード — Kiroku Lot</title>
+  <link rel="stylesheet" href="styles.css" />
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;margin:24px}
-    .card{border:1px solid #ddd;border-radius:8px;padding:16px;margin:12px 0}
-    textarea{width:100%;height:220px;font-family:monospace;white-space:pre;}
-    input[type=password]{font-size:16px;padding:8px;width:260px}
-    button{padding:8px 12px;margin:6px}
-    table{border-collapse:collapse;width:100%}
-    th,td{border:1px solid #eee;padding:6px;text-align:left}
-    .muted{color:#666;font-size:14px}
-    .hidden{display:none}
-    .danger{color:#a00}
+    .admin-container {
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .login-card {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 40px;
+      background: var(--card);
+      border: 1px solid var(--control-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .login-card h1 {
+      margin: 0 0 20px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .login-card input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: rgba(20, 20, 30, 0.6);
+      color: #e8e8f0;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--control-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ff66aa;
+      font-family: 'Courier New', monospace;
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .user-table th,
+    .user-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .user-table th {
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    .user-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .chart-box {
+      background: rgba(20, 20, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 16px;
+    }
+    .hidden {
+      display: none;
+    }
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      background: rgba(20, 20, 30, 0.6);
+      color: #e8e8f0;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body>
-  <h1>管理者ダッシュボード</h1>
-  <div class="card" id="loginCard">
-    <p>パスワードを入力してログインしてください。</p>
-    <input id="pw" type="password" placeholder="パスワードを入力">
-    <button id="loginBtn">ログイン</button>
-    <p class="muted">※ フロントエンドのみの保護です。本番運用ではサーバー側認証を必ず実装してください。</p>
-  </div>
-
-  <div id="dashboard" class="hidden">
-    <div style="display:flex;gap:12px;align-items:center">
-      <h2>データ集計</h2>
-      <button id="refreshBtn">再取得</button>
-      <button id="downloadBtn">JSON をダウンロード</button>
-      <button id="logoutBtn">ログアウト</button>
+  <div class="admin-container">
+    <div class="login-card" id="loginCard">
+      <h1>管理者ダッシュボード</h1>
+      <p style="color:var(--muted);margin-bottom:20px">パスワードを入力してログインしてください</p>
+      <input id="pw" type="password" placeholder="パスワードを入力">
+      <button id="loginBtn" class="btn" style="width:100%">ログイン</button>
+      <p style="color:var(--muted);font-size:0.8rem;margin-top:16px">※ フロントエンドのみの保護です</p>
     </div>
 
-    <div class="card">
-      <h3>概要</h3>
-      <div id="summary"></div>
-    </div>
+    <div id="dashboard" class="hidden">
+      <header class="site-header">
+        <div class="header-left">
+          <h1>管理ダッシュボード</h1>
+          <p class="subtitle">システム統計とユーザーデータ</p>
+        </div>
+        <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+          <button id="refreshBtn" class="btn">再取得</button>
+          <button id="downloadBtn" class="btn">JSON</button>
+          <button id="logoutBtn" class="btn danger">ログアウト</button>
+        </nav>
+      </header>
+      <!-- Stats Overview -->
+      <section style="padding:20px">
+        <div class="stats-grid" id="statsGrid"></div>
+      </section>
 
-    <div class="card">
-      <h3>ユーザー別集計</h3>
-      <div id="usersAggregate"></div>
-    </div>
+      <!-- User Data -->
+      <section class="card" style="margin:20px">
+        <h3 style="margin:0 0 16px;font-size:1.2rem;color:#fff">ユーザー別データ</h3>
+        <div id="usersAggregate"></div>
+      </section>
+
+      <!-- User Accounts -->
+      <section class="card" style="margin:20px">
+        <h3 style="margin:0 0 16px;font-size:1.2rem;color:#fff">ユーザーアカウント</h3>
+        <div id="userAccounts"></div>
+      </section>
 
     <div class="card">
       <h3>Ping（サイト健診）</h3>
@@ -147,13 +246,40 @@ async function collectData(){
 
 function renderSummary(data){
   const ds = data.localStorage;
-  const knownCounts = {};
-  for(const k of knownKeys){ knownCounts[k]= ds[k] ? (Array.isArray(ds[k])? ds[k].length : (Object.keys(ds[k]||{}).length || (typeof ds[k] === 'string'? ds[k].length : 1))) : 0 }
-  const html = ['<ul>'];
-  for(const k of Object.keys(knownCounts)) html.push(`<li><strong>${k}</strong>: ${JSON.stringify(knownCounts[k])}</li>`);
-  html.push(`<li>localStorage 全キー数: ${Object.keys(ds).length}</li>`);
-  html.push('</ul>');
-  el('summary').innerHTML = html.join('\n');
+  const grid = el('statsGrid');
+  grid.innerHTML = '';
+  
+  // Count tests
+  const tests = ds['kiroku_lot_tests_v1'] || [];
+  const testCount = Array.isArray(tests) ? tests.length : 0;
+  
+  // Count cards
+  const cards = ds['kiroku_lot_cards_v1'] || {};
+  const cardCount = cards.decks ? cards.decks.length : 0;
+  
+  // Count users (from access logs)
+  const accessLogs = ds['kiroku_access_logs_v1'] || [];
+  const uniqueUsers = new Set(accessLogs.map(log => log.accountId).filter(id => id)).size;
+  
+  // Total keys
+  const totalKeys = Object.keys(ds).length;
+  
+  const stats = [
+    { label: 'テスト数', value: testCount },
+    { label: 'デッキ数', value: cardCount },
+    { label: 'ユーザー数', value: uniqueUsers },
+    { label: 'ストレージキー', value: totalKeys }
+  ];
+  
+  stats.forEach(stat => {
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = `
+      <div class="stat-value">${stat.value}</div>
+      <div class="stat-label">${stat.label}</div>
+    `;
+    grid.appendChild(card);
+  });
 }
 
 function renderLsKnown(data){
@@ -256,14 +382,16 @@ function aggregateUserStats(data){
 
   // render table
   const table = document.createElement('table');
+  table.className = 'user-table';
   table.innerHTML = '<thead><tr><th>ユーザー</th><th>エントリ数</th><th>最新スコア</th><th>平均スコア</th><th>最終更新</th></tr></thead>';
   const tb = document.createElement('tbody');
   for(const u of Object.keys(users).sort()){
     const info = users[u];
-    const latest = info.scores.length ? info.scores[info.scores.length-1] : '';
-    const avg = info.scores.length ? (Math.round(info.scores.reduce((a,b)=>a+b,0)/info.scores.length*100)/100) : '';
+    const latest = info.scores.length ? info.scores[info.scores.length-1] : '-';
+    const avg = info.scores.length ? (Math.round(info.scores.reduce((a,b)=>a+b,0)/info.scores.length*100)/100) : '-';
+    const lastAt = info.lastAt ? new Date(info.lastAt).toLocaleString() : '-';
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(u)}</td><td>${info.count}</td><td>${escapeHtml(String(latest))}</td><td>${escapeHtml(String(avg))}</td><td>${escapeHtml(String(info.lastAt||''))}</td>`;
+    tr.innerHTML = `<td style="color:#ff66aa;font-weight:600">${escapeHtml(u)}</td><td>${info.count}</td><td>${escapeHtml(String(latest))}</td><td>${escapeHtml(String(avg))}</td><td style="color:var(--muted);font-size:0.85rem">${escapeHtml(lastAt)}</td>`;
     tb.appendChild(tr);
   }
   table.appendChild(tb); dst.appendChild(table);
@@ -277,7 +405,51 @@ async function refreshAndRender(){
   el('raw').value = JSON.stringify(data,null,2);
   renderSummary(data); renderLsKnown(data); renderLsAll(data); renderFiles(data);
   try{ aggregateUserStats(data); }catch(e){ console.error('aggregateUserStats error', e); }
+  try{ renderUserAccounts(data); }catch(e){ console.error('renderUserAccounts error', e); }
   return data;
+}
+
+function renderUserAccounts(data){
+  const container = el('userAccounts');
+  if(!container) return;
+  
+  const ls = data.localStorage || {};
+  const accountsKey = 'kl_accounts_local_v1';
+  const accounts = ls[accountsKey];
+  
+  if(!accounts || typeof accounts !== 'object' || Object.keys(accounts).length === 0){
+    container.innerHTML = '<p style="color:var(--muted)">ローカルアカウントが見つかりません</p>';
+    return;
+  }
+  
+  const table = document.createElement('table');
+  table.className = 'user-table';
+  table.innerHTML = '<thead><tr><th>学籍番号（ID）</th><th>パスワードハッシュ</th><th>作成日時</th><th>データ保存日時</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+  
+  for(const [id, accountData] of Object.entries(accounts)){
+    const tr = document.createElement('tr');
+    const passwordHash = accountData.passwordHash || '-';
+    const createdAt = accountData.createdAt ? new Date(accountData.createdAt).toLocaleString() : '-';
+    const savedAt = accountData.meta?.data?.savedAt ? new Date(accountData.meta.data.savedAt).toLocaleString() : '-';
+    
+    tr.innerHTML = `
+      <td style="color:#ff66aa;font-weight:600;font-family:'Courier New',monospace">${escapeHtml(id)}</td>
+      <td style="font-family:'Courier New',monospace;font-size:0.75rem;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(passwordHash)}">${escapeHtml(passwordHash)}</td>
+      <td style="color:var(--muted);font-size:0.85rem">${escapeHtml(createdAt)}</td>
+      <td style="color:var(--muted);font-size:0.85rem">${escapeHtml(savedAt)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+  
+  table.appendChild(tbody);
+  container.appendChild(table);
+  
+  // Add note about password hashes
+  const note = document.createElement('p');
+  note.style.cssText = 'color:var(--muted);font-size:0.85rem;margin-top:12px';
+  note.innerHTML = '<strong>注意:</strong> パスワードはSHA-256ハッシュ化されています。元のパスワード（誕生日）は表示されません。';
+  container.appendChild(note);
 }
 
 // ----------------------

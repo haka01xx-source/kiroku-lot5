@@ -1,0 +1,25 @@
+{
+  "name": "kiroku-lot",
+  "version": "1.0.1",
+  "description": "テスト点数記録表 - osu!(lazer)風デザインの学習管理アプリ",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build step required for static site'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "study",
+    "test",
+    "score",
+    "memorization",
+    "timer",
+    "spotify"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tstyr/kiroku-lot"
+  }
+}
