@@ -3,52 +3,8 @@
   const PLAYLIST_KEY = 'kiroku_music_playlist';
   
   window.MusicPlayer = {
-    showDialog: showMusicDialog,
-    syncPlaylist: syncPlaylist,
-    loadPlaylistFromAccount: loadPlaylistFromAccount
+    showDialog: showMusicDialog
   };
-  
-  // Sync playlist to Firebase account
-  async function syncPlaylist() {
-    if (!window.currentAccountId || !window.db) return;
-    
-    try {
-      const playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
-      const accountRef = window.db.collection('accounts').doc(window.currentAccountId);
-      await accountRef.set({ musicPlaylist: playlist }, { merge: true });
-      console.log('Playlist synced to account');
-    } catch (error) {
-      console.error('Failed to sync playlist:', error);
-    }
-  }
-  
-  // Load playlist from Firebase account
-  async function loadPlaylistFromAccount() {
-    if (!window.currentAccountId || !window.db) return;
-    
-    try {
-      const accountRef = window.db.collection('accounts').doc(window.currentAccountId);
-      const doc = await accountRef.get();
-      
-      if (doc.exists && doc.data().musicPlaylist) {
-        const cloudPlaylist = doc.data().musicPlaylist;
-        const localPlaylist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
-        
-        // Merge playlists (avoid duplicates)
-        const merged = [...localPlaylist];
-        cloudPlaylist.forEach(item => {
-          if (!merged.find(m => m.url === item.url)) {
-            merged.push(item);
-          }
-        });
-        
-        localStorage.setItem(PLAYLIST_KEY, JSON.stringify(merged));
-        console.log('Playlist loaded from account');
-      }
-    } catch (error) {
-      console.error('Failed to load playlist:', error);
-    }
-  }
 
   function showMusicDialog() {
     const dialog = document.createElement('div');
@@ -247,6 +203,13 @@
           <input type="text" id="playlistUrl" placeholder="URL" style="flex: 2;" />
           <button id="addToPlaylist" class="btn">追加</button>
         </div>
+        ${playlist.length > 0 ? `
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button id="playAllBtn" class="btn" style="width: 100%; background: linear-gradient(135deg, #66ccff 0%, #ff66aa 100%);">
+              ▶ 全て再生
+            </button>
+          </div>
+        ` : ''}
         <div id="playlistItems" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;"></div>
         <button id="closePlaylistDialog" class="btn secondary" style="width: 100%;">閉じる</button>
       `;
@@ -285,7 +248,7 @@
           btn.addEventListener('click', () => {
             const index = parseInt(btn.dataset.index);
             const item = playlist[index];
-            playItem(item);
+            playItem(item, index);
             closeDialog();
           });
         });
@@ -296,9 +259,9 @@
             playlist.splice(index, 1);
             localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
             
-            // Sync to account if logged in
-            if (window.MusicPlayer) {
-              window.MusicPlayer.syncPlaylist().catch(e => console.error('Sync failed:', e));
+            // Trigger auto-save to account
+            if (window.saveToAccount) {
+              window.saveToAccount().catch(e => console.error('Auto-save failed:', e));
             }
             
             renderPlaylist();
@@ -325,9 +288,9 @@
         playlist.push({ title, url, platform });
         localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
         
-        // Sync to account if logged in
-        if (window.MusicPlayer) {
-          window.MusicPlayer.syncPlaylist().catch(e => console.error('Sync failed:', e));
+        // Trigger auto-save to account (if app.js saveToAccount is available)
+        if (window.saveToAccount) {
+          window.saveToAccount().catch(e => console.error('Auto-save failed:', e));
         }
         
         document.getElementById('playlistTitle').value = '';
@@ -337,31 +300,26 @@
       });
       
       document.getElementById('closePlaylistDialog').addEventListener('click', closeDialog);
+      
+      // Play all button
+      const playAllBtn = document.getElementById('playAllBtn');
+      if (playAllBtn) {
+        playAllBtn.addEventListener('click', () => {
+          if (playlist.length > 0) {
+            localStorage.setItem('kiroku_playlist_index', '0');
+            playItemFromPlaylist(playlist[0], true);
+            closeDialog();
+          }
+        });
+      }
     };
     
-    const playItem = (item) => {
-      const url = item.url;
-      
-      if (url.includes('spotify.com')) {
-        const match = url.match(/spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/);
-        if (match) {
-          const [, type, id] = match;
-          showMusicPlayer('spotify', type, id);
-        }
-      } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|music\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
-        if (match) {
-          showMusicPlayer('youtube', 'video', match[1]);
-        }
-      } else if (url.includes('soundcloud.com')) {
-        showMusicPlayer('soundcloud', 'track', url);
-      } else if (url.includes('awa.fm')) {
-        const match = url.match(/awa\.fm\/(track|playlist)\/([a-zA-Z0-9]+)/);
-        if (match) {
-          const [, type, id] = match;
-          showMusicPlayer('awa', type, id);
-        }
+    const playItem = (item, index) => {
+      // Save the index for potential auto-next
+      if (index !== undefined) {
+        localStorage.setItem('kiroku_playlist_index', index.toString());
       }
+      playItemFromPlaylist(item, false);
     };
     
     overlay.addEventListener('click', closeDialog);
@@ -488,23 +446,34 @@
     });
   }
   
-  function showMusicPlayer(platform, type, id) {
+  function showMusicPlayer(platform, type, id, autoNext = false) {
     let embedUrl, height;
     
     if (platform === 'spotify') {
       embedUrl = `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`;
       height = type === 'playlist' ? '380' : '152';
     } else if (platform === 'youtube') {
-      embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1`;
+      embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`;
       height = '200';
     } else if (platform === 'soundcloud') {
-      // SoundCloud uses the full URL for embedding
       embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(id)}&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
       height = '166';
     } else if (platform === 'awa') {
       embedUrl = `https://p.awa.fm/embed/${type}/${id}`;
       height = '200';
     }
+    
+    // Save current player state to localStorage for persistence across pages
+    const playerState = {
+      platform,
+      type,
+      id,
+      embedUrl,
+      height,
+      autoNext,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('kiroku_music_player_state', JSON.stringify(playerState));
     
     let playerContainer = document.getElementById('musicPlayerContainer');
     if (!playerContainer) {
@@ -528,6 +497,7 @@
     playerContainer.innerHTML = `
       <div style="position: relative;">
         <iframe 
+          id="musicPlayerIframe"
           src="${embedUrl}" 
           width="100%" 
           height="${height}" 
@@ -537,11 +507,109 @@
           loading="lazy"
           style="border-radius: 12px;">
         </iframe>
-        <button onclick="document.getElementById('musicPlayerContainer').remove()" 
+        <button onclick="window.MusicPlayer.closePlayer()" 
                 style="position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0, 0, 0, 0.7); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
           ×
         </button>
       </div>
     `;
+    
+    // Auto-play next track if enabled
+    if (autoNext) {
+      setupAutoNext();
+    }
   }
+  
+  function setupAutoNext() {
+    // YouTube API for detecting video end
+    const iframe = document.getElementById('musicPlayerIframe');
+    if (!iframe) return;
+    
+    // Listen for video end (simplified - full implementation would use YouTube IFrame API)
+    setTimeout(() => {
+      const playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
+      const currentIndex = parseInt(localStorage.getItem('kiroku_playlist_index') || '0');
+      
+      if (currentIndex < playlist.length - 1) {
+        playNextInPlaylist();
+      }
+    }, 180000); // Check after 3 minutes (adjust based on typical song length)
+  }
+  
+  function playNextInPlaylist() {
+    const playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
+    let currentIndex = parseInt(localStorage.getItem('kiroku_playlist_index') || '0');
+    
+    currentIndex++;
+    if (currentIndex >= playlist.length) {
+      currentIndex = 0; // Loop back to start
+    }
+    
+    localStorage.setItem('kiroku_playlist_index', currentIndex.toString());
+    
+    const item = playlist[currentIndex];
+    if (item) {
+      playItemFromPlaylist(item, true);
+    }
+  }
+  
+  function playItemFromPlaylist(item, autoNext = false) {
+    const url = item.url;
+    
+    if (url.includes('spotify.com')) {
+      const match = url.match(/spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/);
+      if (match) {
+        const [, type, id] = match;
+        showMusicPlayer('spotify', type, id, autoNext);
+      }
+    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|music\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
+      if (match) {
+        showMusicPlayer('youtube', 'video', match[1], autoNext);
+      }
+    } else if (url.includes('soundcloud.com')) {
+      showMusicPlayer('soundcloud', 'track', url, autoNext);
+    } else if (url.includes('awa.fm')) {
+      const match = url.match(/awa\.fm\/(track|playlist)\/([a-zA-Z0-9]+)/);
+      if (match) {
+        const [, type, id] = match;
+        showMusicPlayer('awa', type, id, autoNext);
+      }
+    }
+  }
+  
+  function closePlayer() {
+    const playerContainer = document.getElementById('musicPlayerContainer');
+    if (playerContainer) {
+      playerContainer.remove();
+    }
+    localStorage.removeItem('kiroku_music_player_state');
+    localStorage.removeItem('kiroku_playlist_index');
+  }
+  
+  function restorePlayer() {
+    const stateStr = localStorage.getItem('kiroku_music_player_state');
+    if (!stateStr) return;
+    
+    try {
+      const state = JSON.parse(stateStr);
+      // Only restore if less than 1 hour old
+      if (Date.now() - state.timestamp < 3600000) {
+        showMusicPlayer(state.platform, state.type, state.id, state.autoNext);
+      }
+    } catch (e) {
+      console.error('Failed to restore player:', e);
+    }
+  }
+  
+  // Auto-restore player on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', restorePlayer);
+  } else {
+    restorePlayer();
+  }
+  
+  // Export additional functions
+  window.MusicPlayer.closePlayer = closePlayer;
+  window.MusicPlayer.playNextInPlaylist = playNextInPlaylist;
 })();

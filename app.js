@@ -1225,8 +1225,11 @@
     const memorizationData = {};
     try{ memKeys.forEach(k=>{ const v = localStorage.getItem(k); memorizationData[k]= v ? JSON.parse(v) : null; }); }catch(e){ /* ignore parse errors */ }
 
+    // gather music playlist
+    const musicPlaylist = JSON.parse(localStorage.getItem('kiroku_music_playlist') || '[]');
+
     if(firebaseDB){
-      await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').set({ testRecords, memorizationData, savedAt: new Date().toISOString() });
+      await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').set({ testRecords, memorizationData, musicPlaylist, savedAt: new Date().toISOString() });
       notify('アカウントへ保存しました');
       return;
     }
@@ -1237,7 +1240,7 @@
       const map = raw ? JSON.parse(raw) : {};
       map[currentAccountId] = map[currentAccountId] || {};
       map[currentAccountId].meta = map[currentAccountId].meta || {};
-  map[currentAccountId].meta.data = { testRecords, memorizationData, savedAt: new Date().toISOString() };
+  map[currentAccountId].meta.data = { testRecords, memorizationData, musicPlaylist, savedAt: new Date().toISOString() };
       localStorage.setItem(key, JSON.stringify(map));
       notify('アカウントへ保存しました (ローカル)');
     }catch(e){ alert('ローカル保存に失敗しました: ' + e.message); }
@@ -1258,6 +1261,11 @@
             Object.keys(md).forEach(k=>{ if(md[k]!==null) localStorage.setItem(k, JSON.stringify(md[k])); });
           }catch(e){ console.warn('apply memorizationData failed', e); }
         }
+        if(payload.musicPlaylist){
+          try{
+            localStorage.setItem('kiroku_music_playlist', JSON.stringify(payload.musicPlaylist));
+          }catch(e){ console.warn('apply musicPlaylist failed', e); }
+        }
         save(); refreshTestSelect(); renderBoard(); notify('アカウントのデータを読み込みました');
       }else alert('アカウントデータの形式が不正です');
       return;
@@ -1273,6 +1281,7 @@
       if(payload){
         if(payload.testRecords){ testRecords = payload.testRecords; if(testRecords.length) currentTestId = testRecords[0].id; }
         if(payload.memorizationData){ try{ const md = payload.memorizationData; Object.keys(md).forEach(k=>{ if(md[k]!==null) localStorage.setItem(k, JSON.stringify(md[k])); }); }catch(e){} }
+        if(payload.musicPlaylist){ try{ localStorage.setItem('kiroku_music_playlist', JSON.stringify(payload.musicPlaylist)); }catch(e){} }
         save(); refreshTestSelect(); renderBoard(); notify('アカウントのデータを読み込みました (ローカル)');
       }else alert('アカウントデータの形式が不正です');
     }catch(e){ alert('ローカル読み込みに失敗しました: ' + e.message); }
@@ -1333,11 +1342,6 @@
           notify('アカウントのデータを自動で読み込みました');
         }
         
-        // Load music playlist
-        if (window.MusicPlayer) {
-          window.MusicPlayer.loadPlaylistFromAccount().catch(e => console.error('Failed to load playlist:', e));
-        }
-        
         return;
       }
 
@@ -1361,6 +1365,10 @@
   // デバッグ用に同期関数と Firebase オブジェクトをグローバルに露出
   try{
     if(typeof window !== 'undefined'){
+      // Expose saveToAccount globally for music player
+      window.saveToAccount = saveToAccount;
+      window.currentAccountId = currentAccountId;
+      
       window._debug = window._debug || {};
       Object.assign(window._debug, {
         registerAccount: registerAccount,
