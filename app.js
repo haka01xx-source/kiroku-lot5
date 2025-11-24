@@ -1477,13 +1477,10 @@
       });
     });
 
-    // Spotify Login Button
+    // Spotify Embed Player Button
     const spotifyLoginBtn = document.getElementById('spotifyLoginBtn');
     if (spotifyLoginBtn) {
-      // Show button if not connected
-      if (window.SpotifyAuth && !window.SpotifyAuth.isTokenValid()) {
-        spotifyLoginBtn.style.display = 'inline-block';
-      }
+      spotifyLoginBtn.style.display = 'inline-block';
       
       spotifyLoginBtn.addEventListener('click', () => {
         const url = prompt(
@@ -1545,18 +1542,11 @@
             style="border-radius: 12px; max-width: 1200px;">
           </iframe>
           <button onclick="document.getElementById('spotifyEmbedContainer').remove()" 
-                  style="padding: 8px 16px; background: var(--danger); color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">
+                  style="padding: 8px 16px; background: #ff4444; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-size: 0.9rem;">
             閉じる
           </button>
         `;
-        
-        // Hide the login button, show disconnect
-        spotifyLoginBtn.style.display = 'none';
       }
-    }
-    if(spotifyLoginBtn){
-      spotifyLoginBtn.style.display = 'inline-block';
-    }
     }
     // record page view for admin analytics (client-side)
     try{ 
