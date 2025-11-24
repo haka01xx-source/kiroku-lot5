@@ -1332,6 +1332,12 @@
           save(); refreshTestSelect(); renderBoard();
           notify('アカウントのデータを自動で読み込みました');
         }
+        
+        // Load music playlist
+        if (window.MusicPlayer) {
+          window.MusicPlayer.loadPlaylistFromAccount().catch(e => console.error('Failed to load playlist:', e));
+        }
+        
         return;
       }
 

@@ -26,11 +26,11 @@
       <div style="display:flex;gap:18px;align-items:flex-start;justify-content:center;margin-top:18px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px;max-width:640px;text-align:left">
           <div style="font-size:0.95rem;color:var(--muted);margin-bottom:6px">履歴（折れ線グラフ）</div>
-          <canvas id="lineChart" width="640" height="260" style="width:100%;height:auto;border:1px solid rgba(0,0,0,0.04);background:#fff"></canvas>
+          <canvas id="lineChart" width="640" height="260" style="width:100%;height:auto;border:1px solid rgba(255,102,170,0.2);background:rgba(40,40,60,0.6);border-radius:8px"></canvas>
         </div>
         <div style="width:320px;text-align:center">
           <div style="font-size:0.95rem;color:var(--muted);margin-bottom:6px">今回の内訳</div>
-          <canvas id="resultChart" width="300" height="300" style="background:#fff;border-radius:8px"></canvas>
+          <canvas id="resultChart" width="300" height="300" style="background:rgba(40,40,60,0.6);border:1px solid rgba(255,102,170,0.2);border-radius:8px"></canvas>
         </div>
       </div>
       <div id="extra" style="margin-top:12px;color:var(--muted)"></div>
@@ -104,9 +104,9 @@
           list.innerHTML = '<h4 style="margin:8px 0 6px">カード別結果</h4>';
           const ul = document.createElement('div'); ul.style.display='flex'; ul.style.flexDirection='column'; ul.style.gap='8px';
           entries.forEach((e,i)=>{
-            const row = document.createElement('div'); row.style.padding='8px'; row.style.border='1px solid #eef3fb'; row.style.borderRadius='6px'; row.style.background='#fff';
+            const row = document.createElement('div'); row.style.padding='8px'; row.style.border='1px solid rgba(255,102,170,0.2)'; row.style.borderRadius='6px'; row.style.background='rgba(40,40,60,0.6)';
             const ok = e.correct ? '✅' : '❌';
-            const title = document.createElement('div'); title.style.fontWeight='600'; title.textContent = `${i+1}. ${ok} ${e.front}`;
+            const title = document.createElement('div'); title.style.fontWeight='600'; title.style.color='#fff'; title.textContent = `${i+1}. ${ok} ${e.front}`;
             const details = document.createElement('div'); details.style.fontSize='0.95rem'; details.style.color='var(--muted)';
             const exp = Array.isArray(e.expected) ? e.expected.join(' | ') : (e.expected||'');
             const ent = Array.isArray(e.entered) ? e.entered.join(' | ') : (e.entered||'');
