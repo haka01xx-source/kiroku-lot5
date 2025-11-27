@@ -66,14 +66,16 @@
     </div>
   </div>
 
-  <script src="app.js" defer></script>
+  <script src="app.js"></script>
   <script>
     // Wait for app.js to expose methods on window._debug
     function waitForDebug(cb){
       if(window._debug && window._debug.registerAccount && window._debug.loginAccount) return cb();
       setTimeout(()=>waitForDebug(cb), 200);
     }
-    document.addEventListener('DOMContentLoaded', ()=>{
+    
+    // Initialize immediately (no DOMContentLoaded needed since script is at bottom)
+    (function init() {
       const idEl = document.getElementById('acctId');
       const bEl = document.getElementById('acctBday');
       const msg = document.getElementById('msg');
@@ -140,12 +142,8 @@
             showMessage(e.message || '登録に失敗しました', true);
           }
         });
-            const ok = await window._debug.loginAccount(idVal, bVal);
-            if(ok){ window.location.href = 'index.html'; }
-          }catch(e){ msg.style.color='#b91c1c'; msg.textContent = e.message; }
-        });
       });
-    });
+    })();
   </script>
 </body>
 </html>
