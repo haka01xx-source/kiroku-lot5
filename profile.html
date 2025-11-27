@@ -121,8 +121,9 @@
       <div class="profile-section">
         <div class="profile-header">
           <div class="avatar-container">
-            <div class="avatar" id="avatarDisplay">👤</div>
-            <div class="avatar-edit" id="avatarEdit">✏️</div>
+            <div class="avatar" id="avatarDisplay" style="background-size: cover; background-position: center;">👤</div>
+            <input type="file" id="avatarUpload" accept="image/*" style="display: none;" />
+            <div class="avatar-edit" id="avatarEdit" title="画像をアップロード">📷</div>
           </div>
           <div style="flex: 1;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
@@ -130,6 +131,7 @@
               <button id="saveProfile" class="btn">保存</button>
             </div>
             <div style="color: var(--muted); font-size: 0.9rem;">学籍番号: <span id="accountId"></span></div>
+            <div style="color: var(--muted); font-size: 0.8rem; margin-top: 4px;">画像をクリックしてアップロード（推奨: 正方形、最大2MB）</div>
           </div>
         </div>
 
@@ -159,14 +161,7 @@
         <div id="chartTooltip" style="display: none; position: absolute; background: rgba(40, 40, 60, 0.95); border: 1px solid rgba(255, 102, 170, 0.5); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; pointer-events: none; z-index: 1000;"></div>
       </div>
 
-      <div class="profile-section">
-        <h3 style="margin: 0 0 16px 0; color: #fff;">アイコン選択</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 12px;">
-          ${['😀', '😎', '🤓', '😊', '🥳', '🤩', '😇', '🤗', '🧐', '🤔', '😴', '🥱', '🤯', '🥶', '🥵', '😱', '🤠', '👻', '👽', '🤖', '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🦄', '🌟', '⭐', '✨', '💫'].map(emoji => 
-            `<div class="avatar-option" data-emoji="${emoji}" style="width: 60px; height: 60px; background: rgba(255, 102, 170, 0.1); border: 2px solid rgba(255, 102, 170, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; transition: all 0.3s ease;">${emoji}</div>`
-          ).join('')}
-        </div>
-      </div>
+
     </div>
   </main>
 
@@ -191,9 +186,75 @@
     const PROFILE_KEY = 'kiroku_user_profile';
     let profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
     
+    // Load from Firebase if available
+    (async () => {
+      if (window.firebaseDB) {
+        try {
+          const accountDoc = await window.firebaseDB.collection('accounts').doc(accountId).get();
+          if (accountDoc.exists && accountDoc.data().profile) {
+            profile = accountDoc.data().profile;
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+            
+            // Update display
+            document.getElementById('displayName').value = profile.displayName || '';
+            const avatarDisplay = document.getElementById('avatarDisplay');
+            if (profile.avatarImage) {
+              avatarDisplay.style.backgroundImage = `url(${profile.avatarImage})`;
+              avatarDisplay.textContent = '';
+            } else {
+              avatarDisplay.textContent = profile.avatar || '👤';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to load profile from Firebase:', e);
+        }
+      }
+    })();
+    
     document.getElementById('accountId').textContent = accountId;
     document.getElementById('displayName').value = profile.displayName || '';
-    document.getElementById('avatarDisplay').textContent = profile.avatar || '👤';
+    
+    // Load avatar (image or emoji)
+    const avatarDisplay = document.getElementById('avatarDisplay');
+    if (profile.avatarImage) {
+      avatarDisplay.style.backgroundImage = `url(${profile.avatarImage})`;
+      avatarDisplay.textContent = '';
+    } else {
+      avatarDisplay.textContent = profile.avatar || '👤';
+    }
+    
+    // Avatar upload
+    document.getElementById('avatarEdit').addEventListener('click', () => {
+      document.getElementById('avatarUpload').click();
+    });
+    
+    document.getElementById('avatarUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Check file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('画像サイズは2MB以下にしてください');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('画像ファイルを選択してください');
+        return;
+      }
+      
+      // Read and convert to base64
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target.result;
+        avatarDisplay.style.backgroundImage = `url(${base64})`;
+        avatarDisplay.textContent = '';
+        profile.avatarImage = base64;
+        profile.avatar = null; // Clear emoji
+      };
+      reader.readAsDataURL(file);
+    });
 
     // Load stats
     const scoreData = JSON.parse(localStorage.getItem('kiroku_user_score') || '{"total":0,"history":[]}');
@@ -233,7 +294,7 @@
     // Save profile
     document.getElementById('saveProfile').addEventListener('click', async () => {
       profile.displayName = document.getElementById('displayName').value.trim();
-      profile.avatar = document.getElementById('avatarDisplay').textContent;
+      // avatar and avatarImage are already set by upload handler
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       
       // Sync to Firebase

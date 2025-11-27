@@ -138,6 +138,18 @@
             
             const ok = await window._debug.loginAccount(idVal, bVal);
             if(ok){ 
+              // Load profile from Firebase
+              if (window.firebaseDB) {
+                try {
+                  const accountDoc = await window.firebaseDB.collection('accounts').doc(idVal).get();
+                  if (accountDoc.exists && accountDoc.data().profile) {
+                    localStorage.setItem('kiroku_user_profile', JSON.stringify(accountDoc.data().profile));
+                  }
+                } catch (e) {
+                  console.warn('Failed to load profile from Firebase:', e);
+                }
+              }
+              
               showMessage('ログイン成功！リダイレクト中...', false);
               setTimeout(() => {
                 window.location.href = 'index.html';
@@ -197,9 +209,21 @@
             // Save profile
             const profile = {
               displayName: displayName || idVal,
-              avatar: selectedAvatar
+              avatar: selectedAvatar,
+              avatarImage: selectedAvatarImage
             };
             localStorage.setItem('kiroku_user_profile', JSON.stringify(profile));
+            
+            // Save profile to Firebase
+            if (window.firebaseDB) {
+              try {
+                await window.firebaseDB.collection('accounts').doc(idVal).set({
+                  profile: profile
+                }, { merge: true });
+              } catch (e) {
+                console.warn('Failed to save profile to Firebase:', e);
+              }
+            }
             
             regMsg.style.display = 'block';
             regMsg.style.background = 'rgba(102, 204, 255, 0.2)';

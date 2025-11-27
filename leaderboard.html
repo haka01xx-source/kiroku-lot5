@@ -183,29 +183,43 @@
         if (window.firebaseDB) {
           // Firebase mode - get all accounts
           const snapshot = await window.firebaseDB.collection('accounts').get();
+          console.log('Firebase accounts found:', snapshot.size);
+          
+          // Get data from subcollection for each account
+          const promises = [];
           snapshot.forEach(doc => {
-            const data = doc.data();
-            // Check both locations for scoreData
-            let scoreData = null;
-            if (data.scoreData) {
-              scoreData = data.scoreData;
-            } else if (data.meta && data.meta.data && data.meta.data.scoreData) {
-              scoreData = data.meta.data.scoreData;
-            }
-            
-            // Get profile
-            const profile = data.profile || (data.meta && data.meta.data && data.meta.data.profile) || {};
-            
-            if (scoreData && scoreData.total > 0) {
-              accounts.push({
-                id: doc.id,
-                score: scoreData.total || 0,
-                history: scoreData.history || [],
-                displayName: profile.displayName || doc.id,
-                avatar: profile.avatar || '👤'
-              });
-            }
+            promises.push(
+              doc.ref.collection('meta').doc('data').get().then(dataDoc => {
+                if (dataDoc.exists) {
+                  const data = dataDoc.data();
+                  const scoreData = data.scoreData;
+                  
+                  if (scoreData && scoreData.total > 0) {
+                    // Get profile from main account doc
+                    return doc.ref.get().then(accountDoc => {
+                      const accountData = accountDoc.data() || {};
+                      const profile = accountData.profile || {};
+                      
+                      return {
+                        id: doc.id,
+                        score: scoreData.total || 0,
+                        history: scoreData.history || [],
+                        displayName: profile.displayName || doc.id,
+                        avatar: profile.avatar || '👤',
+                        avatarImage: profile.avatarImage || null
+                      };
+                    });
+                  }
+                }
+                return null;
+              })
+            );
           });
+          
+          const results = await Promise.all(promises);
+          accounts = results.filter(acc => acc !== null);
+          
+          console.log('Total accounts with scores:', accounts.length);
         } else {
           // Local storage mode
           const key = 'kl_accounts_local_v1';
@@ -223,7 +237,8 @@
                   score: scoreData.total || 0,
                   history: scoreData.history || [],
                   displayName: profile.displayName || accountId,
-                  avatar: profile.avatar || '👤'
+                  avatar: profile.avatar || '👤',
+                  avatarImage: profile.avatarImage || null
                 });
               }
             }
@@ -254,16 +269,23 @@
           return;
         }
 
+        console.log('Displaying accounts:', accounts);
+        
         list.innerHTML = accounts.map((acc, index) => {
           const rank = index + 1;
           const isMe = acc.id === currentAccountId;
           const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
           const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
           
+          // Avatar display (image or emoji)
+          const avatarHtml = acc.avatarImage 
+            ? `<div style="width: 48px; height: 48px; border-radius: 50%; background-image: url(${acc.avatarImage}); background-size: cover; background-position: center; border: 2px solid rgba(255, 102, 170, 0.3);"></div>`
+            : `<div style="font-size: 2rem; margin-right: 12px;">${acc.avatar}</div>`;
+          
           return `
             <div class="rank-item ${isMe ? 'me' : ''}">
               <div class="rank-number ${rankClass}">${medal || rank}</div>
-              <div style="font-size: 2rem; margin-right: 12px;">${acc.avatar}</div>
+              ${avatarHtml}
               <div class="rank-info">
                 <div class="rank-name">${acc.displayName}${isMe ? ' (あなた)' : ''}</div>
                 <div style="font-size: 0.8rem; color: var(--muted);">${acc.id}</div>
