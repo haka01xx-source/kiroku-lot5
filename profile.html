@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>プロフィール設定 - テスト点数記録表</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .profile-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .profile-section {
+      background: rgba(40, 40, 60, 0.6);
+      border: 1px solid rgba(255, 102, 170, 0.2);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .avatar-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff66aa 0%, #66ccff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      border: 3px solid rgba(255, 102, 170, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 32px rgba(255, 102, 170, 0.6);
+    }
+    .avatar-edit {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: rgba(255, 102, 170, 0.9);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .stat-card {
+      background: rgba(20, 20, 30, 0.6);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff66aa;
+      font-family: 'Courier New', monospace;
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="site-header">
+      <div class="header-left">
+        <h1>プロフィール設定</h1>
+        <p class="subtitle">アカウント情報とスコア</p>
+      </div>
+      <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+        <a href="index.html" class="btn">点数記録</a>
+        <a href="memorization.html?edit=1" class="btn">暗記</a>
+        <a href="timer.html" class="btn">タイマー</a>
+        <a href="leaderboard.html" class="btn">ランキング</a>
+      </nav>
+      <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
+        <button id="musicBtn" class="btn" style="background:linear-gradient(135deg,#ff66aa 0%,#ff4488 100%)">
+          <span style="display:flex;align-items:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            音楽
+          </span>
+        </button>
+        <button id="logoutBtn" class="btn">ログアウト</button>
+      </div>
+      <div class="clock-display">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <div class="clock-date" id="clockDate">2024/01/01</div>
+        <div class="clock-runtime" id="clockRuntime">runtime 0:00</div>
+      </div>
+    </header>
+
+    <div class="profile-container">
+      <div class="profile-section">
+        <div class="profile-header">
+          <div class="avatar-container">
+            <div class="avatar" id="avatarDisplay">👤</div>
+            <div class="avatar-edit" id="avatarEdit">✏️</div>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <input type="text" id="displayName" placeholder="表示名を入力" style="flex: 1; font-size: 1.2rem; font-weight: 600;" />
+              <button id="saveProfile" class="btn">保存</button>
+            </div>
+            <div style="color: var(--muted); font-size: 0.9rem;">学籍番号: <span id="accountId"></span></div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalScore">0</div>
+            <div class="stat-label">トータルスコア</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="currentLevel">1</div>
+            <div class="stat-label">レベル</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="currentRank">-</div>
+            <div class="stat-label">ランキング</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="loginDays">0</div>
+            <div class="stat-label">ログイン日数</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h3 style="margin: 0 0 16px 0; color: #fff;">スコア推移（全期間）</h3>
+        <canvas id="fullScoreChart" style="width: 100%; height: 300px;"></canvas>
+        <div id="chartTooltip" style="display: none; position: absolute; background: rgba(40, 40, 60, 0.95); border: 1px solid rgba(255, 102, 170, 0.5); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; pointer-events: none; z-index: 1000;"></div>
+      </div>
+
+      <div class="profile-section">
+        <h3 style="margin: 0 0 16px 0; color: #fff;">アイコン選択</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 12px;">
+          ${['😀', '😎', '🤓', '😊', '🥳', '🤩', '😇', '🤗', '🧐', '🤔', '😴', '🥱', '🤯', '🥶', '🥵', '😱', '🤠', '👻', '👽', '🤖', '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🦄', '🌟', '⭐', '✨', '💫'].map(emoji => 
+            `<div class="avatar-option" data-emoji="${emoji}" style="width: 60px; height: 60px; background: rgba(255, 102, 170, 0.1); border: 2px solid rgba(255, 102, 170, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; transition: all 0.3s ease;">${emoji}</div>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="music-player.js"></script>
+  <script src="score-system.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Check login
+    const accountId = localStorage.getItem('kl_account_id');
+    if (!accountId) {
+      window.location.href = 'login.html';
+    }
+
+    // Music button
+    document.getElementById('musicBtn')?.addEventListener('click', () => {
+      if (window.MusicPlayer) {
+        window.MusicPlayer.showDialog();
+      }
+    });
+
+    // Load profile
+    const PROFILE_KEY = 'kiroku_user_profile';
+    let profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+    
+    document.getElementById('accountId').textContent = accountId;
+    document.getElementById('displayName').value = profile.displayName || '';
+    document.getElementById('avatarDisplay').textContent = profile.avatar || '👤';
+
+    // Load stats
+    const scoreData = JSON.parse(localStorage.getItem('kiroku_user_score') || '{"total":0,"history":[]}');
+    document.getElementById('totalScore').textContent = scoreData.total.toLocaleString();
+    document.getElementById('currentLevel').textContent = Math.floor(scoreData.total / 1000) + 1;
+
+    // Calculate login days
+    const loginDays = new Set((scoreData.history || []).map(h => new Date(h.timestamp).toDateString())).size;
+    document.getElementById('loginDays').textContent = loginDays;
+
+    // Get rank
+    loadRank();
+
+    async function loadRank() {
+      try {
+        let accounts = [];
+        
+        if (window.firebaseDB) {
+          const snapshot = await window.firebaseDB.collection('accounts').get();
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const scoreData = data.scoreData || (data.meta && data.meta.data && data.meta.data.scoreData);
+            if (scoreData && scoreData.total > 0) {
+              accounts.push({ id: doc.id, score: scoreData.total });
+            }
+          });
+        }
+        
+        accounts.sort((a, b) => b.score - a.score);
+        const rank = accounts.findIndex(a => a.id === accountId) + 1;
+        document.getElementById('currentRank').textContent = rank > 0 ? rank : '-';
+      } catch (e) {
+        console.error('Failed to load rank:', e);
+      }
+    }
+
+    // Save profile
+    document.getElementById('saveProfile').addEventListener('click', async () => {
+      profile.displayName = document.getElementById('displayName').value.trim();
+      profile.avatar = document.getElementById('avatarDisplay').textContent;
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      
+      // Sync to Firebase
+      try {
+        if (window.firebaseDB) {
+          await window.firebaseDB.collection('accounts').doc(accountId).set({
+            profile: profile
+          }, { merge: true });
+        } else {
+          const key = 'kl_accounts_local_v1';
+          const raw = localStorage.getItem(key);
+          const map = raw ? JSON.parse(raw) : {};
+          if (!map[accountId]) map[accountId] = {};
+          map[accountId].profile = profile;
+          localStorage.setItem(key, JSON.stringify(map));
+        }
+        alert('プロフィールを保存しました');
+      } catch (e) {
+        alert('保存に失敗しました: ' + e.message);
+      }
+    });
+
+    // Avatar selection
+    document.querySelectorAll('.avatar-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.getElementById('avatarDisplay').textContent = option.dataset.emoji;
+        document.querySelectorAll('.avatar-option').forEach(o => {
+          o.style.background = 'rgba(255, 102, 170, 0.1)';
+          o.style.borderColor = 'rgba(255, 102, 170, 0.2)';
+        });
+        option.style.background = 'rgba(255, 102, 170, 0.3)';
+        option.style.borderColor = 'rgba(255, 102, 170, 0.6)';
+      });
+      
+      option.addEventListener('mouseenter', () => {
+        option.style.transform = 'scale(1.1)';
+        option.style.background = 'rgba(255, 102, 170, 0.2)';
+      });
+      
+      option.addEventListener('mouseleave', () => {
+        option.style.transform = 'scale(1)';
+        if (option.dataset.emoji !== document.getElementById('avatarDisplay').textContent) {
+          option.style.background = 'rgba(255, 102, 170, 0.1)';
+        }
+      });
+    });
+
+    // Draw full score chart with tooltip
+    drawFullScoreChart();
+
+    function drawFullScoreChart() {
+      const canvas = document.getElementById('fullScoreChart');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      
+      const w = rect.width;
+      const h = rect.height;
+      
+      // Get all history
+      const history = scoreData.history || [];
+      if (history.length === 0) {
+        ctx.fillStyle = 'var(--muted)';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('データがありません', w / 2, h / 2);
+        return;
+      }
+      
+      // Group by day
+      const dailyData = [];
+      const dayMap = new Map();
+      let cumulative = 0;
+      
+      history.sort((a, b) => a.timestamp - b.timestamp);
+      
+      history.forEach(h => {
+        const date = new Date(h.timestamp).toDateString();
+        if (!dayMap.has(date)) {
+          cumulative += h.points;
+          dayMap.set(date, { date, score: cumulative, timestamp: h.timestamp });
+        } else {
+          cumulative += h.points;
+          dayMap.get(date).score = cumulative;
+        }
+      });
+      
+      dayMap.forEach(v => dailyData.push(v));
+      
+      const maxScore = Math.max(...dailyData.map(d => d.score), 100);
+      const padding = 50;
+      const chartW = w - padding * 2;
+      const chartH = h - padding * 2;
+      
+      // Background
+      ctx.fillStyle = 'rgba(20, 20, 30, 0.4)';
+      ctx.fillRect(0, 0, w, h);
+      
+      // Grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const y = padding + (chartH * i / 5);
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(padding + chartW, y);
+        ctx.stroke();
+      }
+      
+      // Line
+      ctx.strokeStyle = '#ff66aa';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      const points = [];
+      dailyData.forEach((d, i) => {
+        const x = padding + (chartW * i / (dailyData.length - 1 || 1));
+        const y = padding + chartH - (chartH * d.score / maxScore);
+        points.push({ x, y, data: d });
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+      
+      // Gradient fill
+      ctx.lineTo(padding + chartW, padding + chartH);
+      ctx.lineTo(padding, padding + chartH);
+      ctx.closePath();
+      
+      const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartH);
+      gradient.addColorStop(0, 'rgba(255, 102, 170, 0.3)');
+      gradient.addColorStop(1, 'rgba(255, 102, 170, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // Points
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff66aa';
+        ctx.fill();
+      });
+      
+      // Labels
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(maxScore.toLocaleString(), padding - 5, padding + 5);
+      ctx.fillText('0', padding - 5, padding + chartH + 5);
+      
+      // Tooltip on hover
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        const tooltip = document.getElementById('chartTooltip');
+        let found = false;
+        
+        points.forEach(p => {
+          const distance = Math.sqrt((mouseX - p.x) ** 2 + (mouseY - p.y) ** 2);
+          if (distance < 10) {
+            found = true;
+            const date = new Date(p.data.timestamp).toLocaleDateString('ja-JP');
+            tooltip.innerHTML = `${date}<br>${p.data.score.toLocaleString()} pts`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 10) + 'px';
+            tooltip.style.top = (e.clientY - 40) + 'px';
+          }
+        });
+        
+        if (!found) {
+          tooltip.style.display = 'none';
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', () => {
+        document.getElementById('chartTooltip').style.display = 'none';
+      });
+    }
+  </script>
+</body>
+</html>

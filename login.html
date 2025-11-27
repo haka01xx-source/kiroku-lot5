@@ -43,10 +43,10 @@
     <div class="login-card card">
       <div class="login-header">
         <h1>テスト点数記録表</h1>
-        <p>学籍番号と誕生日でログイン</p>
+        <p id="headerSubtitle">学籍番号と誕生日でログイン</p>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div id="loginForm" style="display: flex; flex-direction: column; gap: 16px;">
         <label style="display:block;">
           <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">学籍番号</div>
           <input id="acctId" placeholder="例: 202312345" style="width: 100%;" />
@@ -62,6 +62,36 @@
         </div>
         
         <div id="msg" style="margin-top:8px;padding:12px;border-radius:8px;display:none;"></div>
+      </div>
+
+      <div id="registerForm" style="display: none; flex-direction: column; gap: 16px;">
+        <label style="display:block;">
+          <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">学籍番号</div>
+          <input id="regAcctId" placeholder="例: 202312345" style="width: 100%;" />
+        </label>
+        <label style="display:block;">
+          <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">誕生日</div>
+          <input id="regAcctBday" type="text" placeholder="YYYYMMDD (例: 20050415)" style="width: 100%;" />
+        </label>
+        <label style="display:block;">
+          <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">表示名（任意）</div>
+          <input id="regDisplayName" placeholder="例: 山田太郎" style="width: 100%;" />
+        </label>
+        <label style="display:block;">
+          <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">アイコン</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            ${['😀', '😎', '🤓', '😊', '🥳', '🤩', '😇', '🤗'].map(emoji => 
+              `<div class="reg-avatar-option" data-emoji="${emoji}" style="width: 50px; height: 50px; background: rgba(255, 102, 170, 0.1); border: 2px solid rgba(255, 102, 170, 0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer;">${emoji}</div>`
+            ).join('')}
+          </div>
+        </label>
+        
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <button id="confirmRegisterBtn" class="btn" style="width: 100%; padding: 14px;">登録してログイン</button>
+          <button id="backToLoginBtn" class="btn secondary" style="width: 100%; padding: 14px;">戻る</button>
+        </div>
+        
+        <div id="regMsg" style="margin-top:8px;padding:12px;border-radius:8px;display:none;"></div>
       </div>
     </div>
   </div>
@@ -118,24 +148,70 @@
           }
         });
         
-        document.getElementById('registerBtn').addEventListener('click', async ()=>{
-          msg.style.display = 'none';
-          const idVal = idEl.value.trim();
-          const bVal = bEl.value.trim();
+        document.getElementById('registerBtn').addEventListener('click', () => {
+          document.getElementById('loginForm').style.display = 'none';
+          document.getElementById('registerForm').style.display = 'flex';
+          document.getElementById('headerSubtitle').textContent = '新規アカウント登録';
+        });
+        
+        document.getElementById('backToLoginBtn').addEventListener('click', () => {
+          document.getElementById('registerForm').style.display = 'none';
+          document.getElementById('loginForm').style.display = 'flex';
+          document.getElementById('headerSubtitle').textContent = '学籍番号と誕生日でログイン';
+        });
+        
+        // Avatar selection
+        let selectedAvatar = '😀';
+        document.querySelectorAll('.reg-avatar-option').forEach(option => {
+          option.addEventListener('click', () => {
+            selectedAvatar = option.dataset.emoji;
+            document.querySelectorAll('.reg-avatar-option').forEach(o => {
+              o.style.background = 'rgba(255, 102, 170, 0.1)';
+              o.style.borderColor = 'rgba(255, 102, 170, 0.2)';
+            });
+            option.style.background = 'rgba(255, 102, 170, 0.3)';
+            option.style.borderColor = 'rgba(255, 102, 170, 0.6)';
+          });
+        });
+        
+        document.getElementById('confirmRegisterBtn').addEventListener('click', async () => {
+          const regMsg = document.getElementById('regMsg');
+          regMsg.style.display = 'none';
+          
+          const idVal = document.getElementById('regAcctId').value.trim();
+          const bVal = document.getElementById('regAcctBday').value.trim();
+          const displayName = document.getElementById('regDisplayName').value.trim();
           
           if (!idVal || !bVal) {
-            showMessage('学籍番号と誕生日を入力してください', true);
+            regMsg.style.display = 'block';
+            regMsg.style.background = 'rgba(255, 68, 102, 0.2)';
+            regMsg.style.border = '1px solid rgba(255, 68, 102, 0.4)';
+            regMsg.style.color = '#ff4466';
+            regMsg.textContent = '学籍番号と誕生日を入力してください';
             return;
           }
           
           try{
             await window._debug.registerAccount(idVal, bVal);
-            showMessage('登録成功！ログイン中...', false);
-            // after successful registration, auto-login and redirect
+            
+            // Save profile
+            const profile = {
+              displayName: displayName || idVal,
+              avatar: selectedAvatar
+            };
+            localStorage.setItem('kiroku_user_profile', JSON.stringify(profile));
+            
+            regMsg.style.display = 'block';
+            regMsg.style.background = 'rgba(102, 204, 255, 0.2)';
+            regMsg.style.border = '1px solid rgba(102, 204, 255, 0.4)';
+            regMsg.style.color = '#66ccff';
+            regMsg.textContent = '登録成功！ログイン中...';
+            
+            // Auto-login and redirect
             const ok = await window._debug.loginAccount(idVal, bVal);
             if(ok){ 
               setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'profile.html';
               }, 500);
             }
           }catch(e){ 

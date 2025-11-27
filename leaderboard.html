@@ -104,6 +104,7 @@
             音楽
           </span>
         </button>
+        <a href="profile.html" class="btn">プロフィール</a>
         <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
         <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
       </div>
@@ -192,11 +193,16 @@
               scoreData = data.meta.data.scoreData;
             }
             
+            // Get profile
+            const profile = data.profile || (data.meta && data.meta.data && data.meta.data.profile) || {};
+            
             if (scoreData && scoreData.total > 0) {
               accounts.push({
                 id: doc.id,
                 score: scoreData.total || 0,
-                history: scoreData.history || []
+                history: scoreData.history || [],
+                displayName: profile.displayName || doc.id,
+                avatar: profile.avatar || '👤'
               });
             }
           });
@@ -210,11 +216,14 @@
             const acc = map[accountId];
             if (acc.meta && acc.meta.data && acc.meta.data.scoreData) {
               const scoreData = acc.meta.data.scoreData;
+              const profile = acc.profile || {};
               if (scoreData.total > 0) {
                 accounts.push({
                   id: accountId,
                   score: scoreData.total || 0,
-                  history: scoreData.history || []
+                  history: scoreData.history || [],
+                  displayName: profile.displayName || accountId,
+                  avatar: profile.avatar || '👤'
                 });
               }
             }
@@ -254,8 +263,10 @@
           return `
             <div class="rank-item ${isMe ? 'me' : ''}">
               <div class="rank-number ${rankClass}">${medal || rank}</div>
+              <div style="font-size: 2rem; margin-right: 12px;">${acc.avatar}</div>
               <div class="rank-info">
-                <div class="rank-name">${acc.id}${isMe ? ' (あなた)' : ''}</div>
+                <div class="rank-name">${acc.displayName}${isMe ? ' (あなた)' : ''}</div>
+                <div style="font-size: 0.8rem; color: var(--muted);">${acc.id}</div>
               </div>
               <div class="rank-score">${acc.score.toLocaleString()} pts</div>
             </div>
