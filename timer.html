@@ -167,6 +167,7 @@
         <a href="index.html" class="btn">点数記録</a>
         <a href="memorization.html?edit=1" class="btn">暗記</a>
         <a href="timer.html" class="btn">タイマー</a>
+        <a href="leaderboard.html" class="btn">ランキング</a>
       </nav>
       <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
         <button id="musicBtn" class="btn" style="background:linear-gradient(135deg,#ff66aa 0%,#ff4488 100%)">
@@ -259,7 +260,7 @@
       </div>
 
       <div class="chart-container">
-        <canvas id="statsChart" width="800" height="400"></canvas>
+        <canvas id="statsChart" style="width: 100%; height: 400px;"></canvas>
       </div>
     </section>
   </main>
@@ -675,8 +676,16 @@
 
       function drawLineChart(logs, periodMs) {
         const ctx = statsChart.getContext('2d');
-        const w = statsChart.width;
-        const h = statsChart.height;
+        
+        // High DPI support
+        const dpr = window.devicePixelRatio || 1;
+        const rect = statsChart.getBoundingClientRect();
+        statsChart.width = rect.width * dpr;
+        statsChart.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        
+        const w = rect.width;
+        const h = rect.height;
         ctx.clearRect(0, 0, w, h);
 
         const now = Date.now();
@@ -754,8 +763,16 @@
 
       function drawBarChart(logs) {
         const ctx = statsChart.getContext('2d');
-        const w = statsChart.width;
-        const h = statsChart.height;
+        
+        // High DPI support
+        const dpr = window.devicePixelRatio || 1;
+        const rect = statsChart.getBoundingClientRect();
+        statsChart.width = rect.width * dpr;
+        statsChart.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        
+        const w = rect.width;
+        const h = rect.height;
         ctx.clearRect(0, 0, w, h);
 
         // Aggregate by subject

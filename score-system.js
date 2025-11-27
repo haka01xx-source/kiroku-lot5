@@ -222,8 +222,10 @@
       padding: 24px;
       z-index: 10000;
       box-shadow: var(--shadow);
-      min-width: 400px;
+      width: 600px;
       max-width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
     `;
     
     const score = getScore();
@@ -247,6 +249,10 @@
         </div>
       </div>
       <div style="background: rgba(40, 40, 60, 0.6); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="color: #fff; font-weight: 600; margin-bottom: 12px;">スコア推移</div>
+        <canvas id="scoreChart" style="width: 100%; height: 200px;"></canvas>
+      </div>
+      <div style="background: rgba(40, 40, 60, 0.6); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="color: #fff; font-weight: 600; margin-bottom: 12px;">スコアの獲得方法</div>
         <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; color: var(--muted);">
           <div>⏱️ 学習時間: 1分ごとに1-5pts</div>
@@ -255,7 +261,10 @@
           <div>🎯 デイリーログイン: 50-100pts</div>
         </div>
       </div>
-      <button id="closeScoreDialog" class="btn" style="width: 100%;">閉じる</button>
+      <div style="display: flex; gap: 8px;">
+        <a href="leaderboard.html" class="btn" style="flex: 1; text-align: center; text-decoration: none;">ランキングを見る</a>
+        <button id="closeScoreDialog" class="btn secondary" style="flex: 1;">閉じる</button>
+      </div>
     `;
     
     const overlay = document.createElement('div');
@@ -279,6 +288,101 @@
     
     overlay.addEventListener('click', closeDialog);
     document.getElementById('closeScoreDialog').addEventListener('click', closeDialog);
+    
+    // Draw score chart
+    setTimeout(() => {
+      drawScoreChart();
+    }, 100);
+  }
+  
+  function drawScoreChart() {
+    const canvas = document.getElementById('scoreChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const w = rect.width;
+    const h = rect.height;
+    
+    // Get score history (last 30 days)
+    const data = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const days = 30;
+    
+    // Aggregate by day
+    const dailyScores = [];
+    let cumulativeScore = 0;
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const dayStart = now - i * dayMs;
+      const dayEnd = dayStart + dayMs;
+      const dayHistory = (data.history || []).filter(h => h.timestamp >= dayStart && h.timestamp < dayEnd);
+      const dayPoints = dayHistory.reduce((sum, h) => sum + h.points, 0);
+      cumulativeScore += dayPoints;
+      dailyScores.push(cumulativeScore);
+    }
+    
+    const maxScore = Math.max(...dailyScores, 100);
+    const padding = 40;
+    const chartW = w - padding * 2;
+    const chartH = h - padding * 2;
+    
+    // Background
+    ctx.fillStyle = 'rgba(20, 20, 30, 0.4)';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartH * i / 4);
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(padding + chartW, y);
+      ctx.stroke();
+    }
+    
+    // Line
+    ctx.strokeStyle = '#ff66aa';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    
+    dailyScores.forEach((score, i) => {
+      const x = padding + (chartW * i / (days - 1));
+      const y = padding + chartH - (chartH * score / maxScore);
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    
+    ctx.stroke();
+    
+    // Gradient fill
+    ctx.lineTo(padding + chartW, padding + chartH);
+    ctx.lineTo(padding, padding + chartH);
+    ctx.closePath();
+    
+    const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartH);
+    gradient.addColorStop(0, 'rgba(255, 102, 170, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 102, 170, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    
+    // Labels
+    ctx.fillStyle = 'var(--muted)';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(maxScore.toLocaleString(), padding - 5, padding + 5);
+    ctx.fillText('0', padding - 5, padding + chartH + 5);
   }
   
   function init() {

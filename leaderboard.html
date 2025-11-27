@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>リーダーボード - テスト点数記録表</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .leaderboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .period-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .period-tab {
+      padding: 10px 20px;
+      background: rgba(40, 40, 60, 0.6);
+      border: 1px solid rgba(255, 102, 170, 0.2);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .period-tab.active {
+      background: linear-gradient(135deg, #ff66aa 0%, #66ccff 100%);
+      border-color: transparent;
+      color: white;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(40, 40, 60, 0.6);
+      border: 1px solid rgba(255, 102, 170, 0.2);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+    .rank-item:hover {
+      background: rgba(50, 50, 75, 0.8);
+      border-color: rgba(255, 102, 170, 0.4);
+      transform: translateX(4px);
+    }
+    .rank-item.me {
+      background: rgba(255, 102, 170, 0.2);
+      border-color: rgba(255, 102, 170, 0.5);
+    }
+    .rank-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 50px;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+    }
+    .rank-number.gold { color: #FFD700; }
+    .rank-number.silver { color: #C0C0C0; }
+    .rank-number.bronze { color: #CD7F32; }
+    .rank-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .rank-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rank-score {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ff66aa;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="site-header">
+      <div class="header-left">
+        <h1>リーダーボード</h1>
+        <p class="subtitle">スコアランキング</p>
+      </div>
+      <nav style="display:flex;gap:12px;align-items:center;margin-left:auto">
+        <a href="index.html" class="btn">点数記録</a>
+        <a href="memorization.html?edit=1" class="btn">暗記</a>
+        <a href="timer.html" class="btn">タイマー</a>
+        <a href="leaderboard.html" class="btn">ランキング</a>
+      </nav>
+      <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
+        <button id="musicBtn" class="btn" style="background:linear-gradient(135deg,#ff66aa 0%,#ff4488 100%)">
+          <span style="display:flex;align-items:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            音楽
+          </span>
+        </button>
+        <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
+        <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
+      </div>
+      <div class="clock-display">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <div class="clock-date" id="clockDate">2024/01/01</div>
+        <div class="clock-runtime" id="clockRuntime">runtime 0:00</div>
+      </div>
+    </header>
+
+    <div class="leaderboard-container">
+      <div class="period-tabs">
+        <button class="period-tab active" data-period="total">トータル</button>
+        <button class="period-tab" data-period="year">年間</button>
+        <button class="period-tab" data-period="month">月間</button>
+        <button class="period-tab" data-period="day">日間</button>
+      </div>
+
+      <div id="leaderboardList"></div>
+      
+      <div id="noData" style="text-align: center; padding: 60px 20px; color: var(--muted); display: none;">
+        <div style="font-size: 3rem; margin-bottom: 16px;">📊</div>
+        <div style="font-size: 1.2rem;">まだランキングデータがありません</div>
+        <div style="margin-top: 8px;">勉強してスコアを獲得しましょう！</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="music-player.js"></script>
+  <script src="score-system.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Check login
+    if (!localStorage.getItem('kl_account_id')) {
+      window.location.href = 'login.html';
+    }
+
+    // Music button
+    document.getElementById('musicBtn')?.addEventListener('click', () => {
+      if (window.MusicPlayer) {
+        window.MusicPlayer.showDialog();
+      }
+    });
+
+    let currentPeriod = 'total';
+    const currentAccountId = localStorage.getItem('kl_account_id');
+
+    // Period tabs
+    document.querySelectorAll('.period-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentPeriod = tab.dataset.period;
+        loadLeaderboard();
+      });
+    });
+
+    async function loadLeaderboard() {
+      const list = document.getElementById('leaderboardList');
+      const noData = document.getElementById('noData');
+      
+      list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--muted);">読み込み中...</div>';
+      noData.style.display = 'none';
+
+      try {
+        // Get all accounts from Firebase or local storage
+        let accounts = [];
+        
+        if (window.firebaseDB) {
+          // Firebase mode
+          const snapshot = await window.firebaseDB.collection('accounts').get();
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.meta && data.meta.data && data.meta.data.scoreData) {
+              accounts.push({
+                id: doc.id,
+                score: data.meta.data.scoreData.total || 0,
+                history: data.meta.data.scoreData.history || []
+              });
+            }
+          });
+        } else {
+          // Local storage mode
+          const key = 'kl_accounts_local_v1';
+          const raw = localStorage.getItem(key);
+          const map = raw ? JSON.parse(raw) : {};
+          
+          Object.keys(map).forEach(accountId => {
+            const acc = map[accountId];
+            if (acc.meta && acc.meta.data && acc.meta.data.scoreData) {
+              accounts.push({
+                id: accountId,
+                score: acc.meta.data.scoreData.total || 0,
+                history: acc.meta.data.scoreData.history || []
+              });
+            }
+          });
+        }
+
+        // Filter by period
+        if (currentPeriod !== 'total') {
+          const now = Date.now();
+          const periodMs = currentPeriod === 'day' ? 24 * 60 * 60 * 1000 :
+                          currentPeriod === 'month' ? 30 * 24 * 60 * 60 * 1000 :
+                          365 * 24 * 60 * 60 * 1000;
+          
+          accounts = accounts.map(acc => {
+            const periodHistory = (acc.history || []).filter(h => now - h.timestamp < periodMs);
+            const periodScore = periodHistory.reduce((sum, h) => sum + h.points, 0);
+            return { ...acc, score: periodScore };
+          });
+        }
+
+        // Sort by score
+        accounts.sort((a, b) => b.score - a.score);
+
+        // Display
+        if (accounts.length === 0) {
+          list.innerHTML = '';
+          noData.style.display = 'block';
+          return;
+        }
+
+        list.innerHTML = accounts.map((acc, index) => {
+          const rank = index + 1;
+          const isMe = acc.id === currentAccountId;
+          const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+          
+          return `
+            <div class="rank-item ${isMe ? 'me' : ''}">
+              <div class="rank-number ${rankClass}">${medal || rank}</div>
+              <div class="rank-info">
+                <div class="rank-name">${acc.id}${isMe ? ' (あなた)' : ''}</div>
+              </div>
+              <div class="rank-score">${acc.score.toLocaleString()} pts</div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('Failed to load leaderboard:', error);
+        list.innerHTML = '<div style="text-align: center; padding: 40px; color: #ff4466;">読み込みに失敗しました</div>';
+      }
+    }
+
+    // Initial load
+    loadLeaderboard();
+  </script>
+</body>
+</html>
