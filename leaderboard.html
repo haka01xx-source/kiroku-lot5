@@ -161,11 +161,18 @@
       });
     });
 
+    let isLoading = false;
+    
     async function loadLeaderboard() {
+      if (isLoading) return;
+      isLoading = true;
+      
       const list = document.getElementById('leaderboardList');
       const noData = document.getElementById('noData');
       
-      list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--muted);">読み込み中...</div>';
+      if (!list.innerHTML || list.innerHTML.includes('読み込み中')) {
+        list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--muted);">読み込み中...</div>';
+      }
       noData.style.display = 'none';
 
       try {
@@ -173,15 +180,23 @@
         let accounts = [];
         
         if (window.firebaseDB) {
-          // Firebase mode
+          // Firebase mode - get all accounts
           const snapshot = await window.firebaseDB.collection('accounts').get();
           snapshot.forEach(doc => {
             const data = doc.data();
-            if (data.meta && data.meta.data && data.meta.data.scoreData) {
+            // Check both locations for scoreData
+            let scoreData = null;
+            if (data.scoreData) {
+              scoreData = data.scoreData;
+            } else if (data.meta && data.meta.data && data.meta.data.scoreData) {
+              scoreData = data.meta.data.scoreData;
+            }
+            
+            if (scoreData && scoreData.total > 0) {
               accounts.push({
                 id: doc.id,
-                score: data.meta.data.scoreData.total || 0,
-                history: data.meta.data.scoreData.history || []
+                score: scoreData.total || 0,
+                history: scoreData.history || []
               });
             }
           });
@@ -194,11 +209,14 @@
           Object.keys(map).forEach(accountId => {
             const acc = map[accountId];
             if (acc.meta && acc.meta.data && acc.meta.data.scoreData) {
-              accounts.push({
-                id: accountId,
-                score: acc.meta.data.scoreData.total || 0,
-                history: acc.meta.data.scoreData.history || []
-              });
+              const scoreData = acc.meta.data.scoreData;
+              if (scoreData.total > 0) {
+                accounts.push({
+                  id: accountId,
+                  score: scoreData.total || 0,
+                  history: scoreData.history || []
+                });
+              }
             }
           });
         }
@@ -247,11 +265,23 @@
       } catch (error) {
         console.error('Failed to load leaderboard:', error);
         list.innerHTML = '<div style="text-align: center; padding: 40px; color: #ff4466;">読み込みに失敗しました</div>';
+      } finally {
+        isLoading = false;
       }
     }
 
     // Initial load
     loadLeaderboard();
+    
+    // Auto-refresh every 5 seconds
+    setInterval(() => {
+      loadLeaderboard();
+    }, 5000);
+    
+    // Also refresh when window gains focus
+    window.addEventListener('focus', () => {
+      loadLeaderboard();
+    });
   </script>
 </body>
 </html>

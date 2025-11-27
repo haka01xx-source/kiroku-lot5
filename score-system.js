@@ -35,7 +35,19 @@
   
   function addScore(points, reason = '') {
     const newScore = getScore() + points;
-    saveScore(newScore);
+    
+    // Add to history
+    const data = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
+    if (!data.history) data.history = [];
+    data.history.push({
+      points: points,
+      reason: reason,
+      timestamp: Date.now()
+    });
+    data.total = newScore;
+    localStorage.setItem(SCORE_KEY, JSON.stringify(data));
+    
+    currentScore = newScore;
     
     // Show animation
     showScoreAnimation(points, reason);
@@ -43,12 +55,45 @@
     // Update display
     updateScoreDisplay();
     
-    // Sync to account if logged in
-    if (window.saveToAccount) {
-      window.saveToAccount().catch(e => console.error('Score sync failed:', e));
-    }
+    // Immediately sync to Firebase
+    syncScoreToFirebase();
     
     return newScore;
+  }
+  
+  async function syncScoreToFirebase() {
+    const accountId = localStorage.getItem('kl_account_id');
+    if (!accountId) return;
+    
+    const scoreData = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
+    
+    try {
+      if (window.firebaseDB) {
+        // Direct Firebase update
+        await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').set({
+          scoreData: scoreData,
+          lastScoreUpdate: new Date().toISOString()
+        }, { merge: true });
+        console.log('Score synced to Firebase');
+      } else {
+        // Local storage fallback
+        const key = 'kl_accounts_local_v1';
+        const raw = localStorage.getItem(key);
+        const map = raw ? JSON.parse(raw) : {};
+        
+        if (!map[accountId]) map[accountId] = {};
+        if (!map[accountId].meta) map[accountId].meta = {};
+        if (!map[accountId].meta.data) map[accountId].meta.data = {};
+        
+        map[accountId].meta.data.scoreData = scoreData;
+        map[accountId].meta.data.lastScoreUpdate = new Date().toISOString();
+        
+        localStorage.setItem(key, JSON.stringify(map));
+        console.log('Score synced to local storage');
+      }
+    } catch (error) {
+      console.error('Failed to sync score:', error);
+    }
   }
   
   function showScoreAnimation(points, reason) {
@@ -142,6 +187,17 @@
   function checkDailyLogin() {
     const today = new Date().toDateString();
     const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
+    
+    // Initialize score data if it doesn't exist
+    const scoreData = localStorage.getItem(SCORE_KEY);
+    if (!scoreData) {
+      localStorage.setItem(SCORE_KEY, JSON.stringify({
+        total: 0,
+        history: []
+      }));
+      // Sync initial data to Firebase
+      syncScoreToFirebase();
+    }
     
     if (lastLogin !== today) {
       localStorage.setItem(LAST_LOGIN_KEY, today);
