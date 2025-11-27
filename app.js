@@ -1576,8 +1576,19 @@
             }
             if (payload.scoreData) {
               localStorage.setItem('kiroku_user_score', JSON.stringify(payload.scoreData));
-              if (window.ScoreSystem) window.ScoreSystem.init();
               console.log('✅ Loaded score:', payload.scoreData.total);
+              // Update score display if already initialized
+              if (window.ScoreSystem) {
+                const scoreDisplay = document.getElementById('scoreDisplay');
+                if (scoreDisplay) {
+                  scoreDisplay.textContent = payload.scoreData.total.toLocaleString();
+                }
+              }
+            } else {
+              // Initialize empty score if not exists
+              const emptyScore = {total: 0, history: []};
+              localStorage.setItem('kiroku_user_score', JSON.stringify(emptyScore));
+              console.log('ℹ️ Initialized empty score');
             }
             if (payload.memorizationData) {
               const md = payload.memorizationData;
