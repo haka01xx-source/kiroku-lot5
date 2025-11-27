@@ -112,6 +112,7 @@
   </main>
 
   <script src="music-player.js"></script>
+  <script src="score-system.js"></script>
   <script>
   // Music button
   document.getElementById('musicBtn')?.addEventListener('click', () => {
@@ -306,7 +307,13 @@
 
   // study mode (full-screen style)
   function showStudy(i){ if(!deckCards.length) return; currentIndex = (i+deckCards.length)%deckCards.length; const c = deckCards[currentIndex]; studyFront.textContent = c.front; studyBack.textContent = c.back; studyBack.style.display='none'; progressEl.textContent = `${currentIndex+1}/${deckCards.length}`; }
-  revealBtn.addEventListener('click', ()=>{ studyBack.style.display='block'; });
+  revealBtn.addEventListener('click', ()=>{ 
+    studyBack.style.display='block'; 
+    // Award score for studying
+    if (window.ScoreSystem) {
+      window.ScoreSystem.addScore(5, '暗記学習');
+    }
+  });
     prevBtn.addEventListener('click', ()=>{ showStudy(currentIndex-1); });
     nextBtn.addEventListener('click', ()=>{
       // in learn mode, when advancing past the last card return to index list
@@ -398,6 +405,14 @@
       const isCorrect = (correct === answers.length);
       // update session
       testSession.seen++; if(isCorrect) testSession.correct++;
+      
+      // Award score for test
+      if (window.ScoreSystem) {
+        if (isCorrect) {
+          window.ScoreSystem.addScore(10, '暗記テスト正解！');
+        }
+      }
+      
       // record per-card entry for results
       try{
         const entry = { cardId: testFront.dataset.cardid || c.id, front: testFront.dataset.front || c.front, back: testFront.dataset.back || c.back, expected: answers, entered: entered, correct: isCorrect };
