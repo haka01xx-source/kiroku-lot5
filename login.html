@@ -2,34 +2,69 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>ログイン - テスト点数記録表</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .login-card {
+      max-width: 450px;
+      width: 100%;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .login-header h1 {
+      font-size: 2rem;
+      margin: 0 0 8px 0;
+      background: linear-gradient(135deg, #ff66aa 0%, #66ccff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .login-header p {
+      color: var(--muted);
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
-  <main class="container">
-    <header class="site-header card">
-      <h1>ログイン</h1>
-    </header>
-
-    <section class="card">
-      <p>学籍番号と誕生日でログインします。</p>
-      <label style="display:block;margin-bottom:8px">学籍番号
-        <input id="acctId" placeholder="学籍番号 (例: 202312345)" />
-      </label>
-      <label style="display:block;margin-bottom:12px">誕生日
-        <input id="acctBday" placeholder="誕生日 (YYYYMMDD)" />
-      </label>
-      <!-- Buttons stacked to avoid confusion -->
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="registerBtn" class="btn">新規登録（登録して自動ログインします）</button>
-        <button id="loginBtn" class="btn">ログイン</button>
-        <a href="index.html" class="btn" style="text-align:center;">戻る</a>
+  <div class="login-container">
+    <div class="login-card card">
+      <div class="login-header">
+        <h1>テスト点数記録表</h1>
+        <p>学籍番号と誕生日でログイン</p>
       </div>
-      <div id="msg" style="margin-top:12px;color:#b91c1c"></div>
-    </section>
 
-  </main>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <label style="display:block;">
+          <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">学籍番号</div>
+          <input id="acctId" placeholder="例: 202312345" style="width: 100%;" />
+        </label>
+        <label style="display:block;">
+          <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">誕生日</div>
+          <input id="acctBday" type="text" placeholder="YYYYMMDD (例: 20050415)" style="width: 100%;" />
+        </label>
+        
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <button id="loginBtn" class="btn" style="width: 100%; padding: 14px;">ログイン</button>
+          <button id="registerBtn" class="btn secondary" style="width: 100%; padding: 14px;">新規登録</button>
+        </div>
+        
+        <div id="msg" style="margin-top:8px;padding:12px;border-radius:8px;display:none;"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js" defer></script>
   <script>
@@ -42,27 +77,69 @@
       const idEl = document.getElementById('acctId');
       const bEl = document.getElementById('acctBday');
       const msg = document.getElementById('msg');
+      
+      function showMessage(text, isError = false) {
+        msg.style.display = 'block';
+        msg.style.background = isError ? 'rgba(255, 68, 102, 0.2)' : 'rgba(102, 204, 255, 0.2)';
+        msg.style.border = isError ? '1px solid rgba(255, 68, 102, 0.4)' : '1px solid rgba(102, 204, 255, 0.4)';
+        msg.style.color = isError ? '#ff4466' : '#66ccff';
+        msg.textContent = text;
+      }
+      
       waitForDebug(()=>{
-        document.getElementById('registerBtn').addEventListener('click', async ()=>{
-          msg.textContent = '';
-          try{
-            await window._debug.registerAccount(idEl.value.trim(), bEl.value.trim());
-            // after successful registration, auto-login and redirect
-            const ok = await window._debug.loginAccount(idEl.value.trim(), bEl.value.trim());
-            if(ok){ window.location.href = 'index.html'; }
-          }catch(e){ msg.style.color='#b91c1c'; msg.textContent = e.message; }
-        });
         document.getElementById('loginBtn').addEventListener('click', async ()=>{
-          msg.textContent = '';
+          msg.style.display = 'none';
+          const idVal = idEl.value.trim();
+          const bVal = bEl.value.trim();
+          
+          if (!idVal || !bVal) {
+            showMessage('学籍番号と誕生日を入力してください', true);
+            return;
+          }
+          
           try{
-            // special admin shortcut: acctId === 'admin' and empty password -> go to admin dashboard
-            const idVal = idEl.value.trim();
-            const bVal = bEl.value.trim();
+            // special admin shortcut
             if(idVal.toLowerCase() === 'admin' && bVal === ''){
-              // redirect to admin page where the real admin password is requested
               window.location.href = 'admin.html';
               return;
             }
+            
+            const ok = await window._debug.loginAccount(idVal, bVal);
+            if(ok){ 
+              showMessage('ログイン成功！リダイレクト中...', false);
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 500);
+            }
+          }catch(e){ 
+            showMessage(e.message || 'ログインに失敗しました', true);
+          }
+        });
+        
+        document.getElementById('registerBtn').addEventListener('click', async ()=>{
+          msg.style.display = 'none';
+          const idVal = idEl.value.trim();
+          const bVal = bEl.value.trim();
+          
+          if (!idVal || !bVal) {
+            showMessage('学籍番号と誕生日を入力してください', true);
+            return;
+          }
+          
+          try{
+            await window._debug.registerAccount(idVal, bVal);
+            showMessage('登録成功！ログイン中...', false);
+            // after successful registration, auto-login and redirect
+            const ok = await window._debug.loginAccount(idVal, bVal);
+            if(ok){ 
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 500);
+            }
+          }catch(e){ 
+            showMessage(e.message || '登録に失敗しました', true);
+          }
+        });
             const ok = await window._debug.loginAccount(idVal, bVal);
             if(ok){ window.location.href = 'index.html'; }
           }catch(e){ msg.style.color='#b91c1c'; msg.textContent = e.message; }

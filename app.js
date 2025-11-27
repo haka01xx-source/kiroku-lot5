@@ -1503,8 +1503,27 @@
     }
   }
 
+  // Check login before initialization
+  function checkLoginRequired() {
+    // Skip login check for login page itself
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('login.html')) return true;
+    
+    // Check if user is logged in
+    const accountId = localStorage.getItem('kl_account_id');
+    if (!accountId) {
+      // Redirect to login page
+      window.location.href = 'login.html';
+      return false;
+    }
+    return true;
+  }
+
   // 初期化
   document.addEventListener('DOMContentLoaded', ()=>{
+    // Check login first
+    if (!checkLoginRequired()) return;
+    
     testRecords = load();
     templates = loadTemplates();
     updateVersionLabel();

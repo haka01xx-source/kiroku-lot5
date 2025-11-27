@@ -267,6 +267,11 @@
   <script src="music-player.js"></script>
   <script src="score-system.js"></script>
   <script>
+    // Check login
+    if (!localStorage.getItem('kl_account_id')) {
+      window.location.href = 'login.html';
+    }
+    
     // Music button
     document.getElementById('musicBtn')?.addEventListener('click', () => {
       if (window.MusicPlayer) {

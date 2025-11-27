@@ -167,48 +167,45 @@
     // Check if already exists
     if (document.getElementById('scoreDisplay')) return;
     
+    // Find clock display and insert score before it
+    const clockDisplay = document.querySelector('.clock-display');
+    if (!clockDisplay) return;
+    
     const scoreContainer = document.createElement('div');
+    scoreContainer.className = 'score-display';
     scoreContainer.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1001;
-      background: rgba(40, 40, 60, 0.9);
-      backdrop-filter: blur(20px);
-      border: 2px solid rgba(255, 102, 170, 0.3);
-      border-radius: 16px;
-      padding: 12px 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(40, 40, 60, 0.6);
+      border: 1px solid rgba(255, 102, 170, 0.2);
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
+      margin-right: 16px;
     `;
     
     scoreContainer.innerHTML = `
-      <div style="font-size: 1.5rem;">⭐</div>
-      <div style="display: flex; flex-direction: column; align-items: flex-start;">
-        <div style="font-size: 0.75rem; color: var(--muted); font-weight: 600;">SCORE</div>
-        <div id="scoreDisplay" style="font-size: 1.3rem; font-weight: 700; color: #fff; font-family: 'Courier New', monospace;">0</div>
-      </div>
+      <div style="font-size: 1rem;">⭐</div>
+      <div id="scoreDisplay" style="font-size: 0.9rem; font-weight: 700; color: #fff; font-family: 'Courier New', monospace;">0</div>
     `;
     
     scoreContainer.addEventListener('mouseenter', () => {
-      scoreContainer.style.transform = 'scale(1.05)';
-      scoreContainer.style.boxShadow = '0 12px 40px rgba(255, 102, 170, 0.6)';
+      scoreContainer.style.background = 'rgba(255, 102, 170, 0.2)';
+      scoreContainer.style.borderColor = 'rgba(255, 102, 170, 0.4)';
     });
     
     scoreContainer.addEventListener('mouseleave', () => {
-      scoreContainer.style.transform = 'scale(1)';
-      scoreContainer.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
+      scoreContainer.style.background = 'rgba(40, 40, 60, 0.6)';
+      scoreContainer.style.borderColor = 'rgba(255, 102, 170, 0.2)';
     });
     
     scoreContainer.addEventListener('click', () => {
       showScoreDetails();
     });
     
-    document.body.appendChild(scoreContainer);
+    clockDisplay.parentElement.insertBefore(scoreContainer, clockDisplay);
     updateScoreDisplay();
   }
   
