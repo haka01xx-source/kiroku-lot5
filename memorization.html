@@ -8,6 +8,10 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <title>暗記モード - テスト点数記録表</title>
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
 <body>
   <main class="container">
@@ -42,49 +46,55 @@
       </div>
     </header>
 
-  <section class="card" id="topControls">
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <!-- Deck selector -->
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px">
-            <span style="color:var(--muted);font-size:0.9rem;white-space:nowrap">デッキ:</span>
-            <select id="deckSelect" style="flex:1;background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px;font-size:0.95rem"></select>
-          </label>
-          
-          <div style="display:flex;gap:8px">
-            <button type="button" id="learnModeBtn" class="btn" style="padding:10px 20px;background:linear-gradient(135deg,#ff66aa 0%,#66ccff 100%)">📚 学習</button>
-            <button type="button" id="testModeBtn" class="btn" style="padding:10px 20px">✏️ テスト</button>
+  <!-- Deck selection screen (Anki-style) -->
+  <section class="card" id="deckSelection" style="display:none">
+    <h2 style="margin:0 0 24px 0;color:#fff">単語帳を選択</h2>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px" id="deckGrid"></div>
+    
+    <div style="display:flex;gap:12px;align-items:center;padding-top:16px;border-top:1px solid rgba(255,102,170,0.2)">
+      <input id="newDeckName" placeholder="新しいデッキ名を入力" style="flex:1;padding:12px;background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;font-size:0.95rem" />
+      <button type="button" id="createDeckBtn" class="btn" style="padding:12px 24px;background:linear-gradient(135deg,#ff66aa 0%,#66ccff 100%)">作成</button>
+    </div>
+  </section>
+
+  <!-- Card editor screen (separate from deck selection) -->
+  <section class="card" id="cardEditor" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="margin:0;color:#fff" id="currentDeckName">デッキ名</h2>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="backToDeckBtn" class="btn secondary">← デッキ選択</button>
+        <button type="button" id="startLearnBtn" class="btn" style="background:linear-gradient(135deg,#ff66aa 0%,#66ccff 100%)">学習開始</button>
+        <button type="button" id="startTestBtn" class="btn secondary">テスト開始</button>
+      </div>
+    </div>
+    
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <!-- Card registration -->
+      <div style="padding:16px;background:rgba(40,40,60,0.6);border-radius:8px">
+        <h3 style="margin:0 0 12px 0;color:#fff">カード登録</h3>
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:12px">表（出題）と裏（解答）を入力。穴埋め箇所は表に <strong>()</strong> を挿入してください。</p>
+        <div style="display:flex;gap:12px;flex-direction:column">
+          <textarea id="cardFront" placeholder="表（問題）を入力: 例）日本の首都は () です" rows="3" style="background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px"></textarea>
+          <textarea id="cardBack" placeholder="裏（解答）。複数は改行・カンマ・スペースでも区切れます（例: 東京 大阪）" rows="2" style="background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px"></textarea>
+          <div style="display:flex;gap:12px;align-items:center">
+            <button type="button" id="insertBlankBtn" class="btn secondary">空欄挿入</button>
+            <button type="button" id="clearCardBtn" class="btn secondary">クリア</button>
+            <button type="button" id="saveCardBtn" class="btn" style="background:linear-gradient(135deg,#ff66aa 0%,#66ccff 100%)">カードを保存</button>
           </div>
         </div>
-        
-        <!-- Deck management -->
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:8px;border-top:1px solid rgba(255,102,170,0.2)">
-          <input id="newDeckName" placeholder="新しいデッキ名を入力" style="flex:1;min-width:200px;padding:10px;background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px" />
-          <button type="button" id="createDeckBtn" class="btn secondary" style="padding:10px 16px">➕ 作成</button>
-          <button type="button" id="deleteDeckBtn" class="btn danger" style="padding:10px 16px">🗑️ 削除</button>
-          <button type="button" id="shareDeckBtn" class="btn secondary" style="padding:10px 16px">📤 共有</button>
-        </div>
       </div>
-    </section>
-
-  <section class="card" id="cardRegister">
-      <h3>カード登録</h3>
-      <p class="subtitle">表（出題）と裏（解答）を入力。穴埋め箇所は表に <strong>()</strong> を挿入してください。裏が複数の空欄に対応する場合は <code>||</code> で区切ってください（例: 答1||答2）。</p>
-      <div style="display:flex;gap:12px;flex-direction:column">
-        <textarea id="cardFront" placeholder="表（問題）を入力: 例）日本の首都は () です" rows="3" style="background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px"></textarea>
-        <textarea id="cardBack" placeholder="裏（解答）。複数は改行・カンマ・スペースでも区切れます（例: 東京 大阪）" rows="2" style="background:rgba(20, 20, 30, 0.6);color:#e8e8f0;border:1px solid var(--input-border);border-radius:8px;padding:10px"></textarea>
-        <div style="display:flex;gap:12px;align-items:center">
-          <button type="button" id="insertBlankBtn" class="btn">空欄挿入</button>
-          <button type="button" id="clearCardBtn" class="btn">クリア</button>
-          <button type="button" id="saveCardBtn" class="btn">保存</button>
+      
+      <!-- Card list -->
+      <div style="padding:16px;background:rgba(40,40,60,0.6);border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="margin:0;color:#fff">カード一覧 (<span id="cardCount">0</span>枚)</h3>
+          <button type="button" id="deleteDeckBtn" class="btn danger">デッキを削除</button>
         </div>
+        <div id="cardsList" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
-    </section>
-
-    <section class="card" id="deckArea">
-      <h3>カード一覧</h3>
-      <div id="cardsList" style="display:flex;flex-direction:column;gap:8px"></div>
-    </section>
+    </div>
+  </section>
 
     <!-- Anki-style settings screen (shown before starting) -->
     <section class="card" id="studySettings" style="display:none">
@@ -396,9 +406,88 @@
     let deckCards = [];
   let editingCardIndex = null;
 
-    function renderDeckSelect(){ deckSelect.innerHTML = ''; store.decks.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; deckSelect.appendChild(o); }); if(deckSelect.options.length) deckSelect.value = deckSelect.options[0].value; currentDeckId = deckSelect.value; loadDeck(); }
+    // Render deck selection grid (Anki-style)
+    function renderDeckGrid() {
+      const grid = document.getElementById('deckGrid');
+      if(!grid) return;
+      
+      grid.innerHTML = '';
+      
+      if(store.decks.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">デッキがありません。新しいデッキを作成してください。</div>';
+        return;
+      }
+      
+      store.decks.forEach(d => {
+        const card = document.createElement('div');
+        card.style.cssText = 'padding:20px;background:rgba(40,40,60,0.6);border:1px solid rgba(255,102,170,0.2);border-radius:12px;cursor:pointer;transition:all 0.3s ease';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+            <h3 style="margin:0;color:#fff;font-size:1.1rem">${d.name}</h3>
+            <button class="delete-deck-btn" data-id="${d.id}" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:1.2rem" title="削除">×</button>
+          </div>
+          <div style="color:var(--muted);font-size:0.9rem">
+            <div>カード: ${(d.cards || []).length}枚</div>
+            <div style="margin-top:4px">作成日: ${new Date(d.createdAt || Date.now()).toLocaleDateString('ja-JP')}</div>
+          </div>
+        `;
+        
+        card.addEventListener('click', (e) => {
+          if(e.target.classList.contains('delete-deck-btn')) {
+            e.stopPropagation();
+            const id = e.target.dataset.id;
+            if(confirm('このデッキを削除しますか？')) {
+              store.decks = store.decks.filter(deck => deck.id !== id);
+              save(store);
+              renderDeckGrid();
+            }
+            return;
+          }
+          openDeckEditor(d.id);
+        });
+        
+        card.addEventListener('mouseenter', () => {
+          card.style.background = 'rgba(50,50,75,0.8)';
+          card.style.borderColor = 'rgba(255,102,170,0.4)';
+          card.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+          card.style.background = 'rgba(40,40,60,0.6)';
+          card.style.borderColor = 'rgba(255,102,170,0.2)';
+          card.style.transform = 'translateY(0)';
+        });
+        
+        grid.appendChild(card);
+      });
+    }
+    
+    function openDeckEditor(deckId) {
+      const d = store.decks.find(x => x.id === deckId);
+      if(!d) return;
+      
+      currentDeckId = d.id;
+      deckCards = d.cards || [];
+      
+      document.getElementById('deckSelection').style.display = 'none';
+      document.getElementById('cardEditor').style.display = 'block';
+      document.getElementById('currentDeckName').textContent = d.name;
+      document.getElementById('cardCount').textContent = deckCards.length;
+      
+      renderCardsList();
+    }
+    
+    function showDeckSelection() {
+      document.getElementById('deckSelection').style.display = 'block';
+      document.getElementById('cardEditor').style.display = 'none';
+      document.getElementById('studySettings').style.display = 'none';
+      studyArea.style.display = 'none';
+      testArea.style.display = 'none';
+      
+      renderDeckGrid();
+    }
 
-    function loadDeck(){ const d = store.decks.find(x=>x.id===deckSelect.value); if(!d){ deckCards=[]; cardsList.innerHTML=''; currentDeckId=null; return;} currentDeckId=d.id; deckCards=d.cards||[]; renderCardsList(); }
+    function loadDeck(){ const d = store.decks.find(x=>x.id===currentDeckId); if(!d){ deckCards=[]; cardsList.innerHTML=''; currentDeckId=null; return;} deckCards=d.cards||[]; renderCardsList(); }
 
     function showEditUI(deckId){
       isEditing = true;
@@ -410,36 +499,103 @@
       updateOpenResultsBtn();
     }
 
-    function renderCardsList(){ cardsList.innerHTML=''; deckCards.forEach((c,i)=>{ const el=document.createElement('div'); el.style.display='flex'; el.style.justifyContent='space-between'; el.style.alignItems='center'; el.style.gap='8px'; const left=document.createElement('div'); left.textContent=(i+1)+'. '+(c.front.slice(0,80)); const btns=document.createElement('div'); btns.style.display='flex'; btns.style.gap='6px'; const edit=document.createElement('button'); edit.className='btn'; edit.textContent='編集'; edit.addEventListener('click', ()=>{ 
-        // enter inline edit for this card
-        editingCardIndex = i;
-        cardFront.value = c.front;
-        cardBack.value = c.back;
-        // show top controls/edit UI if hidden
-        isEditing = true;
-        topControls.style.display = 'block'; cardRegister.style.display='block'; document.getElementById('deckArea').style.display = 'block';
-        // update save button to indicate update
-        saveCardBtn.textContent = '更新';
-        // hide header edit button while editing
-        if(toggleEditBtn) toggleEditBtn.style.display = 'none';
-        if(openMemHeaderBtn) openMemHeaderBtn.style.display = 'none';
-        updateOpenResultsBtn();
-      });
-      const del=document.createElement('button'); del.className='btn danger'; del.textContent='削除'; del.addEventListener('click', ()=>{ if(!confirm('カードを削除しますか？'))return; deckCards.splice(i,1); persistDeck(); renderCardsList(); }); btns.appendChild(edit); btns.appendChild(del); el.appendChild(left); el.appendChild(btns); cardsList.appendChild(el); }); }
+    function renderCardsList(){ 
+      cardsList.innerHTML=''; 
+      
+      // Update card count
+      const countEl = document.getElementById('cardCount');
+      if(countEl) countEl.textContent = deckCards.length;
+      
+      if(deckCards.length === 0) {
+        cardsList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">カードがありません</div>';
+        return;
+      }
+      
+      deckCards.forEach((c,i)=>{ 
+        const el=document.createElement('div'); 
+        el.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px;background:rgba(20,20,30,0.6);border-radius:8px;border:1px solid rgba(255,102,170,0.1)';
+        
+        const left=document.createElement('div'); 
+        left.style.cssText = 'flex:1;color:#fff';
+        left.textContent=(i+1)+'. '+(c.front.slice(0,80)); 
+        
+        const btns=document.createElement('div'); 
+        btns.style.display='flex'; 
+        btns.style.gap='6px'; 
+        
+        const edit=document.createElement('button'); 
+        edit.className='btn secondary'; 
+        edit.textContent='編集'; 
+        edit.style.padding = '6px 12px';
+        edit.addEventListener('click', ()=>{ 
+          editingCardIndex = i;
+          cardFront.value = c.front;
+          cardBack.value = c.back;
+          saveCardBtn.textContent = '更新';
+          cardFront.focus();
+        });
+        
+        const del=document.createElement('button'); 
+        del.className='btn danger'; 
+        del.textContent='削除'; 
+        del.style.padding = '6px 12px';
+        del.addEventListener('click', ()=>{ 
+          if(!confirm('カードを削除しますか？'))return; 
+          deckCards.splice(i,1); 
+          persistDeck(); 
+          renderCardsList(); 
+        }); 
+        
+        btns.appendChild(edit); 
+        btns.appendChild(del); 
+        el.appendChild(left); 
+        el.appendChild(btns); 
+        cardsList.appendChild(el); 
+      }); 
+    }
 
     function persistDeck(){ const idx = store.decks.findIndex(d=>d.id===currentDeckId); if(idx===-1) return; store.decks[idx].cards = deckCards; save(store); }
 
     createDeckBtn.addEventListener('click', ()=>{
-      const name = newDeckName.value.trim(); if(!name) return alert('デッキ名を入力してください');
-      const d = { id: uid(), name, cards: [] }; store.decks.push(d); save(store); newDeckName.value=''; renderDeckSelect(); deckSelect.value = d.id; loadDeck();
+      const name = newDeckName.value.trim(); 
+      if(!name) return alert('デッキ名を入力してください');
+      const d = { id: uid(), name, cards: [], createdAt: Date.now() }; 
+      store.decks.push(d); 
+      save(store); 
+      newDeckName.value=''; 
+      renderDeckGrid();
     });
-    deleteDeckBtn.addEventListener('click', ()=>{
-      if(!currentDeckId) return alert('デッキが選択されていません');
-      if(!confirm('デッキを削除しますか？この操作は取り消せません')) return;
-      store.decks = store.decks.filter(d=>d.id!==currentDeckId); save(store); renderDeckSelect(); loadDeck();
+    
+    document.getElementById('backToDeckBtn')?.addEventListener('click', () => {
+      showDeckSelection();
     });
-
-    deckSelect.addEventListener('change', ()=>{ loadDeck(); });
+    
+    document.getElementById('startLearnBtn')?.addEventListener('click', () => {
+      if(!deckCards.length) {
+        alert('カードがありません。先にカードを作成してください。');
+        return;
+      }
+      currentMode = 'learn';
+      loadChecks();
+      showSettingsScreen();
+    });
+    
+    document.getElementById('startTestBtn')?.addEventListener('click', () => {
+      if(!deckCards.length) {
+        alert('カードがありません。先にカードを作成してください。');
+        return;
+      }
+      currentMode = 'test';
+      updateMode();
+    });
+    
+    document.getElementById('deleteDeckBtn')?.addEventListener('click', () => {
+      if(!currentDeckId) return;
+      if(!confirm('このデッキを削除しますか？この操作は取り消せません')) return;
+      store.decks = store.decks.filter(d=>d.id!==currentDeckId); 
+      save(store); 
+      showDeckSelection();
+    });
 
     insertBlankBtn.addEventListener('click', ()=>{
       const el = cardFront; const start = el.selectionStart||0; const end = el.selectionEnd||0; const v = el.value; el.value = v.slice(0,start) + '()' + v.slice(end); el.selectionStart = el.selectionEnd = start + 1; el.focus();
@@ -943,29 +1099,10 @@
         if(hasCards) { startTestSession(); showTest(0); }
       }
     }
-    if(learnModeBtn) learnModeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation();
-      if(!deckCards.length) {
-        alert('カードがありません。先にカードを作成してください。');
-        return;
-      }
-      // exit edit mode when switching to learn/test
-      isEditing = false;
-      // restore header buttons
-      if(toggleEditBtn) toggleEditBtn.style.display = '';
-      if(openMemHeaderBtn) openMemHeaderBtn.style.display = '';
-      currentMode = 'learn'; 
-      loadChecks(); // Load saved checks
-      showSettingsScreen(); // Show Anki-style settings screen
-    });
-    if(testModeBtn) testModeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation();
-      isEditing = false;
-      if(toggleEditBtn) toggleEditBtn.style.display = '';
-      if(openMemHeaderBtn) openMemHeaderBtn.style.display = '';
-      currentMode = 'test'; updateMode();
-    });
+
 
   // init
-  renderDeckSelect();
+  showDeckSelection();
   // handle importDeck param (shared links)
   const importParam = urlParams.get('importDeck');
   if(importParam){
