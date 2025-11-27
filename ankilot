@@ -1,0 +1,935 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    
+<meta charset="utf-8">
+<title>ホーム - Ankilot</title>
+<meta name="description" content="Ankilot（アンキロット）はWEB上で単語帳を作成して、オンラインで暗記やテストができる無料のサービスです。シンプルなデザインのWEBアプリなので、誰でも簡単に利用できます。作成した単語帳はSNSで共有したり、ほかの人と一緒に暗記することもできます。"><meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,viewport-fit=cover">
+<meta name="csrf-token" content="d5e00b968a901444be197cf5af7466576362762f37a09bef7cb60183821dd06c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8080dd"><meta name="x5-page-mode" content="app">
+<meta name="x5-orientation" content="any">
+<meta name="screen-orientation" content="any">
+<meta name="full-screen" content="yes">
+<meta name="browsermode" content="application">
+
+<meta name="msapplication-navbutton-color" content="#8080dd">
+<meta name="msapplication-TileColor" content="#8080dd">
+
+<meta name="application-name" content="Ankilot">
+<meta name="msapplication-tooltip" content="オンライン単語帳">
+<meta name="msapplication-starturl" content="/">
+
+<meta name="msapplication-tap-highlight" content="no">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ankilot">
+
+<link rel="manifest" href="https://ankilot.com/manifest.json">
+<link rel="mask-icon" href="https://ankilot.com/common/img/brand/manifest-icon.svg" size="any" color="#8080dd">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-512.png" sizes="512x512">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-384.png" sizes="384x384">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-256.png" sizes="256x256">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-192.png" sizes="192x192">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-144.png" sizes="144x144">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-96.png" sizes="96x96">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-72.png" sizes="72x72">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-48.png" sizes="48x48">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-36.png" sizes="36x36">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-180.png" sizes="180x180">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-167.png" sizes="167x167">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-152.png" sizes="152x152">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-120.png" sizes="120x120">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-76.png" sizes="76x76">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-57.png" sizes="57x57">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2388-1668.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1536-2048.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2048-1536.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1668-2224.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2224-1668.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1620-2160.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2160-1620.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1284-2778.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2778-1284.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1170-2532.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2532-1170.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1125-2436.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2436-1125.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1242-2688.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2688-1242.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-828-1792.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1792-828.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1242-2208.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2208-1242.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-750-1334.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1334-750.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="shortcut icon" href="https://ankilot.com/favicon.ico">
+<link type="text/css" rel="stylesheet" href="https://ankilot.com/common/css/base.css?ver=1.6.1.1">
+<link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet"><style>body { font-family: "M PLUS Rounded 1c", san-serif; }</style>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-120595730-1"></script>
+<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-120595730-1');</script>
+
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.ui.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.uitp.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.inview.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/autosize.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/base.js?ver=1.6.1.1"></script>
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:url" content="https://ankilot.com/">
+    <meta property="og:title" content="Ankilot - オンライン単語帳">
+    <meta property="og:description" content="Ankilot（アンキロット）はWEB上で単語帳を作成して、オンラインで暗記やテストができる無料のサービスです。シンプルなデザインのWEBアプリなので、誰でも簡単に利用できます。作成した単語帳はSNSで共有したり、ほかの人と一緒に暗記することもできます。">
+    <meta property="og:image" content="https://ankilot.com/common/img/brand/top_back.png">
+
+    <link type="text/css" rel="stylesheet" href="https://ankilot.com/common/css/tutorial.css?ver=1.0.0">
+    <link type="text/css" rel="stylesheet" href="https://ankilot.com/common/css/home.css?ver=1.0.3">
+
+    <script type="text/javascript" src="https://ankilot.com/common/js/library/chart.min.js"></script>
+    <script type="text/javascript" src="https://ankilot.com/common/js/home.js?ver=1.1.4"></script>
+</head>
+
+<body>
+    <header>
+    <div id="header_contents">
+        <div class="logo">
+            <a href="https://ankilot.com">
+                <img src="https://ankilot.com/common/img/brand/ankilot_logo2.svg" alt="Ankilot">
+            </a>
+        </div>
+        <div class="search_box">
+            <form method="get" action="https://ankilot.com/search/">
+                <input class="keyword" type="search" name="q" placeholder="単語帳をさがす">
+                <input type="hidden" name="f" value="tangocho">
+                <button class="search"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        <div class="main_menu">
+            <nav>
+                <ul>
+                    <li><a href="https://ankilot.com/create/"><i class="fas fa-marker"></i><span>つくる</span></a></li>
+                    <li><a href="https://ankilot.com/search/"><i class="fas fa-search"></i><span>さがす</span></a></li>
+                                        <li><a href="https://ankilot.com/list/"><i class="fas fa-list"></i><span>リスト</span></a></li>
+                                    </ul>
+            </nav>
+        </div>
+        <div class="sub_menu">
+    <div class="user_message_menu">
+        <a class="trigger " title="通知"><img src="https://ankilot.com/common/img/icon/bell.svg"></a>
+        <div class="panel">
+            <span class="panel_menu_title">通知</span>
+            <ul class="panel_main_menu">
+                <li class="empty">通知はありません</li>            </ul>
+        </div>
+    </div>
+    <div class="user_info_menu">
+        <a class="trigger" title="ユーザー"><span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span></a>
+        <div class="panel">
+            <a class="panel_user" href="https://ankilot.com/user/?id=9J8zC8LHFF">
+                <div class="panel_user_icon">
+                    <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                </div>
+                <div class="panel_user_label">
+                    <span class="panel_user_name">kenta</span>
+                    <span class="panel_user_id">@9J8zC8LHFF</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="panel_sub_menu">
+                    <li><a href="https://ankilot.com/setting/"><i class="fas fa-cog"></i>設定<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/offline/"><i class="fas fa-play-circle"></i>オフラインモード<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/manual/"><i class="fas fa-book"></i>マニュアル<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/message/"><i class="fas fa-envelope"></i>メッセージ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/feedback/"><i class="fas fa-comment-alt"></i>フィードバック<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/contact/"><i class="fas fa-paper-plane"></i>お問い合わせ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/donate"><i class="fas fa-gift"></i>開発者を支援<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://status.mukanote.com/"><i class="fas fa-server"></i>サービス稼働状況<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/version"><i class="fas fa-info-circle"></i>Ankilotについて<i class="fas fa-chevron-right"></i></a></li>
+                    <li class="logout"><a href="https://ankilot.com/logout/">ログアウト</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="compact_menu">
+    <a class="trigger ">
+        <div class="inner">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </a>
+    <div class="panel">
+        <div class="header">
+            <a class="panel_user" href="https://ankilot.com/user/?id=9J8zC8LHFF">
+                <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                <div class="user_prof">
+                    <span class="name">kenta</span>
+                    <span class="id">@9J8zC8LHFF</span>
+                </div>
+            </a>
+            <ul class="panel_header_menu">
+                <li><a href="https://ankilot.com/create/"><span class="title">つくる</span><i class="fas fa-marker"></i></a></li>
+                <li><a href="https://ankilot.com/search/"><span class="title">さがす</span><i class="fas fa-search"></i></a></li>
+                <li><a href="https://ankilot.com/list/"><span class="title">リスト</span><i class="fas fa-list"></i></a></li>
+            </ul>
+        </div>
+        <div class="contents">
+            <div class="contents_tab">
+                <label><input type="radio" class="contents_tab_normal" name="contents_tab" value="normal" checked><span>メニュー</span></label>
+                <label><input type="radio" class="contents_tab_notification" name="contents_tab" value="notification"><span class="">通知</span></label>
+            </div>
+            <nav>
+                <ul class="panel_main_menu normal">
+                    <li><a href="https://ankilot.com/setting/"><i class="fas fa-cog"></i>設定<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/offline/"><i class="fas fa-play-circle"></i>オフラインモード<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/manual/"><i class="fas fa-book"></i>マニュアル<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/message/"><i class="fas fa-envelope"></i>メッセージ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/feedback/"><i class="fas fa-comment-alt"></i>フィードバック<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/contact/"><i class="fas fa-paper-plane"></i>お問い合わせ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/donate"><i class="fas fa-gift"></i>開発者を支援<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://status.mukanote.com/"><i class="fas fa-server"></i>サービス稼働状況<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/version"><i class="fas fa-info-circle"></i>Ankilotについて<i class="fas fa-chevron-right"></i></a></li>
+                    <li class="logout"><a href="https://ankilot.com/logout/">ログアウト</a></li>
+                </ul>
+            </nav>
+            <ul class="panel_main_menu notification" style="display: none;">
+                <li class="empty">通知はありません</li>            </ul>
+        </div>
+    </div>
+    <div class="overlay">
+    </div>
+</div>
+        </div>
+</header>
+<div id="topic_path">
+    <div class="inner">
+        <nav itemscope itemtype="https://schema.org/BreadcrumbList">
+            <ol>
+                <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                    <a itemprop="item" href="https://ankilot.com/">
+                        <i class="fas fa-home"></i>
+                        <span itemprop="name">ホーム</span>
+                    </a>
+                    <meta itemprop="position" content="1">
+                </li>
+                            </ol>
+            <meta itemprop="name" content="パンくずリスト">
+        </nav>
+    </div>
+</div>
+    <main>
+        <div id="main_contents" class="transparent">
+                        <div class="wrap">
+                <ul id="box_menu" class="home">
+                    <li>
+                        <a href="https://ankilot.com/create/"><div class="inner"><img src="https://ankilot.com/common/img/icon/writing.svg"><span class="title">つくる</span></div></a>
+                    </li>
+                    <li>
+                        <a href="https://ankilot.com/search/"><div class="inner"><img src="https://ankilot.com/common/img/icon/search.svg"><span class="title">さがす</span></div></a>
+                    </li>
+                    <li>
+                        <a href="https://ankilot.com/list/"><div class="inner"><img src="https://ankilot.com/common/img/icon/list.svg"><span class="title">リスト</span></div></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="wrap">
+                <div class="home_tab">
+                    <label><input type="radio" name="home_tab" value="tangocho"  autocomplete="off" autocomplete="off" checked><span>単語帳</span></label>
+                    <label><input type="radio" name="home_tab" value="user" autocomplete="off"><span>ユーザー</span></label>
+                    <label><input type="radio" name="home_tab" value="message" autocomplete="off"><span>メッセージ</span></label>
+                </div>
+                <div class="home_tangocho_wrap">
+                    <div class="home_tangocho_tab">
+                        <label><input type="radio" name="home_tangocho_tab" value="my_tangocho" autocomplete="off" checked><span>あなたの単語帳</span></label>
+                        <label><input type="radio" name="home_tangocho_tab" value="favorite_tangocho" autocomplete="off"><span>お気に入りの単語帳</span></label>
+                        <label><input type="radio" name="home_tangocho_tab" value="tangocho_history" autocomplete="off"><span>最近使った単語帳</span></label><label><input type="radio" name="home_tangocho_tab" value="0lGleZGG8i" autocomplete="off"><span>歴史総合</span></label><label><input type="radio" name="home_tangocho_tab" value="Zep9AIrgG6" autocomplete="off"><span>生物基礎</span></label>                        <a href="https://ankilot.com/list/add"><i class="fas fa-plus"></i></a>
+                    </div>
+                    <ul class='tangocho_list my_tangocho'>
+                        <li>
+    <a href="https://ankilot.com/view/?id=tGXClKMA5V">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>歴史総合　p38ーp39</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月16日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 12</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_tGXClKMA5V" height="100%" width="100%"></canvas>
+    <span>未実施</span>
+    <script>
+        var ctx = $(".tangocho_history_tGXClKMA5V").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["未実施"],
+                datasets: [{
+                    backgroundColor: ["#dcdcdc"],
+                    data: [12]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=tGXClKMA5V">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=tGXClKMA5V">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=tGXClKMA5V">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=tGXClKMA5V">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=tGXClKMA5V">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('tGXClKMA5V', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=G85pDo3iIf">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>言語文化　古典　助動詞活用表　暗記</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月12日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 2</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_G85pDo3iIf" height="100%" width="100%"></canvas>
+    <span>未実施</span>
+    <script>
+        var ctx = $(".tangocho_history_G85pDo3iIf").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["未実施"],
+                datasets: [{
+                    backgroundColor: ["#dcdcdc"],
+                    data: [2]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=G85pDo3iIf">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=G85pDo3iIf">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=G85pDo3iIf">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=G85pDo3iIf">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=G85pDo3iIf">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('G85pDo3iIf', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=ySaPm91AFo">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>公共　34 金融の役割</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月12日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 18</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_ySaPm91AFo" height="100%" width="100%"></canvas>
+    <span>未実施</span>
+    <script>
+        var ctx = $(".tangocho_history_ySaPm91AFo").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["未実施"],
+                datasets: [{
+                    backgroundColor: ["#dcdcdc"],
+                    data: [18]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=ySaPm91AFo">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=ySaPm91AFo">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=ySaPm91AFo">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=ySaPm91AFo">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=ySaPm91AFo">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('ySaPm91AFo', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=ze1chpYqlG">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>生物　血液凝固 二学期中間テスト対策</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月09日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 8</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_ze1chpYqlG" height="100%" width="100%"></canvas>
+    <span>1回実施</span>
+    <script>
+        var ctx = $(".tangocho_history_ze1chpYqlG").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["正解", "不正解"],
+                datasets: [{
+                    backgroundColor: ["#8080dd", "#dd8080"],
+                    data: [7, 1]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=ze1chpYqlG">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=ze1chpYqlG">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=ze1chpYqlG">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=ze1chpYqlG">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=ze1chpYqlG">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('ze1chpYqlG', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=yw9mj74uvO">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>生物　体内環境を調節する仕組み（2）　二学期中間テスト対策</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月09日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 11</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_yw9mj74uvO" height="100%" width="100%"></canvas>
+    <span>2回実施</span>
+    <script>
+        var ctx = $(".tangocho_history_yw9mj74uvO").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["正解", "不正解"],
+                datasets: [{
+                    backgroundColor: ["#8080dd", "#dd8080"],
+                    data: [11, 0]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=yw9mj74uvO">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=yw9mj74uvO">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=yw9mj74uvO">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=yw9mj74uvO">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=yw9mj74uvO">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('yw9mj74uvO', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=XRoriqfpZo">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>生物　体内環境を調節する仕組み（1）　二学期中間テスト対策</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月09日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 10</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_XRoriqfpZo" height="100%" width="100%"></canvas>
+    <span>2回実施</span>
+    <script>
+        var ctx = $(".tangocho_history_XRoriqfpZo").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["正解", "不正解"],
+                datasets: [{
+                    backgroundColor: ["#8080dd", "#dd8080"],
+                    data: [10, 0]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=XRoriqfpZo">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=XRoriqfpZo">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=XRoriqfpZo">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=XRoriqfpZo">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=XRoriqfpZo">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('XRoriqfpZo', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=bYpyhDenOr">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>生物　恒常性と内分泌系　二学期中間テスト対策</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月09日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 12</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_bYpyhDenOr" height="100%" width="100%"></canvas>
+    <span>2回実施</span>
+    <script>
+        var ctx = $(".tangocho_history_bYpyhDenOr").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["正解", "不正解"],
+                datasets: [{
+                    backgroundColor: ["#8080dd", "#dd8080"],
+                    data: [12, 0]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=bYpyhDenOr">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=bYpyhDenOr">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=bYpyhDenOr">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=bYpyhDenOr">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=bYpyhDenOr">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('bYpyhDenOr', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=pQwJ3DhsIy">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>生物　恒常性と神経系　二学期中間テスト対策</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月09日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 19</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_pQwJ3DhsIy" height="100%" width="100%"></canvas>
+    <span>2回実施</span>
+    <script>
+        var ctx = $(".tangocho_history_pQwJ3DhsIy").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["正解", "不正解"],
+                datasets: [{
+                    backgroundColor: ["#8080dd", "#dd8080"],
+                    data: [19, 0]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=pQwJ3DhsIy">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=pQwJ3DhsIy">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=pQwJ3DhsIy">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=pQwJ3DhsIy">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=pQwJ3DhsIy">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('pQwJ3DhsIy', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=wJQOHq6nDW">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>2イタリア・ドイツの統一とロシアの近代化</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月09日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 2</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_wJQOHq6nDW" height="100%" width="100%"></canvas>
+    <span>未実施</span>
+    <script>
+        var ctx = $(".tangocho_history_wJQOHq6nDW").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["未実施"],
+                datasets: [{
+                    backgroundColor: ["#dcdcdc"],
+                    data: [2]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=wJQOHq6nDW">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=wJQOHq6nDW">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=wJQOHq6nDW">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=wJQOHq6nDW">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=wJQOHq6nDW">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('wJQOHq6nDW', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=wRK0se7V2m">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>歴史総合　p37−p38</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月07日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 13</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_wRK0se7V2m" height="100%" width="100%"></canvas>
+    <span>4回実施</span>
+    <script>
+        var ctx = $(".tangocho_history_wRK0se7V2m").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["正解", "不正解"],
+                datasets: [{
+                    backgroundColor: ["#8080dd", "#dd8080"],
+                    data: [9, 4]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=wRK0se7V2m">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=wRK0se7V2m">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=wRK0se7V2m">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=wRK0se7V2m">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=wRK0se7V2m">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('wRK0se7V2m', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=xKrZlXKb4p">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>7公共　近代科学の考え方</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月07日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 1</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_xKrZlXKb4p" height="100%" width="100%"></canvas>
+    <span>未実施</span>
+    <script>
+        var ctx = $(".tangocho_history_xKrZlXKb4p").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["未実施"],
+                datasets: [{
+                    backgroundColor: ["#dcdcdc"],
+                    data: [1]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=xKrZlXKb4p">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=xKrZlXKb4p">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=xKrZlXKb4p">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=xKrZlXKb4p">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=xKrZlXKb4p">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('xKrZlXKb4p', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li>
+    <a href="https://ankilot.com/view/?id=ASqzpRKRoC">
+        <div class="tangocho">
+            <div class="contents">
+                <div class="header">
+                    <span class="name"><span>35 公共　二学期中間</span></span>
+                    <span class="comment"></span>
+                </div>
+                <div class="detail">
+                    <span class="user">
+                        <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                        <span class="user_name">kenta</span>
+                    </span>
+                    <span class="created_at"><i class="far fa-calendar"></i>2025年10月06日</span>
+                    <span class="length"><i class="far fa-clone"></i>カード 16</span>
+                </div>
+            </div>
+            <div class="results">
+    <canvas class="tangocho_history_ASqzpRKRoC" height="100%" width="100%"></canvas>
+    <span>未実施</span>
+    <script>
+        var ctx = $(".tangocho_history_ASqzpRKRoC").get(0);
+        var myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["未実施"],
+                datasets: [{
+                    backgroundColor: ["#dcdcdc"],
+                    data: [16]
+                }]
+            },
+            options: { legend: { display: false }, animation: { duration: 0 }}
+        });
+    </script>
+</div>
+                    </div>
+    </a>
+    <div class="tangocho_menu left">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel" style="display: none;">
+            <ul>
+                <li><a href="https://ankilot.com/view/anki?id=ASqzpRKRoC">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=ASqzpRKRoC">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=ASqzpRKRoC">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=ASqzpRKRoC">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/edit/?id=ASqzpRKRoC">編集<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteSet('ASqzpRKRoC', true);">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</li>
+    <li class="load"><a href="javascript:void(0)">さらに読み込む</a></li>                    </ul>
+                    <ul class='tangocho_list tangocho_history' style="display: none"></ul>
+<script>getTangochoHistory('9J8zC8LHFF');</script>                </div>
+                <div class="home_user_wrap" style="display: none;">
+                    <div class="home_user_tab">
+                        <label><input type="radio" name="home_user_tab" value="favorite_user" checked><span>お気に入りのユーザー</span></label>
+                    </div>
+                    <ul class="user_list favorite_user">
+                        <li class="load"><a href="javascript:void(0)">さらに読み込む</a></li>
+                    </ul>
+                </div>
+                <div class="home_message_wrap" style="display: none;">
+                    <ul class="message_list">
+                        <li class="load"><a href="javascript:void(0)">さらに読み込む</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+                    </main>
+    <div id="tab_bar">
+    <div class="inner">
+        <nav>
+            <ol>
+                <li >
+                    <a href="https://ankilot.com/create/">
+                        <i class="fas fa-marker"></i>
+                        <span>つくる</span>
+                    </a>
+                </li>
+                <li >
+                    <a href="https://ankilot.com/search/">
+                        <i class="fas fa-search"></i>
+                        <span>さがす</span>
+                    </a>
+                </li>
+                <li class="accent">
+                    <a href="https://ankilot.com/">
+                        <i class="fas fa-home"></i>
+                        <span>ホーム</span>
+                    </a>
+                </li>
+                <li >
+                    <a href="https://ankilot.com/list/">
+                        <i class="fas fa-list"></i>
+                        <span>リスト</span>
+                    </a>
+                </li>
+                <li >
+                    <a href="javascript: void(0);" onclick="openCompactMenuPanel();">
+                        <i class="fas fa-toolbox"></i>
+                        <span>メニュー</span>
+                    </a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<footer>
+    <div id="footer_contents">
+        <div class="menu">
+            <nav>
+                <ul>
+                    <li><a href="https://ankilot.com/version">Ankilotについて</a></li>
+                    <li><a href="https://ankilot.com/terms">利用規約</a></li>
+                    <li><a href="https://ankilot.com/privacy">プライバシーポリシー</a></li>
+                    <li><a href="https://ankilot.com/contact/">お問い合わせ</a></li>
+                    <li><a href="https://profile.mukanote.com/">運営情報</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="copyright">
+            <a href="https://profile.mukanote.com/">&copy; 2018-2025 Muka.</a>
+        </div>
+    </div>
+</footer>
+</body>
+
+</html>

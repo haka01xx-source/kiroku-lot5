@@ -79,16 +79,45 @@
     </section>
 
     <section class="card" id="studyArea" style="display:none;text-align:center">
-      <div id="studyCard" style="padding:24px;font-size:2.6rem;border-radius:8px;border:1px solid rgba(255,102,170,0.2);background:rgba(40,40,60,0.6);min-height:calc(100vh - 200px);display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%">
+      <!-- Settings panel -->
+      <div id="studySettings" style="margin-bottom:16px;padding:16px;background:rgba(40,40,60,0.6);border-radius:8px;text-align:left">
+        <h4 style="margin:0 0 12px 0;color:#fff">学習設定</h4>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+          <label style="display:flex;align-items:center;gap:8px;color:var(--muted)">
+            <input type="checkbox" id="shuffleCards" style="width:18px;height:18px">
+            <span>カードを混ぜる</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;color:var(--muted)">
+            <input type="checkbox" id="hideChecked" style="width:18px;height:18px">
+            <span>チェック済を非表示</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;color:var(--muted)">
+            <input type="checkbox" id="autoFlip" style="width:18px;height:18px">
+            <span>自動でめくる</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;color:var(--muted)">
+            <span>間隔:</span>
+            <input type="number" id="autoFlipTime" min="1" max="10" value="3" style="width:60px;padding:4px;background:rgba(20,20,30,0.6);color:#fff;border:1px solid var(--input-border);border-radius:4px">
+            <span>秒</span>
+          </label>
+          <button type="button" id="resetChecks" class="btn secondary" style="margin-left:auto">チェックをリセット</button>
+        </div>
+      </div>
+      
+      <div id="studyCard" style="padding:24px;font-size:2.6rem;border-radius:8px;border:1px solid rgba(255,102,170,0.2);background:rgba(40,40,60,0.6);min-height:calc(100vh - 400px);display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%;position:relative;cursor:pointer;transition:transform 0.3s ease">
         <div id="studyFront" style="font-weight:700;margin-bottom:12px;color:#fff">表</div>
         <div id="studyBack" style="color:var(--muted);display:none">裏</div>
+        <div id="checkMark" style="position:absolute;top:16px;right:16px;font-size:2rem;opacity:0.3;cursor:pointer;user-select:none">☐</div>
       </div>
       <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-  <button type="button" id="revealBtn" class="btn">答えを見る</button>
-  <button type="button" id="prevBtn" class="btn">前へ</button>
-  <button type="button" id="nextBtn" class="btn">次へ</button>
+        <button type="button" id="revealBtn" class="btn">答えを見る [Enter]</button>
+        <button type="button" id="prevBtn" class="btn">← 前へ</button>
+        <button type="button" id="nextBtn" class="btn">次へ →</button>
       </div>
       <div id="progress" style="margin-top:8px;color:var(--muted)"></div>
+      <div id="progressBar" style="margin-top:8px;width:100%;max-width:600px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-left:auto;margin-right:auto">
+        <div id="progressBarFill" style="height:100%;background:linear-gradient(90deg,#ff66aa 0%,#66ccff 100%);width:0%;transition:width 0.3s ease"></div>
+      </div>
     </section>
 
     <section class="card" id="testArea" style="display:none;text-align:center">
@@ -311,30 +340,211 @@
     });
     clearCardBtn.addEventListener('click', ()=>{ cardFront.value=''; cardBack.value=''; editingCardIndex = null; saveCardBtn.textContent = 'カードを保存'; if(toggleEditBtn) toggleEditBtn.style.display = ''; if(openMemHeaderBtn) openMemHeaderBtn.style.display = ''; updateOpenResultsBtn(); });
 
-  // study mode (full-screen style)
-  function showStudy(i){ if(!deckCards.length) return; currentIndex = (i+deckCards.length)%deckCards.length; const c = deckCards[currentIndex]; studyFront.textContent = c.front; studyBack.textContent = c.back; studyBack.style.display='none'; progressEl.textContent = `${currentIndex+1}/${deckCards.length}`; }
-  revealBtn.addEventListener('click', ()=>{ 
-    studyBack.style.display='block'; 
+  // Anki-like features
+  let cardChecks = {}; // {cardId: boolean}
+  let autoFlipTimer = null;
+  let isCardFlipped = false;
+  
+  // Load checks from localStorage
+  function loadChecks() {
+    try {
+      const saved = localStorage.getItem(`kiroku_checks_${currentDeckId}`);
+      cardChecks = saved ? JSON.parse(saved) : {};
+    } catch(e) {
+      cardChecks = {};
+    }
+  }
+  
+  function saveChecks() {
+    try {
+      localStorage.setItem(`kiroku_checks_${currentDeckId}`, JSON.stringify(cardChecks));
+    } catch(e) {}
+  }
+  
+  // study mode (Anki-style with animations and features)
+  function showStudy(i){ 
+    if(!deckCards.length) return; 
+    
+    // Stop auto-flip timer
+    if(autoFlipTimer) {
+      clearTimeout(autoFlipTimer);
+      autoFlipTimer = null;
+    }
+    
+    // Filter cards if hideChecked is enabled
+    let visibleCards = deckCards;
+    const hideChecked = document.getElementById('hideChecked')?.checked;
+    if(hideChecked) {
+      visibleCards = deckCards.filter(c => !cardChecks[c.id]);
+      if(visibleCards.length === 0) {
+        alert('すべてのカードにチェックが付いています！');
+        return;
+      }
+    }
+    
+    currentIndex = (i + visibleCards.length) % visibleCards.length; 
+    const c = visibleCards[currentIndex]; 
+    
+    // Card flip animation
+    const card = document.getElementById('studyCard');
+    card.style.transform = 'rotateY(90deg)';
+    
+    setTimeout(() => {
+      studyFront.textContent = c.front; 
+      studyBack.textContent = c.back; 
+      studyBack.style.display='none';
+      isCardFlipped = false;
+      
+      // Update check mark
+      const checkMark = document.getElementById('checkMark');
+      if(checkMark) {
+        checkMark.textContent = cardChecks[c.id] ? '☑' : '☐';
+        checkMark.style.opacity = cardChecks[c.id] ? '1' : '0.3';
+      }
+      
+      card.style.transform = 'rotateY(0deg)';
+      
+      // Update progress
+      const actualIndex = deckCards.findIndex(card => card.id === c.id);
+      progressEl.textContent = `${actualIndex + 1}/${deckCards.length}`;
+      
+      // Update progress bar
+      const progressBarFill = document.getElementById('progressBarFill');
+      if(progressBarFill) {
+        const checkedCount = Object.values(cardChecks).filter(v => v).length;
+        const percentage = (checkedCount / deckCards.length) * 100;
+        progressBarFill.style.width = `${percentage}%`;
+      }
+      
+      // Auto-flip if enabled
+      const autoFlip = document.getElementById('autoFlip')?.checked;
+      if(autoFlip) {
+        const time = parseInt(document.getElementById('autoFlipTime')?.value || 3) * 1000;
+        autoFlipTimer = setTimeout(() => {
+          if(!isCardFlipped) {
+            revealCard();
+          }
+        }, time);
+      }
+    }, 150);
+  }
+  
+  function revealCard() {
+    studyBack.style.display='block';
+    isCardFlipped = true;
+    
     // Award score for studying
     if (window.ScoreSystem) {
       window.ScoreSystem.addScore(5, '暗記学習');
     }
+    
+    // Auto-advance if auto-flip is enabled
+    const autoFlip = document.getElementById('autoFlip')?.checked;
+    if(autoFlip) {
+      const time = parseInt(document.getElementById('autoFlipTime')?.value || 3) * 1000;
+      autoFlipTimer = setTimeout(() => {
+        nextBtn.click();
+      }, time);
+    }
+  }
+  
+  // Click card to flip
+  document.getElementById('studyCard')?.addEventListener('click', (e) => {
+    if(e.target.id === 'checkMark') return; // Don't flip when clicking check mark
+    if(!isCardFlipped) {
+      revealCard();
+    }
   });
-    prevBtn.addEventListener('click', ()=>{ showStudy(currentIndex-1); });
-    nextBtn.addEventListener('click', ()=>{
-      // in learn mode, when advancing past the last card return to index list
-      if(currentMode === 'learn'){
-        if(currentIndex + 1 >= deckCards.length){
-          // 学習完了: カード編集画面に戻す
-          topControls.style.display = 'block'; cardRegister.style.display = 'block'; document.getElementById('deckArea').style.display = 'block';
-          studyArea.style.display = 'none'; testArea.style.display = 'none';
-          return;
-        }
-        showStudy(currentIndex+1);
-      } else {
-        showStudy(currentIndex+1);
+  
+  // Check mark toggle
+  document.getElementById('checkMark')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const hideChecked = document.getElementById('hideChecked')?.checked;
+    let visibleCards = hideChecked ? deckCards.filter(c => !cardChecks[c.id]) : deckCards;
+    const c = visibleCards[currentIndex];
+    if(c) {
+      cardChecks[c.id] = !cardChecks[c.id];
+      saveChecks();
+      e.target.textContent = cardChecks[c.id] ? '☑' : '☐';
+      e.target.style.opacity = cardChecks[c.id] ? '1' : '0.3';
+      
+      // Update progress bar
+      const progressBarFill = document.getElementById('progressBarFill');
+      if(progressBarFill) {
+        const checkedCount = Object.values(cardChecks).filter(v => v).length;
+        const percentage = (checkedCount / deckCards.length) * 100;
+        progressBarFill.style.width = `${percentage}%`;
       }
-    });
+    }
+  });
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if(studyArea.style.display === 'none') return;
+    
+    if(e.key === 'Enter') {
+      e.preventDefault();
+      if(!isCardFlipped) {
+        revealCard();
+      } else {
+        nextBtn.click();
+      }
+    } else if(e.key === 'ArrowLeft') {
+      e.preventDefault();
+      prevBtn.click();
+    } else if(e.key === 'ArrowRight') {
+      e.preventDefault();
+      nextBtn.click();
+    } else if(e.key === ' ') {
+      e.preventDefault();
+      document.getElementById('checkMark')?.click();
+    }
+  });
+  
+  // Settings
+  document.getElementById('shuffleCards')?.addEventListener('change', (e) => {
+    if(e.target.checked) {
+      // Shuffle deck
+      for(let i = deckCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deckCards[i], deckCards[j]] = [deckCards[j], deckCards[i]];
+      }
+      showStudy(0);
+    }
+  });
+  
+  document.getElementById('resetChecks')?.addEventListener('click', () => {
+    if(confirm('すべてのチェックをリセットしますか？')) {
+      cardChecks = {};
+      saveChecks();
+      showStudy(currentIndex);
+    }
+  });
+  
+  revealBtn.addEventListener('click', ()=>{ 
+    revealCard();
+  });
+  
+  prevBtn.addEventListener('click', ()=>{ showStudy(currentIndex-1); });
+  
+  nextBtn.addEventListener('click', ()=>{
+    // in learn mode, when advancing past the last card return to index list
+    if(currentMode === 'learn'){
+      const hideChecked = document.getElementById('hideChecked')?.checked;
+      let visibleCards = hideChecked ? deckCards.filter(c => !cardChecks[c.id]) : deckCards;
+      
+      if(currentIndex + 1 >= visibleCards.length){
+        // 学習完了: カード編集画面に戻す
+        if(autoFlipTimer) clearTimeout(autoFlipTimer);
+        topControls.style.display = 'block'; cardRegister.style.display = 'block'; document.getElementById('deckArea').style.display = 'block';
+        studyArea.style.display = 'none'; testArea.style.display = 'none';
+        return;
+      }
+      showStudy(currentIndex+1);
+    } else {
+      showStudy(currentIndex+1);
+    }
+  });
 
     // test mode (穴埋め)
     function buildTestForCard(c){ // returns {htmlFront, answers[], blanks}
@@ -468,7 +678,9 @@
       // restore header buttons
       if(toggleEditBtn) toggleEditBtn.style.display = '';
       if(openMemHeaderBtn) openMemHeaderBtn.style.display = '';
-      currentMode = 'learn'; updateMode();
+      currentMode = 'learn'; 
+      loadChecks(); // Load saved checks
+      updateMode();
     });
     if(testModeBtn) testModeBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation();
       isEditing = false;

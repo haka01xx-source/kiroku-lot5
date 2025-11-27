@@ -1,0 +1,874 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    
+<meta charset="utf-8">
+<title>歴史総合　p38ーp39 / 暗記 - Ankilot</title>
+<meta name="description" content="kenta の単語帳「歴史総合　p38ーp39」をAnkilotで暗記しよう。 イタリア統一運動時、ウィーン体制期にマッツィーニが（）を結成し統一運動を展開。/青年イタリア、イタリア統一運動では主導権を握った（）王国首相の（）が中心となりとういつをすいしん。/サルデーニャ、カヴール"><meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,viewport-fit=cover">
+<meta name="csrf-token" content="38bc9d3f7ee021280ca0e86be66800fc34c025d6c9d32c1a09db3c546b1c53f3">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8080dd"><meta name="x5-page-mode" content="app">
+<meta name="x5-orientation" content="any">
+<meta name="screen-orientation" content="any">
+<meta name="full-screen" content="yes">
+<meta name="browsermode" content="application">
+
+<meta name="msapplication-navbutton-color" content="#8080dd">
+<meta name="msapplication-TileColor" content="#8080dd">
+
+<meta name="application-name" content="Ankilot">
+<meta name="msapplication-tooltip" content="オンライン単語帳">
+<meta name="msapplication-starturl" content="/">
+
+<meta name="msapplication-tap-highlight" content="no">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ankilot">
+
+<link rel="manifest" href="https://ankilot.com/manifest.json">
+<link rel="mask-icon" href="https://ankilot.com/common/img/brand/manifest-icon.svg" size="any" color="#8080dd">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-512.png" sizes="512x512">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-384.png" sizes="384x384">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-256.png" sizes="256x256">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-192.png" sizes="192x192">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-144.png" sizes="144x144">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-96.png" sizes="96x96">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-72.png" sizes="72x72">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-48.png" sizes="48x48">
+<link rel="icon" href="https://ankilot.com/common/img/brand/manifest-icon-36.png" sizes="36x36">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-180.png" sizes="180x180">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-167.png" sizes="167x167">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-152.png" sizes="152x152">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-120.png" sizes="120x120">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-76.png" sizes="76x76">
+<link rel="apple-touch-icon" href="https://ankilot.com/common/img/brand/apple-icon-57.png" sizes="57x57">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2388-1668.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1536-2048.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2048-1536.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1668-2224.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2224-1668.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1620-2160.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2160-1620.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1284-2778.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2778-1284.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1170-2532.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2532-1170.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1125-2436.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2436-1125.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1242-2688.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2688-1242.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-828-1792.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1792-828.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1242-2208.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-2208-1242.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-750-1334.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1334-750.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="https://ankilot.com/common/img/brand/apple-splash-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+<link rel="shortcut icon" href="https://ankilot.com/favicon.ico">
+<link type="text/css" rel="stylesheet" href="https://ankilot.com/common/css/base.css?ver=1.6.1.1">
+<link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet"><style>body { font-family: "M PLUS Rounded 1c", san-serif; }</style>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-120595730-1"></script>
+<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-120595730-1');</script>
+
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.ui.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.uitp.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.inview.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/library/autosize.min.js"></script>
+<script type="text/javascript" src="https://ankilot.com/common/js/base.js?ver=1.6.1.1"></script>
+
+    <meta name="apple-mobile-web-app-title" content="歴史総合　p38ーp39 / 暗記">
+    <meta name="robots" content="noindex">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:url" content="https://ankilot.com/view/?id=tGXClKMA5V">
+    <meta property="og:title" content="暗記 / 歴史総合　p38ーp39">
+    <meta property="og:description" content="kenta の単語帳「歴史総合　p38ーp39」をAnkilotで暗記しよう。 イタリア統一運動時、ウィーン体制期にマッツィーニが（）を結成し統一運動を展開。/青年イタリア、イタリア統一運動では主導権を握った（）王国首相の（）が中心となりとういつをすいしん。/サルデーニャ、カヴール">
+    <meta property="og:image" content="https://ankilot.com/view/image?id=tGXClKMA5V">
+
+    <link type="text/css" rel="stylesheet" href="https://ankilot.com/common/css/library/viewer.css">
+    <link type="text/css" rel="stylesheet" href="https://ankilot.com/common/css/learning.css?ver=1.5.4">
+
+    <script type="text/javascript" src="https://ankilot.com/common/js/library/viewer.min.js"></script>
+    <script type="text/javascript" src="./js/anki.js?ver=1.7.18"></script>
+</head>
+
+<body>
+    <header>
+    <div id="header_contents">
+        <div class="logo">
+            <a href="https://ankilot.com">
+                <img src="https://ankilot.com/common/img/brand/ankilot_logo2.svg" alt="Ankilot">
+            </a>
+        </div>
+        <div class="search_box">
+            <form method="get" action="https://ankilot.com/search/">
+                <input class="keyword" type="search" name="q" placeholder="単語帳をさがす">
+                <input type="hidden" name="f" value="tangocho">
+                <button class="search"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        <div class="main_menu">
+            <nav>
+                <ul>
+                    <li><a href="https://ankilot.com/create/"><i class="fas fa-marker"></i><span>つくる</span></a></li>
+                    <li><a href="https://ankilot.com/search/"><i class="fas fa-search"></i><span>さがす</span></a></li>
+                                        <li><a href="https://ankilot.com/list/"><i class="fas fa-list"></i><span>リスト</span></a></li>
+                                    </ul>
+            </nav>
+        </div>
+        <div class="sub_menu">
+    <div class="user_message_menu">
+        <a class="trigger " title="通知"><img src="https://ankilot.com/common/img/icon/bell.svg"></a>
+        <div class="panel">
+            <span class="panel_menu_title">通知</span>
+            <ul class="panel_main_menu">
+                <li class="empty">通知はありません</li>            </ul>
+        </div>
+    </div>
+    <div class="user_info_menu">
+        <a class="trigger" title="ユーザー"><span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span></a>
+        <div class="panel">
+            <a class="panel_user" href="https://ankilot.com/user/?id=9J8zC8LHFF">
+                <div class="panel_user_icon">
+                    <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                </div>
+                <div class="panel_user_label">
+                    <span class="panel_user_name">kenta</span>
+                    <span class="panel_user_id">@9J8zC8LHFF</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="panel_sub_menu">
+                    <li><a href="https://ankilot.com/setting/"><i class="fas fa-cog"></i>設定<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/offline/"><i class="fas fa-play-circle"></i>オフラインモード<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/manual/"><i class="fas fa-book"></i>マニュアル<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/message/"><i class="fas fa-envelope"></i>メッセージ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/feedback/"><i class="fas fa-comment-alt"></i>フィードバック<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/contact/"><i class="fas fa-paper-plane"></i>お問い合わせ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/donate"><i class="fas fa-gift"></i>開発者を支援<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://status.mukanote.com/"><i class="fas fa-server"></i>サービス稼働状況<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/version"><i class="fas fa-info-circle"></i>Ankilotについて<i class="fas fa-chevron-right"></i></a></li>
+                    <li class="logout"><a href="https://ankilot.com/logout/">ログアウト</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="compact_menu">
+    <a class="trigger ">
+        <div class="inner">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </a>
+    <div class="panel">
+        <div class="header">
+            <a class="panel_user" href="https://ankilot.com/user/?id=9J8zC8LHFF">
+                <span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span>                <div class="user_prof">
+                    <span class="name">kenta</span>
+                    <span class="id">@9J8zC8LHFF</span>
+                </div>
+            </a>
+            <ul class="panel_header_menu">
+                <li><a href="https://ankilot.com/create/"><span class="title">つくる</span><i class="fas fa-marker"></i></a></li>
+                <li><a href="https://ankilot.com/search/"><span class="title">さがす</span><i class="fas fa-search"></i></a></li>
+                <li><a href="https://ankilot.com/list/"><span class="title">リスト</span><i class="fas fa-list"></i></a></li>
+            </ul>
+        </div>
+        <div class="contents">
+            <div class="contents_tab">
+                <label><input type="radio" class="contents_tab_normal" name="contents_tab" value="normal" checked><span>メニュー</span></label>
+                <label><input type="radio" class="contents_tab_notification" name="contents_tab" value="notification"><span class="">通知</span></label>
+            </div>
+            <nav>
+                <ul class="panel_main_menu normal">
+                    <li><a href="https://ankilot.com/setting/"><i class="fas fa-cog"></i>設定<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/offline/"><i class="fas fa-play-circle"></i>オフラインモード<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/manual/"><i class="fas fa-book"></i>マニュアル<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/message/"><i class="fas fa-envelope"></i>メッセージ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/feedback/"><i class="fas fa-comment-alt"></i>フィードバック<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/contact/"><i class="fas fa-paper-plane"></i>お問い合わせ<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/donate"><i class="fas fa-gift"></i>開発者を支援<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://status.mukanote.com/"><i class="fas fa-server"></i>サービス稼働状況<i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="https://ankilot.com/version"><i class="fas fa-info-circle"></i>Ankilotについて<i class="fas fa-chevron-right"></i></a></li>
+                    <li class="logout"><a href="https://ankilot.com/logout/">ログアウト</a></li>
+                </ul>
+            </nav>
+            <ul class="panel_main_menu notification" style="display: none;">
+                <li class="empty">通知はありません</li>            </ul>
+        </div>
+    </div>
+    <div class="overlay">
+    </div>
+</div>
+        </div>
+</header>
+<div id="topic_path">
+    <div class="inner">
+        <nav itemscope itemtype="https://schema.org/BreadcrumbList">
+            <ol>
+                <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                    <a itemprop="item" href="https://ankilot.com/">
+                        <i class="fas fa-home"></i>
+                        <span itemprop="name">ホーム</span>
+                    </a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <a itemprop="item" href="https://ankilot.com/view/?id=tGXClKMA5V">
+        <span itemprop="name">歴史総合　p38ーp39</span>
+    </a>
+    <meta itemprop="position" content="2">
+</li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <a itemprop="item">
+        <span itemprop="name">暗記</span>
+    </a>
+    <meta itemprop="position" content="3">
+</li>            </ol>
+            <meta itemprop="name" content="パンくずリスト">
+        </nav>
+    </div>
+</div>
+    <main>
+        <div id="main_contents">
+            
+<div class="wrap title">
+    <h1><span>歴史総合　p38ーp39</span></h1>
+    <div id="dropdown_menu">
+        <a class="trigger" title="メニュー"><div class="inner"><i class="fas fa-ellipsis-h"></i></div></a>
+        <div class="panel">
+            <ul>
+                <li><a href="https://ankilot.com/view/?id=tGXClKMA5V">表示<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/anki?id=tGXClKMA5V">暗記<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/writing?id=tGXClKMA5V">テスト<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/view/print?id=tGXClKMA5V">出力<i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="https://ankilot.com/contact/?cat=2&tid=tGXClKMA5V">違反報告<i class="fas fa-chevron-right"></i></a></li>
+                <li><a class="anki_screen_setting edit_card" href="javascript:void(0)">編集<i class="fas fa-chevron-right"></i></a></li><li><a href="https://ankilot.com/edit/delete?id=tGXClKMA5V">削除<i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<h2>暗記</h2>
+<div class="tangocho_info">
+    <a class="user info" href="https://ankilot.com/user/?id=9J8zC8LHFF"><span class="user_icon" style="background-image: url(https://ankilot.com/common/img/icon/user_min.jpg);"></span><span>kenta</span></a>
+    <span class="info"><i class="far fa-calendar"></i>2025年10月16日</span>
+    <span class="info"><i class="far fa-clone"></i>カード<span class="count">12</span></span>
+    <span class="info"><i class="far fa-star"></i>いいね<span class="count">0</span></span>
+</div>
+<div class="tangocho_comment">
+    <p></p>
+</div>
+<div class="wrap">
+    <h3>ビューア設定</h3>
+    <p class="mini">[Enter]でカードをめくります。<a class="icon_link" href="https://ankilot.com/manual/key-shortcut" target="_blank"><i class="fas fa-book"></i>キーボードショートカット</a>ビューア設定は暗記開始時に端末内に保存されます。</p>
+    <form id="anki_form">
+        <div class="form_group">
+            <ul class="setting_list">
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">タッチでめくる</span>
+                            <span class="description">タッチだけでカードがめくれます。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting easy_flip" value="false" ></span>
+                    </label>
+                </li>
+                <li >
+                    <label>
+                        <div class="label">
+                            <span class="title">音声で操作する</span>
+                            <span class="description"><a class="icon_link" href="https://ankilot.com/manual/voice-recognition" target="_blank"><i class="fas fa-book"></i>音声認識</a>によって操作します。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting voice_recognition" value="false"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">チェック済を非表示</span>
+                            <span class="description">チェックをつけたカードを非表示にします。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting hide_checked"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">チェックをリセット</span>
+                            <span class="description">チェックをすべてリセットします。</span>
+                        </div>
+                        <span class="excutebtn"><button type="button" class="resetLearned" onclick="resetAllCheck('tGXClKMA5V');"><i class="fas fa-broom"></i></button></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">カードを裏返す</span>
+                            <span class="description">カードの表裏を逆にします。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting reverse"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">カードを混ぜる</span>
+                            <span class="description">カードをランダムに混ぜます。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting shuffle"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">無限ループ</span>
+                            <span class="description">最後に到達すると自動で最初に戻ります。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting infinite_loop"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">練習エリアを表示</span>
+                            <span class="description">手書きやタイピングの練習エリアを表示します。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting memo"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">ショートカットを無効化</span>
+                            <span class="description">すべての<a class="icon_link" href="https://ankilot.com/manual/key-shortcut" target="_blank"><i class="fas fa-book"></i>キーボードショートカット</a>を無効化します。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting disable_shortcut"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">自動でめくる</span>
+                            <span class="description">一定間隔でカードを自動でめくります。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting auto_flip"></span>
+                    </label>
+                </li>
+                <li class="auto_time" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">めくる間隔 (表)</span>
+                            <span class="description">0秒にすると読み上げに合わせてめくります。</span>
+                        </div>
+                        <span class="numbox">
+                            <input type="number" class="anki_screen_setting auto_flip_time" min="0" max="60.0" step="0.1" value="3.0">
+                            <span class="unit">秒</span>
+                        </span>
+                    </label>
+                </li>
+                <li class="auto_time" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">めくる間隔 (裏)</span>
+                            <span class="description">0秒にすると読み上げに合わせてめくります。</span>
+                        </div>
+                        <span class="numbox">
+                            <input type="number" class="anki_screen_setting auto_flip_time2" min="0" max="60.0" step="0.1" value="3.0">
+                            <span class="unit">秒</span>
+                        </span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">読み上げる</span>
+                            <span class="description">カードを機械音声 (発音の保証無し) が読み上げます。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting read_aloud"></span>
+                    </label>
+                </li>
+                <li class="read_aloud_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">読み上げ面</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting read_aloud_side">
+                                <option value="both">両面</option>
+                                <option value="front">表面のみ</option>
+                                <option value="back">裏面のみ</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="read_aloud_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">読み上げ方</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting read_aloud_type">
+                                <option value="normal">ノーマル</option>
+                                <option value="front">両面で表を読み上げ</option>
+                                <option value="back">両面で裏を読み上げ</option>
+                                <option value="reverse">表裏を反転して読み上げ</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="read_aloud_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">読み上げ音声 (表)</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting read_aloud_voice_front">
+                                <option value="auto">自動</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="read_aloud_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">読み上げ音声 (裏)</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting read_aloud_voice_back">
+                                <option value="auto">自動</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <div class="label">
+                            <span class="title">カードのスタイル</span>
+                            <span class="description">文字の色や形状、画像の配置、ヒントの表示を指定できます。</span>
+                        </div>
+                        <span class="button"><input type="checkbox" class="anki_screen_setting text_style"></span>
+                    </label>
+                </li>
+                <li class="text_style_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">文字の色</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting text_style_color">
+                                <option value="normal">ノーマル</option>
+                                <option value="#ffffff" style="color:#000000;">白</option>
+                                <option value="#c0c0c0" style="color:#000000;">シルバー</option>
+                                <option value="#808080" style="color:#000000;">グレー</option>
+                                <option value="#000000" style="color:#000000;">黒</option>
+                                <option value="#ff0000" style="color:#ff0000;">赤</option>
+                                <option value="#ff8000" style="color:#ff8000;">オレンジ</option>
+                                <option value="#ffff00" style="color:#ffff00;">黄</option>
+                                <option value="#80ff00" style="color:#80ff00;">黄緑</option>
+                                <option value="#00ff00" style="color:#00ff00;">緑</option>
+                                <option value="#00ffff" style="color:#00ffff;">水</option>
+                                <option value="#0000ff" style="color:#0000ff;">青</option>
+                                <option value="#8000ff" style="color:#8000ff;">紫</option>
+                                <option value="#ff00ff" style="color:#ff00ff;">ピンク</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="text_style_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">文字の太さ</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting text_style_weight">
+                                <option value="normal">ノーマル</option>
+                                <option value="bold" style="font-weight:bold;">太字</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="text_style_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">文字の大きさ</span>
+                        </div>
+                        <span class="numbox">
+                            <input type="text" class="anki_screen_setting text_style_size" value="auto" list="text_style_size_datalist">
+                            <datalist id="text_style_size_datalist">
+                                <option value="auto">
+                                <option value="6">
+                                <option value="8">
+                                <option value="9">
+                                <option value="10">
+                                <option value="11">
+                                <option value="12">
+                                <option value="14">
+                                <option value="16">
+                                <option value="18">
+                                <option value="20">
+                                <option value="22">
+                                <option value="24">
+                                <option value="26">
+                                <option value="28">
+                                <option value="36">
+                                <option value="48">
+                                <option value="72">
+                                <option value="96">
+                                <option value="120">
+                                <option value="144">
+                                <option value="168">
+                                <option value="192">
+                                <option value="216">
+                                <option value="240">
+                            </datalist>
+                        </span>
+                    </label>
+                </li>
+                <li class="text_style_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">画像の配置</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting text_style_position">
+                                <option value="absolute">背景として表示</option>
+                                <option value="overall">背景として拡大表示</option>
+                                <option value="relative">文字と並べる</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="text_style_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">ヒントの表示</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting text_style_hint">
+                                <option value="normal">表示</option>
+                                <option value="toggle">隠す (クリックで表示)</option>
+                                <option value="hide">非表示</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+                <li class="text_style_item" style="display:none;">
+                    <label>
+                        <div class="label">
+                            <span class="title">カードのめくり方</span>
+                        </div>
+                        <span class="dropdown">
+                            <select class="anki_screen_setting text_style_animation">
+                                <option value="normal">ノーマル</option>
+                                <option value="fade">フェード</option>
+                                <option value="slide">スライド</option>
+                                <option value="none">アニメーションなし</option>
+                            </select>
+                        </span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="background anki_screen_setting init fix">暗記を開始する</button>
+</label>
+    </form>
+</div>
+<div class="anki_fixed_btn">
+    <button type="button" class="background anki_screen_setting init">暗記を開始する</button>
+    <input type="hidden" class="anki_screen_setting viewer_config" value="9J8zC8LHFF">
+</div>
+<div id="learning_panel">
+    <div class="inner">
+        <div class="header">
+            <button class="control left anki_screen_setting pauce"><i class="fas fa-chevron-left"></i><span>設定</span></button>
+            <div class="name"><span>歴史総合　p38ーp39</span></div>
+            <button class="control right anki_screen_setting stop">終了</button>
+        </div>
+        <div class="contents">
+            <div id="anki_screen">
+                <div class="cards">
+                    <ul class="card_list">
+                        <li  data-no="0">
+    <div class="card front">
+        <span class="text">イタリア統一運動時、ウィーン体制期にマッツィーニが（）を結成し統一運動を展開。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">青年イタリア</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="J18ffQZISP">
+</li><li  data-no="1">
+    <div class="card front">
+        <span class="text">イタリア統一運動では主導権を握った（）王国首相の（）が中心となりとういつをすいしん。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">サルデーニャ、カヴール</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="8FBMU3AsWc">
+</li><li  data-no="2">
+    <div class="card front">
+        <span class="text">1860年、出身の（）がシチリアと南イタリアを征服・併合。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">ガリバルディ</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="wmsuj7PyzD">
+</li><li  data-no="3">
+    <div class="card front">
+        <span class="text">1861年、（）王国成立。国王は（）王である。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">イタリア、サルデーニャ</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="4PBG2x6mKU">
+</li><li  data-no="4">
+    <div class="card front">
+        <span class="text">プロセイン首相の（）が軍備を拡張し、統一を推進した。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">ビスマルク</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="NJJeXyQttx">
+</li><li  data-no="5">
+    <div class="card front">
+        <span class="text">ビスマルクは（）（プロイセンーオースリア）戦争でオーストラリアを破る。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">普墺（ふおう）</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="zIQu3CJEiT">
+</li><li  data-no="6">
+    <div class="card front">
+        <span class="text">1871年、（）帝国が成立。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">ドイツ</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="0Ed6jwFk9t">
+</li><li  data-no="7">
+    <div class="card front">
+        <span class="text">1882年、ドイツ・オーストリア・イタリアで（）を結成。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">三国同盟</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="qR7at41d1I">
+</li><li  data-no="8">
+    <div class="card front">
+        <span class="text">1867年オーストリアが（）（二重）帝国を成立させる。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">オーストリア-ハンガリー</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="bOjvNjW9Hd">
+</li><li  data-no="9">
+    <div class="card front">
+        <span class="text">　十九世紀半ばにロシアが（）政策を進め（）半島の侵攻を図り、（）帝国に対して（）戦争を起こした。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">南下政策、バルカン、オスマン、クリミア</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="zZeUXIWh7N">
+</li><li  data-no="10">
+    <div class="card front">
+        <span class="text">ロシアはクリミア戦争に敗北。敗因としてロシアは（）制に基づく農業国で、西洋の近代産業の発展に遅れていたからである。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">農奴</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="CfWqIgE9PP">
+</li><li  data-no="11">
+    <div class="card front">
+        <span class="text">1861年に皇帝（）は（）をだすが、農民の生活は苦しいままだった。</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <div class="card back">
+        <span class="text">アレクサンドル2世、農奴解放</span>
+        
+        
+        <input class="language" type="hidden" value="">
+    </div>
+    <input class="id" type="hidden" value="IfgYFWkqGc">
+</li><li>
+    <div class="card last">
+        <button type="button" class="anki_screen_setting restart"><img src='https://ankilot.com/common/img/icon/brain.svg'><span>もう一度暗記する</span></button>
+        <a class="anki_screen_setting" href='https://ankilot.com/view/writing?id=tGXClKMA5V'><img src='https://ankilot.com/common/img/icon/test.svg'><span>テストする</span></a>
+    </div>
+</li>
+                    </ul>
+                    <div class="control ">
+                        <label class="image_exp_wrap">
+                            <button type="button" class="anki_screen_setting image_exp"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 512 512" xml:space="preserve"><g><polygon class="st0" points="30.291,174.821 30.291,51.704 164.736,186.154 186.151,164.735 51.706,30.294 174.819,30.294  174.819,0 0.002,0 0.005,174.821"></polygon><polygon class="st0" points="337.177,0 337.177,30.294 460.294,30.294 325.848,164.743 347.263,186.154 481.713,51.704  481.713,174.821 511.998,174.821 511.998,0"></polygon><polygon class="st0" points="164.736,325.847 30.291,460.288 30.291,337.17 0.005,337.179 0.002,512 174.819,512 174.819,481.706  51.706,481.706 186.155,347.266"></polygon><polygon class="st0" points="481.713,460.288 347.263,325.839 325.844,347.266 460.294,481.706 337.177,481.706 337.177,512 511.998,512 511.998,337.179 481.705,337.187"></polygon></g></svg></button>
+                        </label>
+                        <label class="read_aloud_wrap">
+                            <button type="button" class="anki_screen_setting read_aloud_btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M110 340a70.08 70.08 0 0 0-70 70v180a70.08 70.08 0 0 0 70 70h122.55L440 769.83V230.17L232.55 340Zm270-12.17v344.34L247.45 602H110a10 10 0 0 1-10-10V408a10 10 0 0 1 10-10h137.45ZM571 293.73l-50.57 32.49a290.22 290.22 0 0 1 0 347.56L571 706.27a349.55 349.55 0 0 0 0-412.54Z"/><path d="M748.92 305.37a497.42 497.42 0 0 0-51.52-92.86L646.87 245a439.67 439.67 0 0 1 0 510l50.53 32.47a500.89 500.89 0 0 0 51.52-482.12Z"/><path d="M887.13 247a648 648 0 0 0-63.42-115.63l-50.51 32.44a589.65 589.65 0 0 1 0 672.38l50.51 32.46A651.22 651.22 0 0 0 887.13 247Z"/></svg></button>
+                        </label>
+                        <label class="check_box">
+                            <input type="checkbox">
+                            <span><svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 512 512" xml:space="preserve"><g><path class="st0" d="M469.402,35.492C334.09,110.664,197.114,324.5,197.114,324.5L73.509,184.176L0,254.336l178.732,222.172 l65.15-2.504C327.414,223.414,512,55.539,512,55.539L469.402,35.492z"></path></g></svg></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="memo" style="display: none;">
+                    <div class="tool_wrap">
+                        <button type="button" class="anki_screen_setting canvas_typing"><i class="fas fa-hand-paper"></i>フリー</button>
+                        <button type="button" class="anki_screen_setting canvas_change"><i class="fas fa-pen-nib"></i>ペン</button>
+                        <button type="button" class="anki_screen_setting canvas_reset"><i class="fas fa-trash-alt"></i>消去</button>
+                    </div>
+                    <div class="canvas_wrap">
+                        <canvas id="guide_canvas"></canvas>
+                        <canvas id="draw_canvas" class="brush"></canvas>
+                        <textarea id="canvas_textarea"></textarea>
+                    </div>
+                </div>
+                <div class="status">
+                    <button class="anki_screen_setting auto_flip_control" style="display: none;"><i class="fas fa-pause"></i></button>
+                    <div class="progress_bar">
+                        <div class="value">
+                            <span style="opacity: 0;">よく頑張りました</span>
+                        </div>
+                    </div>
+                    <span class="card_number">暗記スタート</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>        </div>
+    </main>
+    <div id="tab_bar">
+    <div class="inner">
+        <nav>
+            <ol>
+                <li >
+                    <a href="https://ankilot.com/create/">
+                        <i class="fas fa-marker"></i>
+                        <span>つくる</span>
+                    </a>
+                </li>
+                <li >
+                    <a href="https://ankilot.com/search/">
+                        <i class="fas fa-search"></i>
+                        <span>さがす</span>
+                    </a>
+                </li>
+                <li class="accent">
+                    <a href="https://ankilot.com/">
+                        <i class="fas fa-home"></i>
+                        <span>ホーム</span>
+                    </a>
+                </li>
+                <li >
+                    <a href="https://ankilot.com/list/">
+                        <i class="fas fa-list"></i>
+                        <span>リスト</span>
+                    </a>
+                </li>
+                <li >
+                    <a href="javascript: void(0);" onclick="openCompactMenuPanel();">
+                        <i class="fas fa-toolbox"></i>
+                        <span>メニュー</span>
+                    </a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<footer>
+    <div id="footer_contents">
+        <div class="menu">
+            <nav>
+                <ul>
+                    <li><a href="https://ankilot.com/version">Ankilotについて</a></li>
+                    <li><a href="https://ankilot.com/terms">利用規約</a></li>
+                    <li><a href="https://ankilot.com/privacy">プライバシーポリシー</a></li>
+                    <li><a href="https://ankilot.com/contact/">お問い合わせ</a></li>
+                    <li><a href="https://profile.mukanote.com/">運営情報</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="copyright">
+            <a href="https://profile.mukanote.com/">&copy; 2018-2025 Muka.</a>
+        </div>
+    </div>
+</footer>
+<script>setTangochoHistory('tGXClKMA5V', '歴史総合　p38ーp39', '', 'kenta', '2025-10-16 22:06:27', '12', '9J8zC8LHFF')</script></body>
+
+</html>

@@ -49,44 +49,45 @@
     
     currentScore = newScore;
     
-    console.log(`💰 Score added: +${points} pts (${reason}) → Total: ${newScore}`);
-    
     // Show animation
     showScoreAnimation(points, reason);
     
     // Update display
     updateScoreDisplay();
     
-    // Immediately sync to Firebase (don't await to avoid blocking)
-    syncScoreToFirebase().catch(err => {
-      console.error('Failed to sync score:', err);
-    });
+    // Immediately sync to Firebase
+    syncScoreToFirebase();
     
     return newScore;
   }
   
   async function syncScoreToFirebase() {
     const accountId = localStorage.getItem('kl_account_id');
-    if (!accountId) {
-      console.warn('⚠️ Cannot sync score: not logged in');
-      return;
-    }
-    
-    const scoreData = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
+    if (!accountId) return;
     
     try {
+      // Use the main app's saveToAccount function if available
+      if (window.saveToAccountFromScore) {
+        await window.saveToAccountFromScore();
+        console.log('Score synced via app.js');
+        return;
+      }
+      
+      // Fallback: direct Firebase update
+      const scoreData = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
+      
       if (window.firebaseDB) {
-        // Direct Firebase update - get existing data first
+        // Get existing data first to avoid overwriting
         const dataDoc = await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').get();
         const existingData = dataDoc.exists ? dataDoc.data() : {};
         
-        // Merge with existing data to avoid overwriting other fields
+        // Merge with existing data
         await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').set({
           ...existingData,
           scoreData: scoreData,
           lastScoreUpdate: new Date().toISOString()
         });
-        console.log(`✅ Score synced to Firebase: ${scoreData.total} pts`);
+        console.log('Score synced to Firebase (direct)');
       } else {
         // Local storage fallback
         const key = 'kl_accounts_local_v1';
@@ -101,11 +102,10 @@
         map[accountId].meta.data.lastScoreUpdate = new Date().toISOString();
         
         localStorage.setItem(key, JSON.stringify(map));
-        console.log(`✅ Score synced to local storage: ${scoreData.total} pts`);
+        console.log('Score synced to local storage');
       }
     } catch (error) {
-      console.error('❌ Failed to sync score:', error);
-      throw error;
+      console.error('Failed to sync score:', error);
     }
   }
   
@@ -459,25 +459,6 @@
     createScoreDisplay();
     checkDailyLogin();
     startSessionTimer();
-    
-    // Save score before page unload
-    window.addEventListener('beforeunload', () => {
-      // Use synchronous method for beforeunload
-      const accountId = localStorage.getItem('kl_account_id');
-      if (accountId && window.firebaseDB) {
-        console.log('💾 Saving score before page unload...');
-        // Note: async operations may not complete in beforeunload
-        // The periodic sync should handle most cases
-        syncScoreToFirebase();
-      }
-    });
-    
-    // Periodic sync every 30 seconds
-    setInterval(() => {
-      syncScoreToFirebase().catch(err => {
-        console.error('Periodic sync failed:', err);
-      });
-    }, 30000);
   }
   
   // Auto-initialize on page load

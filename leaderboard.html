@@ -329,6 +329,13 @@
         const accountId = localStorage.getItem('kl_account_id');
         const scoreData = JSON.parse(localStorage.getItem('kiroku_user_score') || '{"total":0,"history":[]}');
         
+        // Wait for Firebase to be ready
+        let attempts = 0;
+        while (!window.firebaseDB && attempts < 10) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+        
         if (window.firebaseDB) {
           // Get existing data
           const dataDoc = await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').get();
@@ -346,7 +353,7 @@
           // Reload leaderboard
           setTimeout(() => loadLeaderboard(), 500);
         } else {
-          debugInfo.textContent = '❌ Firebaseが利用できません';
+          debugInfo.textContent = '❌ Firebaseが利用できません（app.jsが読み込まれていない可能性があります）';
         }
       } catch (e) {
         debugInfo.textContent = `❌ エラー: ${e.message}`;
