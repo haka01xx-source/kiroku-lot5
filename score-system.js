@@ -65,16 +65,29 @@
     const accountId = localStorage.getItem('kl_account_id');
     if (!accountId) return;
     
-    const scoreData = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
-    
     try {
+      // Use the main app's saveToAccount function if available
+      if (window.saveToAccountFromScore) {
+        await window.saveToAccountFromScore();
+        console.log('Score synced via app.js');
+        return;
+      }
+      
+      // Fallback: direct Firebase update
+      const scoreData = JSON.parse(localStorage.getItem(SCORE_KEY) || '{"total":0,"history":[]}');
+      
       if (window.firebaseDB) {
-        // Direct Firebase update
+        // Get existing data first to avoid overwriting
+        const dataDoc = await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').get();
+        const existingData = dataDoc.exists ? dataDoc.data() : {};
+        
+        // Merge with existing data
         await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').set({
+          ...existingData,
           scoreData: scoreData,
           lastScoreUpdate: new Date().toISOString()
-        }, { merge: true });
-        console.log('Score synced to Firebase');
+        });
+        console.log('Score synced to Firebase (direct)');
       } else {
         // Local storage fallback
         const key = 'kl_accounts_local_v1';

@@ -1249,6 +1249,30 @@
     }catch(e){ alert('ローカル保存に失敗しました: ' + e.message); }
   }
 
+  // Expose function for score system to use (silent save without notification)
+  window.saveToAccountFromScore = async function() {
+    if(!currentAccountId) return;
+    const memKeys = ['kiroku_lot_cards_v1','kiroku_lot_cards_results_v1','kiroku_lot_cards_results_history_v1'];
+    const memorizationData = {};
+    try{ memKeys.forEach(k=>{ const v = localStorage.getItem(k); memorizationData[k]= v ? JSON.parse(v) : null; }); }catch(e){ /* ignore */ }
+    const musicPlaylist = JSON.parse(localStorage.getItem('kiroku_music_playlist') || '[]');
+    const scoreData = JSON.parse(localStorage.getItem('kiroku_user_score') || '{"total":0,"history":[]}');
+
+    if(firebaseDB){
+      await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').set({ testRecords, memorizationData, musicPlaylist, scoreData, savedAt: new Date().toISOString() });
+      console.log('Auto-saved score to Firebase');
+    } else {
+      const key = 'kl_accounts_local_v1';
+      const raw = localStorage.getItem(key);
+      const map = raw ? JSON.parse(raw) : {};
+      map[currentAccountId] = map[currentAccountId] || {};
+      map[currentAccountId].meta = map[currentAccountId].meta || {};
+      map[currentAccountId].meta.data = { testRecords, memorizationData, musicPlaylist, scoreData, savedAt: new Date().toISOString() };
+      localStorage.setItem(key, JSON.stringify(map));
+      console.log('Auto-saved score to local storage');
+    }
+  };
+
   async function loadFromAccount(){
     if(!currentAccountId) return alert('先に学籍番号でログインしてください');
     if(firebaseDB){
@@ -1520,13 +1544,47 @@
   }
 
   // 初期化
-  document.addEventListener('DOMContentLoaded', ()=>{
+  document.addEventListener('DOMContentLoaded', async ()=>{
     // Check login first
     if (!checkLoginRequired()) return;
     
     testRecords = load();
     templates = loadTemplates();
     updateVersionLabel();
+    
+    // Auto-load from Firebase on startup
+    if (currentAccountId && firebaseDB) {
+      try {
+        const dataSnap = await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').get();
+        if (dataSnap.exists) {
+          const payload = dataSnap.data();
+          if (payload) {
+            if (payload.testRecords) {
+              testRecords = payload.testRecords;
+              if (testRecords.length) currentTestId = testRecords[0].id;
+            }
+            if (payload.scoreData) {
+              localStorage.setItem('kiroku_user_score', JSON.stringify(payload.scoreData));
+              if (window.ScoreSystem) window.ScoreSystem.init();
+            }
+            if (payload.memorizationData) {
+              const md = payload.memorizationData;
+              Object.keys(md).forEach(k => {
+                if (md[k] !== null) localStorage.setItem(k, JSON.stringify(md[k]));
+              });
+            }
+            if (payload.musicPlaylist) {
+              localStorage.setItem('kiroku_music_playlist', JSON.stringify(payload.musicPlaylist));
+            }
+            console.log('Auto-loaded data from Firebase');
+            refreshTestSelect();
+            renderBoard();
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to auto-load from Firebase:', e);
+      }
+    }
     
     // Start clock
     updateClock();

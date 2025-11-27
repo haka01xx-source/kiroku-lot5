@@ -130,6 +130,17 @@
         <div style="font-size: 1.2rem;">まだランキングデータがありません</div>
         <div style="margin-top: 8px;">勉強してスコアを獲得しましょう！</div>
       </div>
+      
+      <!-- Debug panel -->
+      <div style="margin-top: 24px; padding: 16px; background: rgba(40, 40, 60, 0.6); border: 1px solid rgba(255, 102, 170, 0.2); border-radius: 12px;">
+        <div style="color: #fff; font-weight: 600; margin-bottom: 12px;">🔧 デバッグ</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="debugSyncScore" class="btn secondary">スコアを強制同期</button>
+          <button id="debugShowConsole" class="btn secondary">コンソールログを確認</button>
+          <button id="debugRefresh" class="btn secondary">リロード</button>
+        </div>
+        <div id="debugInfo" style="margin-top: 12px; font-size: 0.85rem; color: var(--muted);"></div>
+      </div>
     </div>
   </main>
 
@@ -307,13 +318,55 @@
       }
     }
 
+    // Debug buttons
+    document.getElementById('debugSyncScore').addEventListener('click', async () => {
+      const debugInfo = document.getElementById('debugInfo');
+      debugInfo.textContent = '同期中...';
+      
+      try {
+        const accountId = localStorage.getItem('kl_account_id');
+        const scoreData = JSON.parse(localStorage.getItem('kiroku_user_score') || '{"total":0,"history":[]}');
+        
+        if (window.firebaseDB) {
+          // Get existing data
+          const dataDoc = await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').get();
+          const existingData = dataDoc.exists ? dataDoc.data() : {};
+          
+          // Save with score
+          await window.firebaseDB.collection('accounts').doc(accountId).collection('meta').doc('data').set({
+            ...existingData,
+            scoreData: scoreData,
+            lastScoreUpdate: new Date().toISOString()
+          });
+          
+          debugInfo.textContent = `✅ 同期完了: ${scoreData.total} pts (${new Date().toLocaleTimeString()})`;
+          
+          // Reload leaderboard
+          setTimeout(() => loadLeaderboard(), 500);
+        } else {
+          debugInfo.textContent = '❌ Firebaseが利用できません';
+        }
+      } catch (e) {
+        debugInfo.textContent = `❌ エラー: ${e.message}`;
+        console.error('Sync error:', e);
+      }
+    });
+    
+    document.getElementById('debugShowConsole').addEventListener('click', () => {
+      alert('F12キーを押してコンソールを開き、ログを確認してください。\n\n確認項目:\n- Firebase accounts found: X\n- Account XXX: dataDoc exists=true/false\n- Total accounts with scores: X');
+    });
+    
+    document.getElementById('debugRefresh').addEventListener('click', () => {
+      window.location.reload();
+    });
+    
     // Initial load
     loadLeaderboard();
     
-    // Auto-refresh every 5 seconds
+    // Auto-refresh every 10 seconds (reduced frequency)
     setInterval(() => {
       loadLeaderboard();
-    }, 5000);
+    }, 10000);
     
     // Also refresh when window gains focus
     window.addEventListener('focus', () => {
