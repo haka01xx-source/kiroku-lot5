@@ -188,29 +188,32 @@
           // Get data from subcollection for each account
           const promises = [];
           snapshot.forEach(doc => {
+            const accountData = doc.data() || {};
+            const profile = accountData.profile || {};
+            
             promises.push(
               doc.ref.collection('meta').doc('data').get().then(dataDoc => {
+                console.log(`Account ${doc.id}: dataDoc exists=${dataDoc.exists}`);
                 if (dataDoc.exists) {
                   const data = dataDoc.data();
+                  console.log(`Account ${doc.id} data:`, data);
                   const scoreData = data.scoreData;
                   
-                  if (scoreData && scoreData.total > 0) {
-                    // Get profile from main account doc
-                    return doc.ref.get().then(accountDoc => {
-                      const accountData = accountDoc.data() || {};
-                      const profile = accountData.profile || {};
-                      
-                      return {
-                        id: doc.id,
-                        score: scoreData.total || 0,
-                        history: scoreData.history || [],
-                        displayName: profile.displayName || doc.id,
-                        avatar: profile.avatar || '👤',
-                        avatarImage: profile.avatarImage || null
-                      };
-                    });
+                  if (scoreData) {
+                    console.log(`Account ${doc.id} score:`, scoreData.total);
+                    return {
+                      id: doc.id,
+                      score: scoreData.total || 0,
+                      history: scoreData.history || [],
+                      displayName: profile.displayName || doc.id,
+                      avatar: profile.avatar || '👤',
+                      avatarImage: profile.avatarImage || null
+                    };
                   }
                 }
+                return null;
+              }).catch(err => {
+                console.error(`Error loading account ${doc.id}:`, err);
                 return null;
               })
             );
@@ -220,6 +223,7 @@
           accounts = results.filter(acc => acc !== null);
           
           console.log('Total accounts with scores:', accounts.length);
+          console.log('Accounts:', accounts);
         } else {
           // Local storage mode
           const key = 'kl_accounts_local_v1';
