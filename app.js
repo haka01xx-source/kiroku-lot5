@@ -1555,6 +1555,16 @@
     // Auto-load from Firebase on startup
     if (currentAccountId && firebaseDB) {
       try {
+        console.log('🔄 Auto-loading data from Firebase for:', currentAccountId);
+        
+        // Load profile
+        const accountDoc = await firebaseDB.collection('accounts').doc(currentAccountId).get();
+        if (accountDoc.exists && accountDoc.data().profile) {
+          localStorage.setItem('kiroku_user_profile', JSON.stringify(accountDoc.data().profile));
+          console.log('✅ Loaded profile');
+        }
+        
+        // Load data
         const dataSnap = await firebaseDB.collection('accounts').doc(currentAccountId).collection('meta').doc('data').get();
         if (dataSnap.exists) {
           const payload = dataSnap.data();
@@ -1562,27 +1572,32 @@
             if (payload.testRecords) {
               testRecords = payload.testRecords;
               if (testRecords.length) currentTestId = testRecords[0].id;
+              console.log('✅ Loaded test records');
             }
             if (payload.scoreData) {
               localStorage.setItem('kiroku_user_score', JSON.stringify(payload.scoreData));
               if (window.ScoreSystem) window.ScoreSystem.init();
+              console.log('✅ Loaded score:', payload.scoreData.total);
             }
             if (payload.memorizationData) {
               const md = payload.memorizationData;
               Object.keys(md).forEach(k => {
                 if (md[k] !== null) localStorage.setItem(k, JSON.stringify(md[k]));
               });
+              console.log('✅ Loaded memorization data');
             }
             if (payload.musicPlaylist) {
               localStorage.setItem('kiroku_music_playlist', JSON.stringify(payload.musicPlaylist));
+              console.log('✅ Loaded music playlist');
             }
-            console.log('Auto-loaded data from Firebase');
             refreshTestSelect();
             renderBoard();
           }
+        } else {
+          console.log('ℹ️ No saved data found in Firebase');
         }
       } catch (e) {
-        console.warn('Failed to auto-load from Firebase:', e);
+        console.error('❌ Failed to auto-load from Firebase:', e);
       }
     }
     

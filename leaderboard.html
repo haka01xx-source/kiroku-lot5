@@ -194,47 +194,49 @@
         if (window.firebaseDB) {
           // Firebase mode - get all accounts
           const snapshot = await window.firebaseDB.collection('accounts').get();
-          console.log('Firebase accounts found:', snapshot.size);
+          console.log('🔍 Firebase accounts found:', snapshot.size);
           
           // Get data from subcollection for each account
-          const promises = [];
-          snapshot.forEach(doc => {
-            const accountData = doc.data() || {};
-            const profile = accountData.profile || {};
-            
-            promises.push(
-              doc.ref.collection('meta').doc('data').get().then(dataDoc => {
-                console.log(`Account ${doc.id}: dataDoc exists=${dataDoc.exists}`);
-                if (dataDoc.exists) {
-                  const data = dataDoc.data();
-                  console.log(`Account ${doc.id} data:`, data);
-                  const scoreData = data.scoreData;
-                  
-                  if (scoreData) {
-                    console.log(`Account ${doc.id} score:`, scoreData.total);
-                    return {
-                      id: doc.id,
-                      score: scoreData.total || 0,
-                      history: scoreData.history || [],
-                      displayName: profile.displayName || doc.id,
-                      avatar: profile.avatar || '👤',
-                      avatarImage: profile.avatarImage || null
-                    };
-                  }
+          for (const doc of snapshot.docs) {
+            try {
+              const accountId = doc.id;
+              const accountData = doc.data() || {};
+              const profile = accountData.profile || {};
+              
+              console.log(`📋 Account ${accountId}:`, { hasProfile: !!accountData.profile, profile });
+              
+              // Get score data from subcollection
+              const dataDoc = await doc.ref.collection('meta').doc('data').get();
+              
+              if (dataDoc.exists) {
+                const data = dataDoc.data();
+                const scoreData = data.scoreData;
+                
+                console.log(`💯 Account ${accountId} scoreData:`, scoreData);
+                
+                if (scoreData && scoreData.total >= 0) {
+                  accounts.push({
+                    id: accountId,
+                    score: scoreData.total || 0,
+                    history: scoreData.history || [],
+                    displayName: profile.displayName || accountId,
+                    avatar: profile.avatar || '👤',
+                    avatarImage: profile.avatarImage || null
+                  });
+                  console.log(`✅ Added account ${accountId} with score ${scoreData.total}`);
+                } else {
+                  console.log(`⚠️ Account ${accountId} has no valid scoreData`);
                 }
-                return null;
-              }).catch(err => {
-                console.error(`Error loading account ${doc.id}:`, err);
-                return null;
-              })
-            );
-          });
+              } else {
+                console.log(`❌ Account ${accountId} has no meta/data document`);
+              }
+            } catch (err) {
+              console.error(`❌ Error loading account ${doc.id}:`, err);
+            }
+          }
           
-          const results = await Promise.all(promises);
-          accounts = results.filter(acc => acc !== null);
-          
-          console.log('Total accounts with scores:', accounts.length);
-          console.log('Accounts:', accounts);
+          console.log('📊 Total accounts with scores:', accounts.length);
+          console.log('👥 All accounts:', accounts);
         } else {
           // Local storage mode
           const key = 'kl_accounts_local_v1';
