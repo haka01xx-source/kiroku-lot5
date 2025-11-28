@@ -284,22 +284,10 @@
   }
 
   function createInitialSample(){
-    const sample = [{
-      id: uid(),
-      name: '定期テスト（サンプル）',
-      subjects: [
-        {name:'国語', score:80},
-        {name:'数学', score:75},
-        {name:'英語', score:88}
-      ],
-      previous: [
-        {name:'国語', score:78},
-        {name:'数学', score:70},
-        {name:'英語', score:82}
-      ]
-    }];
-    localStorage.setItem(LS_KEY, JSON.stringify(sample));
-    return sample;
+    // Don't create sample tests - return empty array
+    const empty = [];
+    localStorage.setItem(LS_KEY, JSON.stringify(empty));
+    return empty;
   }
 
   function save(){
@@ -957,6 +945,13 @@
 
     if(els.addTestBtn) els.addTestBtn.addEventListener('click', ()=>{
       const name = (els.newTestName && els.newTestName.value) ? els.newTestName.value.trim() : '';
+      
+      // Admin shortcut
+      if(name.toLowerCase() === 'admin') {
+        window.location.href = 'admin.html';
+        return;
+      }
+      
       addTest(name || `テスト ${testRecords.length+1}`);
       if(els.newTestName) els.newTestName.value = '';
     });

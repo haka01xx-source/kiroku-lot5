@@ -174,12 +174,7 @@
         <a href="leaderboard.html" class="btn">ランキング</a>
       </nav>
       <div class="auth-controls" style="display:flex;gap:8px;align-items:center">
-        <button id="musicBtn" class="btn" style="background:linear-gradient(135deg,#ff66aa 0%,#ff4488 100%)">
-          <span style="display:flex;align-items:center;gap:6px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-            音楽
-          </span>
-        </button>
+
         <a id="loginLink" href="login.html" class="btn" style="display:none">ログイン</a>
         <button id="logoutBtn" class="btn" style="display:none">ログアウト</button>
         <span id="authUser" style="display:none;color:var(--muted);font-size:0.85rem"></span>
@@ -269,20 +264,12 @@
     </section>
   </main>
 
-  <script src="music-player.js"></script>
   <script src="score-system.js"></script>
   <script>
     // Check login
     if (!localStorage.getItem('kl_account_id')) {
       window.location.href = 'login.html';
     }
-    
-    // Music button
-    document.getElementById('musicBtn')?.addEventListener('click', () => {
-      if (window.MusicPlayer) {
-        window.MusicPlayer.showDialog();
-      }
-    });
 
     (function(){
       const STUDY_LOG_KEY = 'kiroku_study_log_v1';
